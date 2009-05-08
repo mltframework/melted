@@ -1,0 +1,35 @@
+schema_version: 0.1
+type: filter # consumer, filter, producer, or transition
+identifier: vignette
+title: Vignette Effect
+version: 0.2.5
+copyright: Copyright (C) 2008 Marco Gittler
+license: GPL
+language: en
+url: none
+creator: Marco Gittler
+tags:
+  - Video # this may produce video
+description: |
+  Vigentte around a point with adjustable smooth, radius, position
+  and transparency
+icon:
+filename: oldfilm/vignette.svg # relative to $MLT_DATA/modules/
+  content-type: image/svg
+
+notes: Implementation or additional usage notes go here.
+bugs: # this can be just for documentation, or the tool may disclose it to help user avoid pitfalls
+  - need to do some speed improvement.
+
+parameters:
+  - identifier: geometry # 'argument' is a reserved name for a value supplied to the factory
+    title: Geometry Value  # the title can be used as a label for the widget
+    type: geometry
+    description: Start position, "smooth":"radius","X"x"Y","maxopac"
+    readonly: no
+    required: yes
+    mutable: no
+    format: %d:%d:%dx%d:%d
+    minimum: 0:0:0:0:0
+    maximum: 100:100:100:100:100
+    default: 80:50%:50%:50%:0

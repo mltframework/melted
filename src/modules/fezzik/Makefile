@@ -1,0 +1,36 @@
+include ../../../config.mak
+
+TARGET = ../libmltfezzik$(LIBSUF)
+
+OBJS = factory.o \
+	   producer_fezzik.o \
+	   producer_hold.o 
+
+CFLAGS += -I../..
+
+LDFLAGS += -L../../framework -lmlt
+
+SRCS := $(OBJS:.o=.c)
+
+all: 	$(TARGET)
+
+$(TARGET): $(OBJS)
+		$(CC) $(SHFLAGS) -o $@ $(OBJS) $(LDFLAGS)
+
+depend:	$(SRCS)
+		$(CC) -MM $(CFLAGS) $^ 1>.depend
+
+distclean:	clean
+		rm -f .depend
+
+clean:	
+		rm -f $(OBJS) $(TARGET) 
+
+install: all
+	install -m 755 $(TARGET) "$(DESTDIR)$(libdir)/mlt"
+	install -m 644 ../fezzik.dict "$(DESTDIR)$(prefix)/share/mlt"
+	install -m 644 ../fezzik.ini "$(DESTDIR)$(prefix)/share/mlt"
+
+ifneq ($(wildcard .depend),)
+include .depend
+endif

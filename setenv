@@ -1,0 +1,26 @@
+
+# Environment variable settings to allow execution without install
+
+export MLT_REPOSITORY=`pwd`/src/modules
+export MLT_DATA=`pwd`/src/modules
+export MLT_PROFILES_PATH=`pwd`/profiles
+
+export LD_LIBRARY_PATH=\
+`pwd`/src/framework:\
+`pwd`/src/valerie:\
+`pwd`/src/miracle:\
+`pwd`/src/modules/bluefish:\
+`pwd`/../BlueLinuxDriver/install/lib:\
+`pwd`/../mpeg_sdk_release/bin:\
+`pwd`/../dvcpro_sdk_release/lib:\
+`pwd`/../sr_sdk_release:\
+$LD_LIBRARY_PATH
+
+[ $(uname -s) = Darwin ] && export DYLD_LIBRARY_PATH=$LD_LIBRARY_PATH
+
+export PATH=\
+`pwd`/src/albino:\
+`pwd`/src/inigo:\
+`pwd`/src/humperdink:\
+`pwd`/src/miracle:\
+$PATH

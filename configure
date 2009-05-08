@@ -1,0 +1,248 @@
+#!/bin/sh
+
+export version=0.3.9
+export soversion=1
+
+show_help()
+{
+	cat << EOF
+Non-autotool config script for MLT.
+
+Help options:
+
+  --help                  - this information
+
+General build options:
+
+  --prefix=directory      - install prefix for path (default: $prefix)
+  --libdir=directory      - lib directory (default: $prefix/lib)
+  --enable-gpl            - Enable GPL components
+  --disable-debug         - Compile without debug support (default: on)
+  --disable-mmx           - Compile without MMX support (default: on)
+  --disable-sse           - Compile without SSE support (default: on)
+  --arch='arch'             - Compile for a specific architecture (default: none)
+  --cpu='cpu'             - Compile for a specific CPU (default: none)
+
+Module disables options:
+
+EOF
+
+	for i in src/modules/*
+	do
+		[ -d $i ] && [ "`basename $i`" != "CVS" ] && echo `basename $i` `[ -f $i/gpl ] && echo [GPL]`
+	done |
+	awk '{ printf( "  --disable-%-14.14s- Disable the %s module %s\n", $1, $1, $2 ); }'
+
+	echo
+	echo "  NOTE: libraries marked [GPL] will not be built unless --enable-gpl is stipulated."
+	echo
+}
+
+build_config()
+{
+	(
+		echo "version=$version"
+		echo "soversion=$soversion"
+		echo "prefix=$prefix"
+		echo "libdir=$libdir"
+		echo "bindir=$prefix/bin"
+		echo "targetos=$targetos"
+
+		[ "$mmx" = "true" ] && 
+		echo "MMX_FLAGS=-DUSE_MMX"
+
+		[ "$sse" = "true" ] && 
+		echo "SSE_FLAGS=-DUSE_SSE"
+
+		[ "$debug" = "true" ] && 
+		echo "DEBUG_FLAGS=-g"
+
+		echo "LARGE_FILE=-D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE"
+
+		[ "$arch" != "" ] && echo "TARGETARCH=-march=$arch"
+		[ "$cpu" != "" ] && echo "TARGETCPU=-mcpu=$cpu"
+		echo "OPTIMISATIONS=-O2 -pipe -fomit-frame-pointer"
+
+		echo "CFLAGS+=-Wall -fPIC -DPIC \$(TARGETARCH) \$(TARGETCPU) \$(OPTIMISATIONS) \$(MMX_FLAGS) \$(SSE_FLAGS) \$(DEBUG_FLAGS) \$(LARGE_FILE)"
+
+		case $targetos in
+		Darwin)
+		sysctl -a hw | grep "x86_64: 1" > /dev/null && echo "ARCH_X86_64=1" && echo "CFLAGS+=-DARCH_X86_64"
+		echo "CFLAGS+=-D__DARWIN__ `sdl-config --cflags`"
+		echo "SHFLAGS=-dynamiclib"
+		echo "LDFLAGS+=`sdl-config --libs`"
+		;;
+		Linux)
+		[ "$(uname -m)" = "x86_64" ] && echo "ARCH_X86_64=1" && echo "CFLAGS+=-DARCH_X86_64"
+		echo "OPTIMISATIONS+=-ffast-math"
+		echo "CFLAGS+=-pthread"
+		echo "SHFLAGS=-shared"
+		echo "LIBDL=-ldl"
+		echo "RDYNAMIC=-rdynamic"
+		;;
+		FreeBSD)
+		[ "$(uname -m)" = "x86_64" ] && echo "ARCH_X86_64=1" && echo "CFLAGS+=-DARCH_X86_64"
+		echo "OPTIMISATIONS+=-ffast-math"
+		echo "CFLAGS+=-pthread"
+		echo "SHFLAGS=-shared"
+		echo "RDYNAMIC=-rdynamic"
+		;;
+		*)
+		;;
+		esac
+		echo "LIBSUF=$LIBSUF"
+	) > config.mak
+
+	echo "#!/bin/sh" > mlt-config
+	(
+		echo export version=$version
+		echo export prefix=$prefix
+		echo export libdir=$libdir
+		echo export bindir=$prefix/bin
+	) >> mlt-config
+
+	cat < mlt-config-template >> mlt-config
+
+	echo -n > packages.dat
+}
+
+build_pkgconfig()
+{
+	for i in framework valerie miracle
+	do
+		echo prefix="$prefix" > mlt-$i.pc
+		(
+			echo exec_prefix=$prefix
+			echo libdir=$libdir
+			echo includedir=$prefix/include
+			echo version=$version
+			echo cflags=`grep ^$i packages.dat | cut -f 2`
+			echo libs=`grep ^$i packages.dat | cut -f 3`
+		) >> mlt-$i.pc
+		cat mlt-$i.pc.in >>mlt-$i.pc
+	done
+}
+
+# Debug mode
+set +x
+
+# Define build directory for scripts called
+export build_dir=`dirname $0`
+export prefix=/usr/local
+export libdir=""
+export help=0
+export debug=true
+export mmx=true
+export sse=true
+export gpl=false
+export arch=
+export cpu=
+export targetos=
+
+# Determine OS
+targetos=$(uname -s)
+# Chose appropriate suffix for libraries
+case $targetos in
+	Darwin)
+	LIBSUF=".dylib"
+	;;
+	Linux|FreeBSD)
+	LIBSUF=".so"
+	;;
+	*)
+	LIBSUF=".so"
+	;;
+esac
+export LIBSUF
+
+# Iterate through arguments
+for i in "$@"
+do
+	case $i in
+		--help )			help=1 ;;
+		--prefix=* )		prefix="${i#--prefix=}" ;;
+		--libdir=* )		libdir="${i#--libdir=}" ;;
+		--disable-debug )	debug=false ;;
+		--disable-mmx )		mmx=false; sse=false ;;
+		--disable-sse )		sse=false ;;
+		--enable-gpl )		gpl=true ;;
+		--arch=* )			arch="${i#--arch=}" ;;
+		--cpu=* )			cpu="${i#--cpu=}" ;;
+	esac
+done
+
+# Determine the libdir if it's not specified in the args
+[ "$libdir" = "" ] && libdir=$prefix/lib
+
+# Double check MMX (Darwin, Linux and FreeBSD supported, may end up disabling MMX on other platforms incorrectly)
+if [ "$mmx" = "true" ]
+then
+	case $targetos in
+		Darwin)
+		sysctl -a hw | grep "mmx: 1" > /dev/null || mmx=false
+		;;
+		Linux)
+		grep mmx /proc/cpuinfo > /dev/null 2>&1 || mmx=false
+		;;
+		FreeBSD)
+		[ "$(make -V MACHINE_CPU:Mmmx)" ] || mmx=false
+		;;
+		*)
+		grep mmx /proc/cpuinfo > /dev/null 2>&1 || mmx=false
+		;;
+	esac
+fi
+
+# Double check SSE (Darwin, Linux and FreeBSD supported, may end up disabling SSE on other platforms incorrectly)
+if [ "$sse" = "true" ]
+then
+	case $targetos in
+		Darwin)
+		sysctl -a hw | grep "sse: 1" > /dev/null || sse=false
+		;;
+		Linux)
+		grep sse /proc/cpuinfo > /dev/null 2>&1 || sse=false
+		;;
+		FreeBSD)
+		[ "$(make -V MACHINE_CPU:Msse)" ] || sse=false
+		;;
+		*)
+		grep sse /proc/cpuinfo > /dev/null 2>&1 || sse=false
+		;;
+	esac
+fi
+
+# Show help if requested
+if [ $help = 1 ]
+then
+	show_help
+else
+	# Log the configuration history
+	date >> config.log
+	echo "$0 $@" >> config.log
+
+	build_config
+fi
+
+# Iterate through each of the components
+for i in framework modules inigo valerie miracle humperdink
+do
+	if [ -x src/$i/configure ]
+	then
+		[ $help = 0 ] && echo "Configuring `basename $i`:"
+		olddir=`pwd`
+		cd src/$i
+		./configure "$@"
+		[ $? != 0 ] && exit 1
+		cd $olddir
+	fi
+done
+
+# Build the pkg-config files
+build_pkgconfig
+
+# Report GPL Usage
+[ $help != 1 ] && 
+( [ "$gpl" = "false" ] && 
+echo "GPL Components are disabled" || 
+echo "GPL License Used" )

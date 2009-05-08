@@ -1,0 +1,31 @@
+#!/bin/sh
+
+if [ "$help" != "1" ]
+then
+
+	if [ "$targetos" = "Darwin" ]
+	then
+		echo "- does not build on Darwin: disabling"
+		touch ../disable-kino
+		exit 0
+	fi
+
+	# Entirely optional...
+	pkg-config libquicktime 2> /dev/null
+	lqt_disabled=$?
+
+	pkg-config libdv 2> /dev/null
+	libdv_disabled=$?
+
+	echo > config.h
+	[ "$lqt_disabled" = "0" ] && echo "#define HAVE_LIBQUICKTIME" >> config.h
+	[ "$libdv_disabled" = "0" ] && echo "#define HAVE_LIBDV" >> config.h
+	echo > config.mak
+	[ "$lqt_disabled" = "0" ] && echo "HAVE_LIBQUICKTIME=1" >> config.mak
+	[ "$libdv_disabled" = "0" ] && echo "HAVE_LIBDV=1" >> config.mak
+
+	[ "$lqt_disabled" != "0" ] && echo "- libquicktime not found: only enabling dv avi support"
+	[ "$libdv_disabled" != "0" -a "$lqt_disabled" = "0" ] && echo "- libdv not found: mov dv may not have audio"
+	
+	exit 0
+fi

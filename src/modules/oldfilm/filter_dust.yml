@@ -1,0 +1,47 @@
+schema_version: 0.1
+type: filter # consumer, filter, producer, or transition
+identifier: dust
+title: Dust
+version: 0.2.5
+copyright: Copyright (C) 2008 Marco Gittler
+license: GPL
+language: en
+url: none
+creator: Marco Gittler
+tags:
+  - Video # this may produce video
+description: Add dust and specks to the Video, as in old movies
+icon:
+  filename: oldfilm/fdust.svg # relative to $MLT_DATA/modules/
+  content-type: image/svg
+
+notes: Implementation or additional usage notes go here.
+bugs: # this can be just for documentation, or the tool may disclose it to help user avoid pitfalls
+  - need to do some speed improvement.
+
+parameters:
+  - identifier: maxdiameter
+    title: Maximal Diameter
+    type: integer
+    description: Maximal diameter of a dust piece
+    readonly: no
+    required: yes
+    minimum: 0
+    maximum: 100
+    default: 2
+    mutable: no
+    widget: spinner
+    unit: %
+
+  - identifier: maxcount
+    title: Maximal number of dust 
+    type: integer
+    description: How many dust pieces are on the image
+    readonly: no
+    required: yes
+    minimum: 0
+    maximum: 400
+    default: 10
+    mutable: no
+    widget: spinner
+

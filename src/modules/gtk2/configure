@@ -1,0 +1,38 @@
+#!/bin/sh
+
+if [ "$help" != "1" ]
+then
+
+	pkg-config gtk+-2.0 2> /dev/null
+	disable_gtk2=$?
+
+	pkg-config gdk-pixbuf-2.0 2> /dev/null
+	disable_pixbuf=$?
+
+	pkg-config pangoft2 2> /dev/null
+	disable_pango=$?
+
+	if [ "$disable_gtk2" != "0" -a "$disable_pixbuf" != 0 -a "$disable_pango" != "0" ]
+	then
+		echo "- GTK2 components not found: disabling"
+		touch ../disable-gtk2
+		exit 0
+	fi
+
+	[ "$disable_gtk2" != "0" ] && echo "- gtk2 not found: gtk2 preview disabled"
+	[ "$disable_pixbuf" != "0" ] && echo "- pixbuf not found: pixbuf loader and rescaler disabled"
+	[ "$disable_pango" != "0" ] && echo "- pango not found: pango titler disabled"
+
+	echo > config.h
+	[ "$disable_gtk2" = "0" ] && echo "#define USE_GTK2" >> config.h
+	[ "$disable_pixbuf" = "0" ] && echo "#define USE_PIXBUF" >> config.h
+	[ "$disable_pango" = "0" ] && echo "#define USE_PANGO" >> config.h
+
+	echo > config.mak
+	[ "$disable_gtk2" = "0" ] && echo "USE_GTK2=1" >> config.mak
+	[ "$disable_pixbuf" = "0" ] && echo "USE_PIXBUF=1" >> config.mak
+	[ "$disable_pango" = "0" ] && echo "USE_PANGO=1" >> config.mak
+
+	exit 0
+fi
+
