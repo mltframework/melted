@@ -1,0 +1,38 @@
+Servers and Westley Docs
+------------------------
+
+	One of the key features of MLT is its server capabilities. This feature
+	allows you to pass westley documents seamlessly from one process to 
+	another and even to different computers on your network. 
+
+	The miracle playout server is one such example of an application which 
+	uses this functionality - you can build your own servers into your own
+	processes with ease.
+
+	A server process would be running as follows:
+
+	    #include <mlt++/Miracle>
+	    using namespace Mlt;
+	
+	    int main( void )
+	    {
+	        Miracle miracle( "miracle", 5250 );
+	        miracle.start( );
+	        miracle.execute( "uadd sdl" );
+	        miracle.execute( "play u0" );
+	        miracle.wait_for_shutdown( );
+	        return 0;
+	    }
+
+	Typically, when you have an MLT object such as a producer or a playlist,
+	you can send a westley representation of this to a running server with:
+
+	    Conumser valerie( "valerie", "localhost:5250" );
+	    valerie.connect( producer );
+	    valerie.start( );
+
+	The effect of the push will be to append the producer on to the first
+	unit (u0).
+
+	You can completely customise the miracle server - an example of this
+	is shown below.
