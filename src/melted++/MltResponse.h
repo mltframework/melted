@@ -1,6 +1,6 @@
 /**
- * MltResponse.h - MLT Wrapper
- * Copyright (C) 2004-2005 Charles Yates
+ * MltResponse.h - MLT MVCP Wrapper
+ * Copyright (C) 2004-2009 Charles Yates
  * Author: Charles Yates <charles.yates@pandora.be>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,19 +21,19 @@
 #ifndef _MLTPP_RESPONSE_H_
 #define _MLTPP_RESPONSE_H_
 
-#include <valerie/valerie_response.h>
+#include <mvcp/mvcp_response.h>
 
 namespace Mlt
 {
 	class Response
 	{
 		private:
-			valerie_response _response;
+			mvcp_response _response;
 		public:
-			Response( valerie_response response );
+			Response( mvcp_response response );
 			Response( int error, const char *message );
 			~Response( );
-			valerie_response get_response( );
+			mvcp_response get_response( );
 			int error_code( );
 			const char *error_string( );
 			char *get( int );

@@ -1,6 +1,6 @@
 /**
- * MltResponse.cpp - MLT Wrapper
- * Copyright (C) 2004-2005 Charles Yates
+ * MltResponse.cpp - MLT MVCP Wrapper
+ * Copyright (C) 2004-2009 Charles Yates
  * Author: Charles Yates <charles.yates@pandora.be>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
 #include "MltResponse.h"
 using namespace Mlt;
 
-Response::Response( valerie_response response ) :
+Response::Response( mvcp_response response ) :
 	_response( response )
 {
 }
@@ -30,43 +30,43 @@ Response::Response( valerie_response response ) :
 Response::Response( int error, const char *message ) :
 	_response( NULL )
 {
-	_response = valerie_response_init( );
+	_response = mvcp_response_init( );
 	if ( _response != NULL )
-		valerie_response_set_error( _response, error, message );
+		mvcp_response_set_error( _response, error, message );
 }
 
 Response::~Response( )
 {
-	valerie_response_close( _response );
+	mvcp_response_close( _response );
 }
 
-valerie_response Response::get_response( )
+mvcp_response Response::get_response( )
 {
 	return _response;
 }
 
 int Response::error_code( )
 {
-	return valerie_response_get_error_code( get_response( ) );
+	return mvcp_response_get_error_code( get_response( ) );
 }
 
 const char *Response::error_string( )
 {
-	return valerie_response_get_error_string( get_response( ) );
+	return mvcp_response_get_error_string( get_response( ) );
 }
 
 char *Response::get( int index )
 {
-	return valerie_response_get_line( get_response( ), index );
+	return mvcp_response_get_line( get_response( ), index );
 }
 
 int Response::count( )
 {
-	return valerie_response_count( get_response( ) );
+	return mvcp_response_count( get_response( ) );
 }
 
 int Response::write( const char *data )
 {
-	return valerie_response_write( get_response( ), data, strlen( data ) );
+	return mvcp_response_write( get_response( ), data, strlen( data ) );
 }
 

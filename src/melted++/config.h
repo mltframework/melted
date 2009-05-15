@@ -1,6 +1,6 @@
 /**
- * config.h - Convenience header file for all mlt++ objects
- * Copyright (C) 2004-2005 Charles Yates
+ * config.h - Convenience header file for all melted++ objects
+ * Copyright (C) 2004-2009 Charles Yates
  * Author: Charles Yates <charles.yates@pandora.be>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -18,17 +18,17 @@
  * Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef MLTPP_CONFIG_H_
-#define MLTPP_CONFIG_H_
+#ifndef MELTEDPP_CONFIG_H_
+#define MELTEDPP_CONFIG_H_
 
 #ifdef WIN32
-    #ifdef MLTPP_EXPORTS
-        #define MLTPP_DECLSPEC __declspec( dllexport )
+    #ifdef MELTEDPP_EXPORTS
+        #define MELTEDPP_DECLSPEC __declspec( dllexport )
     #else
-        #define MLTPP_DECLSPEC __declspec( dllimport )
+        #define MELTEDPP_DECLSPEC __declspec( dllimport )
     #endif
 #else
-	#define MLTPP_DECLSPEC
+	#define MELTEDPP_DECLSPEC
 #endif
 
 #endif

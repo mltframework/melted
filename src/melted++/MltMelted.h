@@ -1,6 +1,6 @@
 /**
- * MltMiracle.h - MLT Wrapper
- * Copyright (C) 2004-2005 Charles Yates
+ * MltMelted.h - MLT Melted Wrapper
+ * Copyright (C) 2004-2009 Charles Yates
  * Author: Charles Yates <charles.yates@pandora.be>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -18,12 +18,12 @@
  * Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef _MLTPP_MIRACLE_H_
-#define _MLTPP_MIRACLE_H_
+#ifndef _MLTPP_MELTED_H_
+#define _MLTPP_MELTED_H_
 
-#include <miracle/miracle_server.h>
-#include <miracle/miracle_log.h>
-#include "MltService.h"
+#include <melted/melted_server.h>
+#include <melted/melted_log.h>
+#include <MltService.h>
 
 namespace Mlt
 {
@@ -31,17 +31,17 @@ namespace Mlt
 	class Service;
 	class Response;
 
-	class Miracle : public Properties
+	class Melted : public Properties
 	{
 		private:
-			miracle_server server;
+			melted_server server;
 			void *_real;
 			parser_execute _execute;
 			parser_received _received;
 			parser_push _push;
 		public:
-			Miracle( char *name, int port = 5250, char *config = NULL );
-			virtual ~Miracle( );
+			Melted( char *name, int port = 5250, char *config = NULL );
+			virtual ~Melted( );
 			mlt_properties get_properties( );
 			bool start( );
 			bool is_running( );
