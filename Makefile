@@ -41,7 +41,9 @@ install:
 	fi
 
 uninstall:
-	rm -f "$(DESTDIR)$(libdir)"/pkgconfig/mlt-*.pc
+	rm -f "$(DESTDIR)$(libdir)"/pkgconfig/mlt-melted.pc
+	rm -f "$(DESTDIR)$(libdir)"/pkgconfig/mlt-melted++.pc
+	rm -f "$(DESTDIR)$(libdir)"/pkgconfig/mlt-mvcp.pc
 	list='$(SUBDIRS)'; \
 	for subdir in $$list; do \
 		$(MAKE) DESTDIR=$(DESTDIR) -C $$subdir $@ || exit 1; \
