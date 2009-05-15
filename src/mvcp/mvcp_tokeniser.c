@@ -1,6 +1,6 @@
 /*
- * valerie_tokeniser.c -- String tokeniser
- * Copyright (C) 2002-2003 Ushodaya Enterprises Limited
+ * mvcp_tokeniser.c -- String tokeniser
+ * Copyright (C) 2002-2009 Ushodaya Enterprises Limited
  * Author: Charles Yates <charles.yates@pandora.be>
  *
  * This library is free software; you can redistribute it and/or
@@ -23,23 +23,23 @@
 #include <string.h>
 
 /* Application header files */
-#include "valerie_tokeniser.h"
+#include "mvcp_tokeniser.h"
 
 /** Initialise a tokeniser.
 */
 
-valerie_tokeniser valerie_tokeniser_init( )
+mvcp_tokeniser mvcp_tokeniser_init( )
 {
-	valerie_tokeniser tokeniser = malloc( sizeof( valerie_tokeniser_t ) );
+	mvcp_tokeniser tokeniser = malloc( sizeof( mvcp_tokeniser_t ) );
 	if ( tokeniser != NULL )
-		memset( tokeniser, 0, sizeof( valerie_tokeniser_t ) );
+		memset( tokeniser, 0, sizeof( mvcp_tokeniser_t ) );
 	return tokeniser;
 }
 
 /** Clear the tokeniser.
 */
 
-static void valerie_tokeniser_clear( valerie_tokeniser tokeniser )
+static void mvcp_tokeniser_clear( mvcp_tokeniser tokeniser )
 {
 	int index = 0;
 	for ( index = 0; index < tokeniser->count; index ++ )
@@ -52,7 +52,7 @@ static void valerie_tokeniser_clear( valerie_tokeniser tokeniser )
 /** Append a string to the tokeniser.
 */
 
-static int valerie_tokeniser_append( valerie_tokeniser tokeniser, char *token )
+static int mvcp_tokeniser_append( mvcp_tokeniser tokeniser, char *token )
 {
 	int error = 0;
 
@@ -77,7 +77,7 @@ static int valerie_tokeniser_append( valerie_tokeniser tokeniser, char *token )
 /** Parse a string by splitting on the delimiter provided.
 */
 
-int valerie_tokeniser_parse_new( valerie_tokeniser tokeniser, char *string, const char *delimiter )
+int mvcp_tokeniser_parse_new( mvcp_tokeniser tokeniser, char *string, const char *delimiter )
 {
 	int count = 0;
 	int length = strlen( string );
@@ -85,7 +85,7 @@ int valerie_tokeniser_parse_new( valerie_tokeniser tokeniser, char *string, cons
 	int index = 0;
 	char *token = strdup( string );
 
-	valerie_tokeniser_clear( tokeniser );
+	mvcp_tokeniser_clear( tokeniser );
 	tokeniser->input = strdup( string );
 	strcpy( token, "" );
 
@@ -97,7 +97,7 @@ int valerie_tokeniser_parse_new( valerie_tokeniser tokeniser, char *string, cons
 		if ( end == NULL )
 		{
 			strcat( token, start );
-			valerie_tokeniser_append( tokeniser, token );
+			mvcp_tokeniser_append( tokeniser, token );
 			index = length;
 			count ++;
 		}
@@ -107,7 +107,7 @@ int valerie_tokeniser_parse_new( valerie_tokeniser tokeniser, char *string, cons
 			index += end - start;
 			if ( token[ 0 ] != '\"' || ( token[ 0 ] == '\"' && token[ strlen( token ) - 1 ] == '\"' ) )
 			{
-				valerie_tokeniser_append( tokeniser, token );
+				mvcp_tokeniser_append( tokeniser, token );
 				strcpy( token, "" );
 				count ++;
 			}
@@ -127,7 +127,7 @@ int valerie_tokeniser_parse_new( valerie_tokeniser tokeniser, char *string, cons
 	if ( !strcmp( token, "" ) )
 	{
 		count = 0 - ( count - 1 );
-		valerie_tokeniser_append( tokeniser, token );
+		mvcp_tokeniser_append( tokeniser, token );
 	}
 		
 	free( token );
@@ -137,7 +137,7 @@ int valerie_tokeniser_parse_new( valerie_tokeniser tokeniser, char *string, cons
 /** Get the original input.
 */
 
-char *valerie_tokeniser_get_input( valerie_tokeniser tokeniser )
+char *mvcp_tokeniser_get_input( mvcp_tokeniser tokeniser )
 {
 	return tokeniser->input;
 }
@@ -145,7 +145,7 @@ char *valerie_tokeniser_get_input( valerie_tokeniser tokeniser )
 /** Get the number of tokens.
 */
 
-int valerie_tokeniser_count( valerie_tokeniser tokeniser )
+int mvcp_tokeniser_count( mvcp_tokeniser tokeniser )
 {
 	return tokeniser->count;
 }
@@ -153,7 +153,7 @@ int valerie_tokeniser_count( valerie_tokeniser tokeniser )
 /** Get a token as a string.
 */
 
-char *valerie_tokeniser_get_string( valerie_tokeniser tokeniser, int index )
+char *mvcp_tokeniser_get_string( mvcp_tokeniser tokeniser, int index )
 {
 	if ( index < tokeniser->count )
 		return tokeniser->tokens[ index ];
@@ -164,9 +164,9 @@ char *valerie_tokeniser_get_string( valerie_tokeniser tokeniser, int index )
 /** Close the tokeniser.
 */
 
-void valerie_tokeniser_close( valerie_tokeniser tokeniser )
+void mvcp_tokeniser_close( mvcp_tokeniser tokeniser )
 {
-	valerie_tokeniser_clear( tokeniser );
+	mvcp_tokeniser_clear( tokeniser );
 	free( tokeniser->tokens );
 	free( tokeniser );
 }

@@ -1,6 +1,6 @@
 /*
- * valerie_tokeniser.h -- String tokeniser
- * Copyright (C) 2002-2003 Ushodaya Enterprises Limited
+ * mvcp_tokeniser.h -- String tokeniser
+ * Copyright (C) 2002-2009 Ushodaya Enterprises Limited
  * Author: Charles Yates <charles.yates@pandora.be>
  *
  * This library is free software; you can redistribute it and/or
@@ -18,8 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef _VALERIE_TOKENISER_H_
-#define _VALERIE_TOKENISER_H_
+#ifndef _MVCP_TOKENISER_H_
+#define _MVCP_TOKENISER_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -36,17 +36,17 @@ typedef struct
 	int count;
 	int size;
 }
-*valerie_tokeniser, valerie_tokeniser_t;
+*mvcp_tokeniser, mvcp_tokeniser_t;
 
 /** Remote parser API.
 */
 
-extern valerie_tokeniser valerie_tokeniser_init( );
-extern int valerie_tokeniser_parse_new( valerie_tokeniser, char *, const char * );
-extern char *valerie_tokeniser_get_input( valerie_tokeniser );
-extern int valerie_tokeniser_count( valerie_tokeniser );
-extern char *valerie_tokeniser_get_string( valerie_tokeniser, int );
-extern void valerie_tokeniser_close( valerie_tokeniser );
+extern mvcp_tokeniser mvcp_tokeniser_init( );
+extern int mvcp_tokeniser_parse_new( mvcp_tokeniser, char *, const char * );
+extern char *mvcp_tokeniser_get_input( mvcp_tokeniser );
+extern int mvcp_tokeniser_count( mvcp_tokeniser );
+extern char *mvcp_tokeniser_get_string( mvcp_tokeniser, int );
+extern void mvcp_tokeniser_close( mvcp_tokeniser );
 
 #ifdef __cplusplus
 }

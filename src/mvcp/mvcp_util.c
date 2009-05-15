@@ -1,6 +1,6 @@
 /*
- * valerie_util.c -- General Purpose Client Utilities
- * Copyright (C) 2002-2003 Ushodaya Enterprises Limited
+ * mvcp_util.c -- General Purpose Client Utilities
+ * Copyright (C) 2002-2009 Ushodaya Enterprises Limited
  * Author: Charles Yates <charles.yates@pandora.be>
  *
  * This library is free software; you can redistribute it and/or
@@ -23,12 +23,12 @@
 #include <ctype.h>
 
 /* Application header files */
-#include "valerie_util.h"
+#include "mvcp_util.h"
 
 /** Remove LF or CR/LF terminations from the input string.
 */
 
-char *valerie_util_chomp( char *input )
+char *mvcp_util_chomp( char *input )
 {
 	if ( input != NULL )
 	{
@@ -44,7 +44,7 @@ char *valerie_util_chomp( char *input )
 /** Remove leading and trailing spaces from the input string.
 */
 
-char *valerie_util_trim( char *input )
+char *mvcp_util_trim( char *input )
 {
 	if ( input != NULL )
 	{
@@ -63,7 +63,7 @@ char *valerie_util_trim( char *input )
 /** Strip the specified string of leading and trailing 'value' (ie: ").
 */
 
-char *valerie_util_strip( char *input, char value )
+char *mvcp_util_strip( char *input, char value )
 {
 	if ( input != NULL )
 	{

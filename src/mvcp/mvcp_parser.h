@@ -1,6 +1,6 @@
 /*
- * valerie_parser.h -- Valerie Parser for Miracle Server
- * Copyright (C) 2002-2003 Ushodaya Enterprises Limited
+ * mvcp_parser.h -- MVCP Parser for Melted
+ * Copyright (C) 2002-2009 Ushodaya Enterprises Limited
  * Author: Charles Yates <charles.yates@pandora.be>
  *
  * This library is free software; you can redistribute it and/or
@@ -18,15 +18,15 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef _VALERIE_PARSER_H_
-#define _VALERIE_PARSER_H_
+#ifndef _MVCP_PARSER_H_
+#define _MVCP_PARSER_H_
 
 /* MLT Header files */
 #include <framework/mlt.h>
 
 /* Application header files */
-#include "valerie_response.h"
-#include "valerie_notifier.h"
+#include "mvcp_response.h"
+#include "mvcp_notifier.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -36,13 +36,13 @@ extern "C"
 /** Callbacks to define the parser.
 */
 
-typedef valerie_response (*parser_connect)( void * );
-typedef valerie_response (*parser_execute)( void *, char * );
-typedef valerie_response (*parser_received)( void *, char *, char * );
-typedef valerie_response (*parser_push)( void *, char *, mlt_service );
+typedef mvcp_response (*parser_connect)( void * );
+typedef mvcp_response (*parser_execute)( void *, char * );
+typedef mvcp_response (*parser_received)( void *, char *, char * );
+typedef mvcp_response (*parser_push)( void *, char *, mlt_service );
 typedef void (*parser_close)( void * );
 
-/** Structure for the valerie parser.
+/** Structure for the mvcp parser.
 */
 
 typedef struct
@@ -53,21 +53,21 @@ typedef struct
 	parser_received received;
 	parser_close close;
 	void *real;
-	valerie_notifier notifier;
+	mvcp_notifier notifier;
 }
-*valerie_parser, valerie_parser_t;
+*mvcp_parser, mvcp_parser_t;
 
 /** API for the parser - note that no constructor is defined here.
 */
 
-extern valerie_response valerie_parser_connect( valerie_parser );
-extern valerie_response valerie_parser_push( valerie_parser, char *, mlt_service );
-extern valerie_response valerie_parser_received( valerie_parser, char *, char * );
-extern valerie_response valerie_parser_execute( valerie_parser, char * );
-extern valerie_response valerie_parser_executef( valerie_parser, const char *, ... );
-extern valerie_response valerie_parser_run( valerie_parser, char * );
-extern valerie_notifier valerie_parser_get_notifier( valerie_parser );
-extern void valerie_parser_close( valerie_parser );
+extern mvcp_response mvcp_parser_connect( mvcp_parser );
+extern mvcp_response mvcp_parser_push( mvcp_parser, char *, mlt_service );
+extern mvcp_response mvcp_parser_received( mvcp_parser, char *, char * );
+extern mvcp_response mvcp_parser_execute( mvcp_parser, char * );
+extern mvcp_response mvcp_parser_executef( mvcp_parser, const char *, ... );
+extern mvcp_response mvcp_parser_run( mvcp_parser, char * );
+extern mvcp_notifier mvcp_parser_get_notifier( mvcp_parser );
+extern void mvcp_parser_close( mvcp_parser );
 
 #ifdef __cplusplus
 }

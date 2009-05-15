@@ -1,6 +1,6 @@
 /*
- * valerie_response.h -- Response
- * Copyright (C) 2002-2003 Ushodaya Enterprises Limited
+ * mvcp_response.h -- Response
+ * Copyright (C) 2002-2009 Ushodaya Enterprises Limited
  * Author: Charles Yates <charles.yates@pandora.be>
  *
  * This library is free software; you can redistribute it and/or
@@ -18,8 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef _VALERIE_RESPONSE_H_
-#define _VALERIE_RESPONSE_H_
+#ifndef _MVCP_RESPONSE_H_
+#define _MVCP_RESPONSE_H_
 
 #include <stdio.h>
 
@@ -38,21 +38,21 @@ typedef struct
 	int count;
 	int append;
 }
-*valerie_response, valerie_response_t;
+*mvcp_response, mvcp_response_t;
 
 /** API for accessing the response structure.
 */
 
-extern valerie_response valerie_response_init( );
-extern valerie_response valerie_response_clone( valerie_response );
-extern int valerie_response_get_error_code( valerie_response );
-extern const char *valerie_response_get_error_string( valerie_response );
-extern char *valerie_response_get_line( valerie_response, int );
-extern int valerie_response_count( valerie_response );
-extern void valerie_response_set_error( valerie_response, int, const char * );
-extern int valerie_response_printf( valerie_response, size_t, const char *, ... );
-extern int valerie_response_write( valerie_response, const char *, int );
-extern void valerie_response_close( valerie_response );
+extern mvcp_response mvcp_response_init( );
+extern mvcp_response mvcp_response_clone( mvcp_response );
+extern int mvcp_response_get_error_code( mvcp_response );
+extern const char *mvcp_response_get_error_string( mvcp_response );
+extern char *mvcp_response_get_line( mvcp_response, int );
+extern int mvcp_response_count( mvcp_response );
+extern void mvcp_response_set_error( mvcp_response, int, const char * );
+extern int mvcp_response_printf( mvcp_response, size_t, const char *, ... );
+extern int mvcp_response_write( mvcp_response, const char *, int );
+extern void mvcp_response_close( mvcp_response );
 
 #ifdef __cplusplus
 }

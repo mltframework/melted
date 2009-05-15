@@ -1,6 +1,6 @@
 /*
- * valerie_remote.h -- Remote Parser
- * Copyright (C) 2002-2003 Ushodaya Enterprises Limited
+ * mvcp_remote.h -- Remote Parser
+ * Copyright (C) 2002-2009 Ushodaya Enterprises Limited
  * Author: Charles Yates <charles.yates@pandora.be>
  *
  * This library is free software; you can redistribute it and/or
@@ -18,11 +18,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef _VALERIE_REMOTE_H_
-#define _VALERIE_REMOTE_H_
+#ifndef _MVCP_REMOTE_H_
+#define _MVCP_REMOTE_H_
 
 /* Application header files */
-#include "valerie_parser.h"
+#include "mvcp_parser.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -32,7 +32,7 @@ extern "C"
 /** Remote parser API.
 */
 
-extern valerie_parser valerie_parser_init_remote( char *, int );
+extern mvcp_parser mvcp_parser_init_remote( char *, int );
 
 #ifdef __cplusplus
 }

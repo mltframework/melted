@@ -1,6 +1,6 @@
 /*
- * valerie_parser.c -- Valerie Parser for Miracle
- * Copyright (C) 2002-2003 Ushodaya Enterprises Limited
+ * mvcp_parser.c -- MVCP Parser for Melted
+ * Copyright (C) 2002-2009 Ushodaya Enterprises Limited
  * Author: Charles Yates <charles.yates@pandora.be>
  *
  * This library is free software; you can redistribute it and/or
@@ -25,13 +25,13 @@
 #include <string.h>
 
 /* Application header files */
-#include "valerie_parser.h"
-#include "valerie_util.h"
+#include "mvcp_parser.h"
+#include "mvcp_util.h"
 
 /** Connect to the parser.
 */
 
-valerie_response valerie_parser_connect( valerie_parser parser )
+mvcp_response mvcp_parser_connect( mvcp_parser parser )
 {
 	return parser->connect( parser->real );
 }
@@ -39,7 +39,7 @@ valerie_response valerie_parser_connect( valerie_parser parser )
 /** Execute a command via the parser.
 */
 
-valerie_response valerie_parser_execute( valerie_parser parser, char *command )
+mvcp_response mvcp_parser_execute( mvcp_parser parser, char *command )
 {
 	return parser->execute( parser->real, command );
 }
@@ -47,7 +47,7 @@ valerie_response valerie_parser_execute( valerie_parser parser, char *command )
 /** Push a service via the parser.
 */
 
-valerie_response valerie_parser_received( valerie_parser parser, char *command, char *doc )
+mvcp_response mvcp_parser_received( mvcp_parser parser, char *command, char *doc )
 {
 	return parser->received != NULL ? parser->received( parser->real, command, doc ) : NULL;
 }
@@ -55,7 +55,7 @@ valerie_response valerie_parser_received( valerie_parser parser, char *command, 
 /** Push a service via the parser.
 */
 
-valerie_response valerie_parser_push( valerie_parser parser, char *command, mlt_service service )
+mvcp_response mvcp_parser_push( mvcp_parser parser, char *command, mlt_service service )
 {
 	return parser->push( parser->real, command, service );
 }
@@ -63,53 +63,53 @@ valerie_response valerie_parser_push( valerie_parser parser, char *command, mlt_
 /** Execute a formatted command via the parser.
 */
 
-valerie_response valerie_parser_executef( valerie_parser parser, const char *format, ... )
+mvcp_response mvcp_parser_executef( mvcp_parser parser, const char *format, ... )
 {
 	char *command = malloc( 10240 );
-	valerie_response response = NULL;
+	mvcp_response response = NULL;
  	if ( command != NULL )
 	{
 		va_list list;
 		va_start( list, format );
 		if ( vsnprintf( command, 10240, format, list ) != 0 )
-			response = valerie_parser_execute( parser, command );
+			response = mvcp_parser_execute( parser, command );
 		va_end( list );
 		free( command );
 	}
 	return response;
 }
 
-/** Execute the contents of a file. Note the special case valerie_response returned.
+/** Execute the contents of a file. Note the special case mvcp_response returned.
 */
 
-valerie_response valerie_parser_run( valerie_parser parser, char *filename )
+mvcp_response mvcp_parser_run( mvcp_parser parser, char *filename )
 {
-	valerie_response response = valerie_response_init( );
+	mvcp_response response = mvcp_response_init( );
 	if ( response != NULL )
 	{
 		FILE *file = fopen( filename, "r" );
 		if ( file != NULL )
 		{
 			char command[ 1024 ];
-			valerie_response_set_error( response, 201, "OK" );
-			while ( valerie_response_get_error_code( response ) == 201 && fgets( command, 1024, file ) )
+			mvcp_response_set_error( response, 201, "OK" );
+			while ( mvcp_response_get_error_code( response ) == 201 && fgets( command, 1024, file ) )
 			{
-				valerie_util_trim( valerie_util_chomp( command ) );
+				mvcp_util_trim( mvcp_util_chomp( command ) );
 				if ( strcmp( command, "" ) && command[ 0 ] != '#' )
 				{
-					valerie_response temp = NULL;
-					valerie_response_printf( response, 1024, "%s\n", command );
-					temp = valerie_parser_execute( parser, command );
+					mvcp_response temp = NULL;
+					mvcp_response_printf( response, 1024, "%s\n", command );
+					temp = mvcp_parser_execute( parser, command );
 					if ( temp != NULL )
 					{
 						int index = 0;
-						for ( index = 0; index < valerie_response_count( temp ); index ++ )
-							valerie_response_printf( response, 10240, "%s\n", valerie_response_get_line( temp, index ) );
-						valerie_response_close( temp );
+						for ( index = 0; index < mvcp_response_count( temp ); index ++ )
+							mvcp_response_printf( response, 10240, "%s\n", mvcp_response_get_line( temp, index ) );
+						mvcp_response_close( temp );
 					}
 					else
 					{
-						valerie_response_set_error( response, 500, "Batch execution failed" );
+						mvcp_response_set_error( response, 500, "Batch execution failed" );
 					}
 				}
 			}
@@ -117,7 +117,7 @@ valerie_response valerie_parser_run( valerie_parser parser, char *filename )
 		}
 		else
 		{
-			valerie_response_set_error( response, 404, "File not found." );
+			mvcp_response_set_error( response, 404, "File not found." );
 		}
 	}
 	return response;
@@ -126,22 +126,22 @@ valerie_response valerie_parser_run( valerie_parser parser, char *filename )
 /** Get the notifier associated to the parser.
 */
 
-valerie_notifier valerie_parser_get_notifier( valerie_parser parser )
+mvcp_notifier mvcp_parser_get_notifier( mvcp_parser parser )
 {
 	if ( parser->notifier == NULL )
-		parser->notifier = valerie_notifier_init( );
+		parser->notifier = mvcp_notifier_init( );
 	return parser->notifier;
 }
 
 /** Close the parser.
 */
 
-void valerie_parser_close( valerie_parser parser )
+void mvcp_parser_close( mvcp_parser parser )
 {
 	if ( parser != NULL )
 	{
 		parser->close( parser->real );
-		valerie_notifier_close( parser->notifier );
+		mvcp_notifier_close( parser->notifier );
 		free( parser );
 	}
 }

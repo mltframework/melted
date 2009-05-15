@@ -1,6 +1,6 @@
 /*
- * valerie.h -- High Level Client API for miracle
- * Copyright (C) 2002-2003 Ushodaya Enterprises Limited
+ * mvcp.h -- High Level Client API for Melted
+ * Copyright (C) 2002-2009 Ushodaya Enterprises Limited
  * Author: Charles Yates <charles.yates@pandora.be>
  *
  * This library is free software; you can redistribute it and/or
@@ -18,8 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef _VALERIE_H_
-#define _VALERIE_H_
+#ifndef _MVCP_H_
+#define _MVCP_H_
 
 /* System header files */
 #include <limits.h>
@@ -28,9 +28,9 @@
 #include <framework/mlt.h>
 
 /* Application header files */
-#include "valerie_parser.h"
-#include "valerie_status.h"
-#include "valerie_notifier.h"
+#include "mvcp_parser.h"
+#include "mvcp_status.h"
+#include "mvcp_notifier.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -42,93 +42,93 @@ extern "C"
 
 typedef enum
 {
-	valerie_ok = 0,
-	valerie_malloc_failed,
-	valerie_unknown_error,
-	valerie_no_response,
-	valerie_invalid_command,
-	valerie_server_timeout,
-	valerie_missing_argument,
-	valerie_server_unavailable,
-	valerie_unit_creation_failed,
-	valerie_unit_unavailable,
-	valerie_invalid_file,
-	valerie_invalid_position
+	mvcp_ok = 0,
+	mvcp_malloc_failed,
+	mvcp_unknown_error,
+	mvcp_no_response,
+	mvcp_invalid_command,
+	mvcp_server_timeout,
+	mvcp_missing_argument,
+	mvcp_server_unavailable,
+	mvcp_unit_creation_failed,
+	mvcp_unit_unavailable,
+	mvcp_invalid_file,
+	mvcp_invalid_position
 }
-valerie_error_code;
+mvcp_error_code;
 
 /** Clip index specification.
 */
 
 typedef enum
 {
-	valerie_absolute = 0,
-	valerie_relative
+	mvcp_absolute = 0,
+	mvcp_relative
 }
-valerie_clip_offset;
+mvcp_clip_offset;
 
 /** Client structure.
 */
 
 typedef struct
 {
-	valerie_parser parser;
-	valerie_response last_response;
+	mvcp_parser parser;
+	mvcp_response last_response;
 }
-*valerie, valerie_t;
+*mvcp, mvcp_t;
 
 /** Client API.
 */
 
-extern valerie valerie_init( valerie_parser );
+extern mvcp mvcp_init( mvcp_parser );
 
-/* Connect to the valerie parser instance */
-extern valerie_error_code valerie_connect( valerie );
+/* Connect to the mvcp parser instance */
+extern mvcp_error_code mvcp_connect( mvcp );
 
 /* Global functions */
-extern valerie_error_code valerie_set( valerie, char *, char * );
-extern valerie_error_code valerie_get( valerie, char *, char *, int );
-extern valerie_error_code valerie_run( valerie, char * );
+extern mvcp_error_code mvcp_set( mvcp, char *, char * );
+extern mvcp_error_code mvcp_get( mvcp, char *, char *, int );
+extern mvcp_error_code mvcp_run( mvcp, char * );
 
 /* Unit functions */
-extern valerie_error_code valerie_unit_add( valerie, char *, int * );
-extern valerie_error_code valerie_unit_load( valerie, int, char * );
-extern valerie_error_code valerie_unit_load_clipped( valerie, int, char *, int32_t, int32_t );
-extern valerie_error_code valerie_unit_load_back( valerie, int, char * );
-extern valerie_error_code valerie_unit_load_back_clipped( valerie, int, char *, int32_t, int32_t );
-extern valerie_error_code valerie_unit_append( valerie, int, char *, int32_t, int32_t );
-extern valerie_error_code valerie_unit_receive( valerie, int, char *, char * );
-extern valerie_error_code valerie_unit_push( valerie, int, char *, mlt_service );
-extern valerie_error_code valerie_unit_clean( valerie, int );
-extern valerie_error_code valerie_unit_wipe( valerie, int );
-extern valerie_error_code valerie_unit_clear( valerie, int );
-extern valerie_error_code valerie_unit_clip_move( valerie, int, valerie_clip_offset, int, valerie_clip_offset, int );
-extern valerie_error_code valerie_unit_clip_remove( valerie, int, valerie_clip_offset, int );
-extern valerie_error_code valerie_unit_remove_current_clip( valerie, int );
-extern valerie_error_code valerie_unit_clip_insert( valerie, int, valerie_clip_offset, int, char *, int32_t, int32_t );
-extern valerie_error_code valerie_unit_play( valerie, int );
-extern valerie_error_code valerie_unit_play_at_speed( valerie, int, int );
-extern valerie_error_code valerie_unit_stop( valerie, int );
-extern valerie_error_code valerie_unit_pause( valerie, int );
-extern valerie_error_code valerie_unit_rewind( valerie, int );
-extern valerie_error_code valerie_unit_fast_forward( valerie, int );
-extern valerie_error_code valerie_unit_step( valerie, int, int32_t );
-extern valerie_error_code valerie_unit_goto( valerie, int, int32_t );
-extern valerie_error_code valerie_unit_clip_goto( valerie, int, valerie_clip_offset, int, int32_t );
-extern valerie_error_code valerie_unit_clip_set_in( valerie, int, valerie_clip_offset, int, int32_t );
-extern valerie_error_code valerie_unit_clip_set_out( valerie, int, valerie_clip_offset, int, int32_t );
-extern valerie_error_code valerie_unit_set_in( valerie, int, int32_t );
-extern valerie_error_code valerie_unit_set_out( valerie, int, int32_t );
-extern valerie_error_code valerie_unit_clear_in( valerie, int );
-extern valerie_error_code valerie_unit_clear_out( valerie, int );
-extern valerie_error_code valerie_unit_clear_in_out( valerie, int );
-extern valerie_error_code valerie_unit_set( valerie, int, const char *, const char * );
-extern valerie_error_code valerie_unit_get( valerie, int, char * );
-extern valerie_error_code valerie_unit_status( valerie, int, valerie_status );
-extern valerie_error_code valerie_unit_transfer( valerie, int, int );
+extern mvcp_error_code mvcp_unit_add( mvcp, char *, int * );
+extern mvcp_error_code mvcp_unit_load( mvcp, int, char * );
+extern mvcp_error_code mvcp_unit_load_clipped( mvcp, int, char *, int32_t, int32_t );
+extern mvcp_error_code mvcp_unit_load_back( mvcp, int, char * );
+extern mvcp_error_code mvcp_unit_load_back_clipped( mvcp, int, char *, int32_t, int32_t );
+extern mvcp_error_code mvcp_unit_append( mvcp, int, char *, int32_t, int32_t );
+extern mvcp_error_code mvcp_unit_receive( mvcp, int, char *, char * );
+extern mvcp_error_code mvcp_unit_push( mvcp, int, char *, mlt_service );
+extern mvcp_error_code mvcp_unit_clean( mvcp, int );
+extern mvcp_error_code mvcp_unit_wipe( mvcp, int );
+extern mvcp_error_code mvcp_unit_clear( mvcp, int );
+extern mvcp_error_code mvcp_unit_clip_move( mvcp, int, mvcp_clip_offset, int, mvcp_clip_offset, int );
+extern mvcp_error_code mvcp_unit_clip_remove( mvcp, int, mvcp_clip_offset, int );
+extern mvcp_error_code mvcp_unit_remove_current_clip( mvcp, int );
+extern mvcp_error_code mvcp_unit_clip_insert( mvcp, int, mvcp_clip_offset, int, char *, int32_t, int32_t );
+extern mvcp_error_code mvcp_unit_play( mvcp, int );
+extern mvcp_error_code mvcp_unit_play_at_speed( mvcp, int, int );
+extern mvcp_error_code mvcp_unit_stop( mvcp, int );
+extern mvcp_error_code mvcp_unit_pause( mvcp, int );
+extern mvcp_error_code mvcp_unit_rewind( mvcp, int );
+extern mvcp_error_code mvcp_unit_fast_forward( mvcp, int );
+extern mvcp_error_code mvcp_unit_step( mvcp, int, int32_t );
+extern mvcp_error_code mvcp_unit_goto( mvcp, int, int32_t );
+extern mvcp_error_code mvcp_unit_clip_goto( mvcp, int, mvcp_clip_offset, int, int32_t );
+extern mvcp_error_code mvcp_unit_clip_set_in( mvcp, int, mvcp_clip_offset, int, int32_t );
+extern mvcp_error_code mvcp_unit_clip_set_out( mvcp, int, mvcp_clip_offset, int, int32_t );
+extern mvcp_error_code mvcp_unit_set_in( mvcp, int, int32_t );
+extern mvcp_error_code mvcp_unit_set_out( mvcp, int, int32_t );
+extern mvcp_error_code mvcp_unit_clear_in( mvcp, int );
+extern mvcp_error_code mvcp_unit_clear_out( mvcp, int );
+extern mvcp_error_code mvcp_unit_clear_in_out( mvcp, int );
+extern mvcp_error_code mvcp_unit_set( mvcp, int, const char *, const char * );
+extern mvcp_error_code mvcp_unit_get( mvcp, int, char * );
+extern mvcp_error_code mvcp_unit_status( mvcp, int, mvcp_status );
+extern mvcp_error_code mvcp_unit_transfer( mvcp, int, int );
 
 /* Notifier functionality. */
-extern valerie_notifier valerie_get_notifier( valerie );
+extern mvcp_notifier mvcp_get_notifier( mvcp );
 
 /** Structure for the directory.
 */
@@ -136,9 +136,9 @@ extern valerie_notifier valerie_get_notifier( valerie );
 typedef struct
 {
 	char *directory;
-	valerie_response response;
+	mvcp_response response;
 }
-*valerie_dir, valerie_dir_t;
+*mvcp_dir, mvcp_dir_t;
 
 /** Directory entry structure.
 */
@@ -150,14 +150,14 @@ typedef struct
 	char full[ PATH_MAX + NAME_MAX ];
 	unsigned long long size;
 }
-*valerie_dir_entry, valerie_dir_entry_t;
+*mvcp_dir_entry, mvcp_dir_entry_t;
 
 /* Directory reading. */
-extern valerie_dir valerie_dir_init( valerie, const char * );
-extern valerie_error_code valerie_dir_get_error_code( valerie_dir );
-extern valerie_error_code valerie_dir_get( valerie_dir, int, valerie_dir_entry );
-extern int valerie_dir_count( valerie_dir );
-extern void valerie_dir_close( valerie_dir );
+extern mvcp_dir mvcp_dir_init( mvcp, const char * );
+extern mvcp_error_code mvcp_dir_get_error_code( mvcp_dir );
+extern mvcp_error_code mvcp_dir_get( mvcp_dir, int, mvcp_dir_entry );
+extern int mvcp_dir_count( mvcp_dir );
+extern void mvcp_dir_close( mvcp_dir );
 
 /** Structure for the list.
 */
@@ -165,9 +165,9 @@ extern void valerie_dir_close( valerie_dir );
 typedef struct
 {
 	int generation;
-	valerie_response response;
+	mvcp_response response;
 }
-*valerie_list, valerie_list_t;
+*mvcp_list, mvcp_list_t;
 
 /** List entry structure.
 */
@@ -182,23 +182,23 @@ typedef struct
 	int32_t size;
 	int32_t fps;
 }
-*valerie_list_entry, valerie_list_entry_t;
+*mvcp_list_entry, mvcp_list_entry_t;
 
 /* List reading. */
-extern valerie_list valerie_list_init( valerie, int );
-extern valerie_error_code valerie_list_get_error_code( valerie_list );
-extern valerie_error_code valerie_list_get( valerie_list, int, valerie_list_entry );
-extern int valerie_list_count( valerie_list );
-extern void valerie_list_close( valerie_list );
+extern mvcp_list mvcp_list_init( mvcp, int );
+extern mvcp_error_code mvcp_list_get_error_code( mvcp_list );
+extern mvcp_error_code mvcp_list_get( mvcp_list, int, mvcp_list_entry );
+extern int mvcp_list_count( mvcp_list );
+extern void mvcp_list_close( mvcp_list );
 
 /** Structure for nodes.
 */
 
 typedef struct
 {
-	valerie_response response;
+	mvcp_response response;
 }
-*valerie_nodes, valerie_nodes_t;
+*mvcp_nodes, mvcp_nodes_t;
 
 /** Node entry structure.
 */
@@ -209,23 +209,23 @@ typedef struct
 	char guid[ 17 ];
 	char name[ 1024 ];
 }
-*valerie_node_entry, valerie_node_entry_t;
+*mvcp_node_entry, mvcp_node_entry_t;
 
 /* Node reading. */
-extern valerie_nodes valerie_nodes_init( valerie );
-extern valerie_error_code valerie_nodes_get_error_code( valerie_nodes );
-extern valerie_error_code valerie_nodes_get( valerie_nodes, int, valerie_node_entry );
-extern int valerie_nodes_count( valerie_nodes );
-extern void valerie_nodes_close( valerie_nodes );
+extern mvcp_nodes mvcp_nodes_init( mvcp );
+extern mvcp_error_code mvcp_nodes_get_error_code( mvcp_nodes );
+extern mvcp_error_code mvcp_nodes_get( mvcp_nodes, int, mvcp_node_entry );
+extern int mvcp_nodes_count( mvcp_nodes );
+extern void mvcp_nodes_close( mvcp_nodes );
 
 /** Structure for units.
 */
 
 typedef struct
 {
-	valerie_response response;
+	mvcp_response response;
 }
-*valerie_units, valerie_units_t;
+*mvcp_units, mvcp_units_t;
 
 /** Unit entry structure.
 */
@@ -237,25 +237,25 @@ typedef struct
 	char guid[ 512 ];
 	int online;
 }
-*valerie_unit_entry, valerie_unit_entry_t;
+*mvcp_unit_entry, mvcp_unit_entry_t;
 
 /* Unit reading. */
-extern valerie_units valerie_units_init( valerie );
-extern valerie_error_code valerie_units_get_error_code( valerie_units );
-extern valerie_error_code valerie_units_get( valerie_units, int, valerie_unit_entry );
-extern int valerie_units_count( valerie_units );
-extern void valerie_units_close( valerie_units );
+extern mvcp_units mvcp_units_init( mvcp );
+extern mvcp_error_code mvcp_units_get_error_code( mvcp_units );
+extern mvcp_error_code mvcp_units_get( mvcp_units, int, mvcp_unit_entry );
+extern int mvcp_units_count( mvcp_units );
+extern void mvcp_units_close( mvcp_units );
 
 /* Miscellaenous functions */
-extern valerie_response valerie_get_last_response( valerie );
-extern const char *valerie_error_description( valerie_error_code );
+extern mvcp_response mvcp_get_last_response( mvcp );
+extern const char *mvcp_error_description( mvcp_error_code );
 
 /* Courtesy functions. */
-extern valerie_error_code valerie_execute( valerie, size_t, const char *, ... );
-extern valerie_error_code valerie_push( valerie, mlt_service, size_t, const char *, ... );
+extern mvcp_error_code mvcp_execute( mvcp, size_t, const char *, ... );
+extern mvcp_error_code mvcp_push( mvcp, mlt_service, size_t, const char *, ... );
 
 /* Close function. */
-extern void valerie_close( valerie );
+extern void mvcp_close( mvcp );
 
 #ifdef __cplusplus
 }

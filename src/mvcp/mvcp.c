@@ -1,6 +1,6 @@
 /*
- * valerie.c -- High Level Client API for miracle
- * Copyright (C) 2002-2003 Ushodaya Enterprises Limited
+ * mvcp.c -- High Level Client API for Melted
+ * Copyright (C) 2002-2009 Ushodaya Enterprises Limited
  * Author: Charles Yates <charles.yates@pandora.be>
  *
  * This library is free software; you can redistribute it and/or
@@ -25,19 +25,19 @@
 #include <stdarg.h>
 
 /* Application header files */
-#include "valerie.h"
-#include "valerie_tokeniser.h"
-#include "valerie_util.h"
+#include "mvcp.h"
+#include "mvcp_tokeniser.h"
+#include "mvcp_util.h"
 
-/** Initialise the valerie structure.
+/** Initialise the mvcp structure.
 */
 
-valerie valerie_init( valerie_parser parser )
+mvcp mvcp_init( mvcp_parser parser )
 {
-	valerie this = malloc( sizeof( valerie_t ) );
+	mvcp this = malloc( sizeof( mvcp_t ) );
 	if ( this != NULL )
 	{
-		memset( this, 0, sizeof( valerie_t ) );
+		memset( this, 0, sizeof( mvcp_t ) );
 		this->parser = parser;
 	}
 	return this;
@@ -46,12 +46,12 @@ valerie valerie_init( valerie_parser parser )
 /** Set the response structure associated to the last command.
 */
 
-static void valerie_set_last_response( valerie this, valerie_response response )
+static void mvcp_set_last_response( mvcp this, mvcp_response response )
 {
 	if ( this != NULL )
 	{
 		if ( this->last_response != NULL )
-			valerie_response_close( this->last_response );
+			mvcp_response_close( this->last_response );
 		this->last_response = response;
 	}
 }
@@ -59,15 +59,15 @@ static void valerie_set_last_response( valerie this, valerie_response response )
 /** Connect to the parser.
 */
 
-valerie_error_code valerie_connect( valerie this )
+mvcp_error_code mvcp_connect( mvcp this )
 {
-	valerie_error_code error = valerie_server_unavailable;
-	valerie_response response = valerie_parser_connect( this->parser );
+	mvcp_error_code error = mvcp_server_unavailable;
+	mvcp_response response = mvcp_parser_connect( this->parser );
 	if ( response != NULL )
 	{
-		valerie_set_last_response( this, response );
-		if ( valerie_response_get_error_code( response ) == 100 )
-			error = valerie_ok;
+		mvcp_set_last_response( this, response );
+		if ( mvcp_response_get_error_code( response ) == 100 )
+			error = mvcp_ok;
 	}
 	return error;
 }
@@ -75,40 +75,40 @@ valerie_error_code valerie_connect( valerie this )
 /** Interpret a non-context sensitive error code.
 */
 
-static valerie_error_code valerie_get_error_code( valerie this, valerie_response response )
+static mvcp_error_code mvcp_get_error_code( mvcp this, mvcp_response response )
 {
-	valerie_error_code error = valerie_server_unavailable;
-	switch( valerie_response_get_error_code( response ) )
+	mvcp_error_code error = mvcp_server_unavailable;
+	switch( mvcp_response_get_error_code( response ) )
 	{
 		case -1:
-			error = valerie_server_unavailable;
+			error = mvcp_server_unavailable;
 			break;
 		case -2:
-			error = valerie_no_response;
+			error = mvcp_no_response;
 			break;
 		case 200:
 		case 201:
 		case 202:
-			error = valerie_ok;
+			error = mvcp_ok;
 			break;
 		case 400:
-			error = valerie_invalid_command;
+			error = mvcp_invalid_command;
 			break;
 		case 401:
-			error = valerie_server_timeout;
+			error = mvcp_server_timeout;
 			break;
 		case 402:
-			error = valerie_missing_argument;
+			error = mvcp_missing_argument;
 			break;
 		case 403:
-			error = valerie_unit_unavailable;
+			error = mvcp_unit_unavailable;
 			break;
 		case 404:
-			error = valerie_invalid_file;
+			error = mvcp_invalid_file;
 			break;
 		default:
 		case 500:
-			error = valerie_unknown_error;
+			error = mvcp_unknown_error;
 			break;
 	}
 	return error;
@@ -117,9 +117,9 @@ static valerie_error_code valerie_get_error_code( valerie this, valerie_response
 /** Execute a command.
 */
 
-valerie_error_code valerie_execute( valerie this, size_t size, const char *format, ... )
+mvcp_error_code mvcp_execute( mvcp this, size_t size, const char *format, ... )
 {
-	valerie_error_code error = valerie_server_unavailable;
+	mvcp_error_code error = mvcp_server_unavailable;
 	char *command = malloc( size );
 	if ( this != NULL && command != NULL )
 	{
@@ -127,19 +127,19 @@ valerie_error_code valerie_execute( valerie this, size_t size, const char *forma
 		va_start( list, format );
 		if ( vsnprintf( command, size, format, list ) != 0 )
 		{
-			valerie_response response = valerie_parser_execute( this->parser, command );
-			valerie_set_last_response( this, response );
-			error = valerie_get_error_code( this, response );
+			mvcp_response response = mvcp_parser_execute( this->parser, command );
+			mvcp_set_last_response( this, response );
+			error = mvcp_get_error_code( this, response );
 		}
 		else
 		{
-			error = valerie_invalid_command;
+			error = mvcp_invalid_command;
 		}
 		va_end( list );
 	}
 	else
 	{
-		error = valerie_malloc_failed;
+		error = mvcp_malloc_failed;
 	}
 	free( command );
 	return error;
@@ -148,9 +148,9 @@ valerie_error_code valerie_execute( valerie this, size_t size, const char *forma
 /** Execute a command.
 */
 
-valerie_error_code valerie_receive( valerie this, char *doc, size_t size, const char *format, ... )
+mvcp_error_code mvcp_receive( mvcp this, char *doc, size_t size, const char *format, ... )
 {
-	valerie_error_code error = valerie_server_unavailable;
+	mvcp_error_code error = mvcp_server_unavailable;
 	char *command = malloc( size );
 	if ( this != NULL && command != NULL )
 	{
@@ -158,19 +158,19 @@ valerie_error_code valerie_receive( valerie this, char *doc, size_t size, const 
 		va_start( list, format );
 		if ( vsnprintf( command, size, format, list ) != 0 )
 		{
-			valerie_response response = valerie_parser_received( this->parser, command, doc );
-			valerie_set_last_response( this, response );
-			error = valerie_get_error_code( this, response );
+			mvcp_response response = mvcp_parser_received( this->parser, command, doc );
+			mvcp_set_last_response( this, response );
+			error = mvcp_get_error_code( this, response );
 		}
 		else
 		{
-			error = valerie_invalid_command;
+			error = mvcp_invalid_command;
 		}
 		va_end( list );
 	}
 	else
 	{
-		error = valerie_malloc_failed;
+		error = mvcp_malloc_failed;
 	}
 	free( command );
 	return error;
@@ -179,9 +179,9 @@ valerie_error_code valerie_receive( valerie this, char *doc, size_t size, const 
 /** Execute a command.
 */
 
-valerie_error_code valerie_push( valerie this, mlt_service service, size_t size, const char *format, ... )
+mvcp_error_code mvcp_push( mvcp this, mlt_service service, size_t size, const char *format, ... )
 {
-	valerie_error_code error = valerie_server_unavailable;
+	mvcp_error_code error = mvcp_server_unavailable;
 	char *command = malloc( size );
 	if ( this != NULL && command != NULL )
 	{
@@ -189,19 +189,19 @@ valerie_error_code valerie_push( valerie this, mlt_service service, size_t size,
 		va_start( list, format );
 		if ( vsnprintf( command, size, format, list ) != 0 )
 		{
-			valerie_response response = valerie_parser_push( this->parser, command, service );
-			valerie_set_last_response( this, response );
-			error = valerie_get_error_code( this, response );
+			mvcp_response response = mvcp_parser_push( this->parser, command, service );
+			mvcp_set_last_response( this, response );
+			error = mvcp_get_error_code( this, response );
 		}
 		else
 		{
-			error = valerie_invalid_command;
+			error = mvcp_invalid_command;
 		}
 		va_end( list );
 	}
 	else
 	{
-		error = valerie_malloc_failed;
+		error = mvcp_malloc_failed;
 	}
 	free( command );
 	return error;
@@ -210,21 +210,21 @@ valerie_error_code valerie_push( valerie this, mlt_service service, size_t size,
 /** Set a global property.
 */
 
-valerie_error_code valerie_set( valerie this, char *property, char *value )
+mvcp_error_code mvcp_set( mvcp this, char *property, char *value )
 {
-	return valerie_execute( this, 1024, "SET %s=%s", property, value );
+	return mvcp_execute( this, 1024, "SET %s=%s", property, value );
 }
 
 /** Get a global property.
 */
 
-valerie_error_code valerie_get( valerie this, char *property, char *value, int length )
+mvcp_error_code mvcp_get( mvcp this, char *property, char *value, int length )
 {
-	valerie_error_code error = valerie_execute( this, 1024, "GET %s", property );
-	if ( error == valerie_ok )
+	mvcp_error_code error = mvcp_execute( this, 1024, "GET %s", property );
+	if ( error == mvcp_ok )
 	{
-		valerie_response response = valerie_get_last_response( this );
-		strncpy( value, valerie_response_get_line( response, 1 ), length );
+		mvcp_response response = mvcp_get_last_response( this );
+		strncpy( value, mvcp_response_get_line( response, 1 ), length );
 	}
 	return error;
 }
@@ -232,28 +232,28 @@ valerie_error_code valerie_get( valerie this, char *property, char *value, int l
 /** Run a script.
 */
 
-valerie_error_code valerie_run( valerie this, char *file )
+mvcp_error_code mvcp_run( mvcp this, char *file )
 {
-	return valerie_execute( this, 10240, "RUN \"%s\"", file );
+	return mvcp_execute( this, 10240, "RUN \"%s\"", file );
 }
 
 /** Add a unit.
 */
 
-valerie_error_code valerie_unit_add( valerie this, char *guid, int *unit )
+mvcp_error_code mvcp_unit_add( mvcp this, char *guid, int *unit )
 {
-	valerie_error_code error = valerie_execute( this, 1024, "UADD %s", guid );
-	if ( error == valerie_ok )
+	mvcp_error_code error = mvcp_execute( this, 1024, "UADD %s", guid );
+	if ( error == mvcp_ok )
 	{
-		int length = valerie_response_count( this->last_response );
-		char *line = valerie_response_get_line( this->last_response, length - 1 );
+		int length = mvcp_response_count( this->last_response );
+		char *line = mvcp_response_get_line( this->last_response, length - 1 );
 		if ( line == NULL || sscanf( line, "U%d", unit ) != 1 )
-			error = valerie_unit_creation_failed;
+			error = mvcp_unit_creation_failed;
 	}
 	else
 	{
-		if ( error == valerie_unknown_error )
-			error = valerie_unit_creation_failed;
+		if ( error == mvcp_unknown_error )
+			error = mvcp_unit_creation_failed;
 	}
 	return error;
 }
@@ -261,19 +261,19 @@ valerie_error_code valerie_unit_add( valerie this, char *guid, int *unit )
 /** Load a file on the specified unit.
 */
 
-valerie_error_code valerie_unit_load( valerie this, int unit, char *file )
+mvcp_error_code mvcp_unit_load( mvcp this, int unit, char *file )
 {
-	return valerie_execute( this, 10240, "LOAD U%d \"%s\"", unit, file );
+	return mvcp_execute( this, 10240, "LOAD U%d \"%s\"", unit, file );
 }
 
-static void valerie_interpret_clip_offset( char *output, valerie_clip_offset offset, int clip )
+static void mvcp_interpret_clip_offset( char *output, mvcp_clip_offset offset, int clip )
 {
 	switch( offset )
 	{
-		case valerie_absolute:
+		case mvcp_absolute:
 			sprintf( output, "%d", clip );
 			break;
-		case valerie_relative:
+		case mvcp_relative:
 			if ( clip < 0 )
 				sprintf( output, "%d", clip );
 			else
@@ -285,280 +285,280 @@ static void valerie_interpret_clip_offset( char *output, valerie_clip_offset off
 /** Load a file on the specified unit with the specified in/out points.
 */
 
-valerie_error_code valerie_unit_load_clipped( valerie this, int unit, char *file, int32_t in, int32_t out )
+mvcp_error_code mvcp_unit_load_clipped( mvcp this, int unit, char *file, int32_t in, int32_t out )
 {
-	return valerie_execute( this, 10240, "LOAD U%d \"%s\" %d %d", unit, file, in, out );
+	return mvcp_execute( this, 10240, "LOAD U%d \"%s\" %d %d", unit, file, in, out );
 }
 
 /** Load a file on the specified unit at the end of the current pump.
 */
 
-valerie_error_code valerie_unit_load_back( valerie this, int unit, char *file )
+mvcp_error_code mvcp_unit_load_back( mvcp this, int unit, char *file )
 {
-	return valerie_execute( this, 10240, "LOAD U%d \"!%s\"", unit, file );
+	return mvcp_execute( this, 10240, "LOAD U%d \"!%s\"", unit, file );
 }
 
 /** Load a file on the specified unit at the end of the pump with the specified in/out points.
 */
 
-valerie_error_code valerie_unit_load_back_clipped( valerie this, int unit, char *file, int32_t in, int32_t out )
+mvcp_error_code mvcp_unit_load_back_clipped( mvcp this, int unit, char *file, int32_t in, int32_t out )
 {
-	return valerie_execute( this, 10240, "LOAD U%d \"!%s\" %d %d", unit, file, in, out );
+	return mvcp_execute( this, 10240, "LOAD U%d \"!%s\" %d %d", unit, file, in, out );
 }
 
 /** Append a file on the specified unit.
 */
 
-valerie_error_code valerie_unit_append( valerie this, int unit, char *file, int32_t in, int32_t out )
+mvcp_error_code mvcp_unit_append( mvcp this, int unit, char *file, int32_t in, int32_t out )
 {
-	return valerie_execute( this, 10240, "APND U%d \"%s\" %d %d", unit, file, in, out );
+	return mvcp_execute( this, 10240, "APND U%d \"%s\" %d %d", unit, file, in, out );
 }
 
 /** Push a service on to a unit.
 */
 
-valerie_error_code valerie_unit_receive( valerie this, int unit, char *command, char *doc )
+mvcp_error_code mvcp_unit_receive( mvcp this, int unit, char *command, char *doc )
 {
-	return valerie_receive( this, doc, 10240, "PUSH U%d %s", unit, command );
+	return mvcp_receive( this, doc, 10240, "PUSH U%d %s", unit, command );
 }
 
 /** Push a service on to a unit.
 */
 
-valerie_error_code valerie_unit_push( valerie this, int unit, char *command, mlt_service service )
+mvcp_error_code mvcp_unit_push( mvcp this, int unit, char *command, mlt_service service )
 {
-	return valerie_push( this, service, 10240, "PUSH U%d %s", unit, command );
+	return mvcp_push( this, service, 10240, "PUSH U%d %s", unit, command );
 }
 
 /** Clean the unit - this function removes all but the currently playing clip.
 */
 
-valerie_error_code valerie_unit_clean( valerie this, int unit )
+mvcp_error_code mvcp_unit_clean( mvcp this, int unit )
 {
-	return valerie_execute( this, 1024, "CLEAN U%d", unit );
+	return mvcp_execute( this, 1024, "CLEAN U%d", unit );
 }
 
 /** Clear the unit - this function removes all clips.
 */
 
-valerie_error_code valerie_unit_clear( valerie this, int unit )
+mvcp_error_code mvcp_unit_clear( mvcp this, int unit )
 {
-	return valerie_execute( this, 1024, "CLEAR U%d", unit );
+	return mvcp_execute( this, 1024, "CLEAR U%d", unit );
 }
 
 /** Wipe the unit - this function removes all clips before the current one.
 */
 
-valerie_error_code valerie_unit_wipe( valerie this, int unit )
+mvcp_error_code mvcp_unit_wipe( mvcp this, int unit )
 {
-	return valerie_execute( this, 1024, "WIPE U%d", unit );
+	return mvcp_execute( this, 1024, "WIPE U%d", unit );
 }
 
 /** Move clips on the units playlist.
 */
 
-valerie_error_code valerie_unit_clip_move( valerie this, int unit, valerie_clip_offset src_offset, int src, valerie_clip_offset dest_offset, int dest )
+mvcp_error_code mvcp_unit_clip_move( mvcp this, int unit, mvcp_clip_offset src_offset, int src, mvcp_clip_offset dest_offset, int dest )
 {
 	char temp1[ 100 ];
 	char temp2[ 100 ];
-	valerie_interpret_clip_offset( temp1, src_offset, src );
-	valerie_interpret_clip_offset( temp2, dest_offset, dest );
-	return valerie_execute( this, 1024, "MOVE U%d %s %s", unit, temp1, temp2 );
+	mvcp_interpret_clip_offset( temp1, src_offset, src );
+	mvcp_interpret_clip_offset( temp2, dest_offset, dest );
+	return mvcp_execute( this, 1024, "MOVE U%d %s %s", unit, temp1, temp2 );
 }
 
 /** Remove clip at the specified position.
 */
 
-valerie_error_code valerie_unit_clip_remove( valerie this, int unit, valerie_clip_offset offset, int clip )
+mvcp_error_code mvcp_unit_clip_remove( mvcp this, int unit, mvcp_clip_offset offset, int clip )
 {
 	char temp[ 100 ];
-	valerie_interpret_clip_offset( temp, offset, clip );
-	return valerie_execute( this, 1024, "REMOVE U%d %s", unit, temp );
+	mvcp_interpret_clip_offset( temp, offset, clip );
+	return mvcp_execute( this, 1024, "REMOVE U%d %s", unit, temp );
 }
 
 /** Remove the currently playing clip.
 */
 
-valerie_error_code valerie_unit_remove_current_clip( valerie this, int unit )
+mvcp_error_code mvcp_unit_remove_current_clip( mvcp this, int unit )
 {
-	return valerie_execute( this, 1024, "REMOVE U%d", unit );
+	return mvcp_execute( this, 1024, "REMOVE U%d", unit );
 }
 
 /** Insert clip at the specified position.
 */
 
-valerie_error_code valerie_unit_clip_insert( valerie this, int unit, valerie_clip_offset offset, int clip, char *file, int32_t in, int32_t out )
+mvcp_error_code mvcp_unit_clip_insert( mvcp this, int unit, mvcp_clip_offset offset, int clip, char *file, int32_t in, int32_t out )
 {
 	char temp[ 100 ];
-	valerie_interpret_clip_offset( temp, offset, clip );
-	return valerie_execute( this, 1024, "INSERT U%d \"%s\" %s %d %d", unit, file, temp, in, out );
+	mvcp_interpret_clip_offset( temp, offset, clip );
+	return mvcp_execute( this, 1024, "INSERT U%d \"%s\" %s %d %d", unit, file, temp, in, out );
 }
 
 /** Play the unit at normal speed.
 */
 
-valerie_error_code valerie_unit_play( valerie this, int unit )
+mvcp_error_code mvcp_unit_play( mvcp this, int unit )
 {
-	return valerie_execute( this, 1024, "PLAY U%d 1000", unit );
+	return mvcp_execute( this, 1024, "PLAY U%d 1000", unit );
 }
 
 /** Play the unit at specified speed.
 */
 
-valerie_error_code valerie_unit_play_at_speed( valerie this, int unit, int speed )
+mvcp_error_code mvcp_unit_play_at_speed( mvcp this, int unit, int speed )
 {
-	return valerie_execute( this, 10240, "PLAY U%d %d", unit, speed );
+	return mvcp_execute( this, 10240, "PLAY U%d %d", unit, speed );
 }
 
 /** Stop playback on the specified unit.
 */
 
-valerie_error_code valerie_unit_stop( valerie this, int unit )
+mvcp_error_code mvcp_unit_stop( mvcp this, int unit )
 {
-	return valerie_execute( this, 1024, "STOP U%d", unit );
+	return mvcp_execute( this, 1024, "STOP U%d", unit );
 }
 
 /** Pause playback on the specified unit.
 */
 
-valerie_error_code valerie_unit_pause( valerie this, int unit )
+mvcp_error_code mvcp_unit_pause( mvcp this, int unit )
 {
-	return valerie_execute( this, 1024, "PAUSE U%d", unit );
+	return mvcp_execute( this, 1024, "PAUSE U%d", unit );
 }
 
 /** Rewind the specified unit.
 */
 
-valerie_error_code valerie_unit_rewind( valerie this, int unit )
+mvcp_error_code mvcp_unit_rewind( mvcp this, int unit )
 {
-	return valerie_execute( this, 1024, "REW U%d", unit );
+	return mvcp_execute( this, 1024, "REW U%d", unit );
 }
 
 /** Fast forward the specified unit.
 */
 
-valerie_error_code valerie_unit_fast_forward( valerie this, int unit )
+mvcp_error_code mvcp_unit_fast_forward( mvcp this, int unit )
 {
-	return valerie_execute( this, 1024, "FF U%d", unit );
+	return mvcp_execute( this, 1024, "FF U%d", unit );
 }
 
 /** Step by the number of frames on the specified unit.
 */
 
-valerie_error_code valerie_unit_step( valerie this, int unit, int32_t step )
+mvcp_error_code mvcp_unit_step( mvcp this, int unit, int32_t step )
 {
-	return valerie_execute( this, 1024, "STEP U%d %d", unit, step );
+	return mvcp_execute( this, 1024, "STEP U%d %d", unit, step );
 }
 
 /** Goto the specified frame on the specified unit.
 */
 
-valerie_error_code valerie_unit_goto( valerie this, int unit, int32_t position )
+mvcp_error_code mvcp_unit_goto( mvcp this, int unit, int32_t position )
 {
-	return valerie_execute( this, 1024, "GOTO U%d %d", unit, position );
+	return mvcp_execute( this, 1024, "GOTO U%d %d", unit, position );
 }
 
 /** Goto the specified frame in the clip on the specified unit.
 */
 
-valerie_error_code valerie_unit_clip_goto( valerie this, int unit, valerie_clip_offset offset, int clip, int32_t position )
+mvcp_error_code mvcp_unit_clip_goto( mvcp this, int unit, mvcp_clip_offset offset, int clip, int32_t position )
 {
 	char temp[ 100 ];
-	valerie_interpret_clip_offset( temp, offset, clip );
-	return valerie_execute( this, 1024, "GOTO U%d %d %s", unit, position, temp );
+	mvcp_interpret_clip_offset( temp, offset, clip );
+	return mvcp_execute( this, 1024, "GOTO U%d %d %s", unit, position, temp );
 }
 
 /** Set the in point of the loaded file on the specified unit.
 */
 
-valerie_error_code valerie_unit_set_in( valerie this, int unit, int32_t in )
+mvcp_error_code mvcp_unit_set_in( mvcp this, int unit, int32_t in )
 {
-	return valerie_execute( this, 1024, "SIN U%d %d", unit, in );
+	return mvcp_execute( this, 1024, "SIN U%d %d", unit, in );
 }
 
 /** Set the in point of the clip on the specified unit.
 */
 
-valerie_error_code valerie_unit_clip_set_in( valerie this, int unit, valerie_clip_offset offset, int clip, int32_t in )
+mvcp_error_code mvcp_unit_clip_set_in( mvcp this, int unit, mvcp_clip_offset offset, int clip, int32_t in )
 {
 	char temp[ 100 ];
-	valerie_interpret_clip_offset( temp, offset, clip );
-	return valerie_execute( this, 1024, "SIN U%d %d %s", unit, in, temp );
+	mvcp_interpret_clip_offset( temp, offset, clip );
+	return mvcp_execute( this, 1024, "SIN U%d %d %s", unit, in, temp );
 }
 
 /** Set the out point of the loaded file on the specified unit.
 */
 
-valerie_error_code valerie_unit_set_out( valerie this, int unit, int32_t out )
+mvcp_error_code mvcp_unit_set_out( mvcp this, int unit, int32_t out )
 {
-	return valerie_execute( this, 1024, "SOUT U%d %d", unit, out );
+	return mvcp_execute( this, 1024, "SOUT U%d %d", unit, out );
 }
 
 /** Set the out point of the clip on the specified unit.
 */
 
-valerie_error_code valerie_unit_clip_set_out( valerie this, int unit, valerie_clip_offset offset, int clip, int32_t in )
+mvcp_error_code mvcp_unit_clip_set_out( mvcp this, int unit, mvcp_clip_offset offset, int clip, int32_t in )
 {
 	char temp[ 100 ];
-	valerie_interpret_clip_offset( temp, offset, clip );
-	return valerie_execute( this, 1024, "SOUT U%d %d %s", unit, in, temp );
+	mvcp_interpret_clip_offset( temp, offset, clip );
+	return mvcp_execute( this, 1024, "SOUT U%d %d %s", unit, in, temp );
 }
 
 /** Clear the in point of the loaded file on the specified unit.
 */
 
-valerie_error_code valerie_unit_clear_in( valerie this, int unit )
+mvcp_error_code mvcp_unit_clear_in( mvcp this, int unit )
 {
-	return valerie_execute( this, 1024, "SIN U%d -1", unit );
+	return mvcp_execute( this, 1024, "SIN U%d -1", unit );
 }
 
 /** Clear the out point of the loaded file on the specified unit.
 */
 
-valerie_error_code valerie_unit_clear_out( valerie this, int unit )
+mvcp_error_code mvcp_unit_clear_out( mvcp this, int unit )
 {
-	return valerie_execute( this, 1024, "SOUT U%d -1", unit );
+	return mvcp_execute( this, 1024, "SOUT U%d -1", unit );
 }
 
 /** Clear the in and out points on the loaded file on the specified unit.
 */
 
-valerie_error_code valerie_unit_clear_in_out( valerie this, int unit )
+mvcp_error_code mvcp_unit_clear_in_out( mvcp this, int unit )
 {
-	valerie_error_code error = valerie_unit_clear_out( this, unit );
-	if ( error == valerie_ok )
-		error = valerie_unit_clear_in( this, unit );
+	mvcp_error_code error = mvcp_unit_clear_out( this, unit );
+	if ( error == mvcp_ok )
+		error = mvcp_unit_clear_in( this, unit );
 	return error;
 }
 
 /** Set a unit configuration property.
 */
 
-valerie_error_code valerie_unit_set( valerie this, int unit, const char *name, const char *value )
+mvcp_error_code mvcp_unit_set( mvcp this, int unit, const char *name, const char *value )
 {
-	return valerie_execute( this, 1024, "USET U%d %s=%s", unit, name, value );
+	return mvcp_execute( this, 1024, "USET U%d %s=%s", unit, name, value );
 }
 
 /** Get a unit configuration property.
 */
 
-valerie_error_code valerie_unit_get( valerie this, int unit, char *name )
+mvcp_error_code mvcp_unit_get( mvcp this, int unit, char *name )
 {
-	return valerie_execute( this, 1024, "UGET U%d %s", unit, name );
+	return mvcp_execute( this, 1024, "UGET U%d %s", unit, name );
 }
 
 /** Get a units status.
 */
 
-valerie_error_code valerie_unit_status( valerie this, int unit, valerie_status status )
+mvcp_error_code mvcp_unit_status( mvcp this, int unit, mvcp_status status )
 {
-	valerie_error_code error = valerie_execute( this, 1024, "USTA U%d", unit );
-	int error_code = valerie_response_get_error_code( this->last_response );
+	mvcp_error_code error = mvcp_execute( this, 1024, "USTA U%d", unit );
+	int error_code = mvcp_response_get_error_code( this->last_response );
 
-	memset( status, 0, sizeof( valerie_status_t ) );
+	memset( status, 0, sizeof( mvcp_status_t ) );
 	status->unit = unit;
-	if ( error_code == 202 && valerie_response_count( this->last_response ) == 2 )
-		valerie_status_parse( status, valerie_response_get_line( this->last_response, 1 ) );
+	if ( error_code == 202 && mvcp_response_count( this->last_response ) == 2 )
+		mvcp_status_parse( status, mvcp_response_get_line( this->last_response, 1 ) );
 	else if ( error_code == 403 )
 		status->status = unit_undefined;
 
@@ -568,18 +568,18 @@ valerie_error_code valerie_unit_status( valerie this, int unit, valerie_status s
 /** Transfer the current settings of unit src to unit dest.
 */
 
-valerie_error_code valerie_unit_transfer( valerie this, int src, int dest )
+mvcp_error_code mvcp_unit_transfer( mvcp this, int src, int dest )
 {
-	return valerie_execute( this, 1024, "XFER U%d U%d", src, dest );
+	return mvcp_execute( this, 1024, "XFER U%d U%d", src, dest );
 }
 
 /** Obtain the parsers notifier.
 */
 
-valerie_notifier valerie_get_notifier( valerie this )
+mvcp_notifier mvcp_get_notifier( mvcp this )
 {
 	if ( this != NULL )
-		return valerie_parser_get_notifier( this->parser );
+		return mvcp_parser_get_notifier( this->parser );
 	else
 		return NULL;
 }
@@ -587,14 +587,14 @@ valerie_notifier valerie_get_notifier( valerie this )
 /** List the contents of the specified directory.
 */
 
-valerie_dir valerie_dir_init( valerie this, const char *directory )
+mvcp_dir mvcp_dir_init( mvcp this, const char *directory )
 {
-	valerie_dir dir = malloc( sizeof( valerie_dir_t ) );
+	mvcp_dir dir = malloc( sizeof( mvcp_dir_t ) );
 	if ( dir != NULL )
 	{
-		memset( dir, 0, sizeof( valerie_dir_t ) );
+		memset( dir, 0, sizeof( mvcp_dir_t ) );
 		dir->directory = strdup( directory );
-		dir->response = valerie_parser_executef( this->parser, "CLS \"%s\"", directory );
+		dir->response = mvcp_parser_executef( this->parser, "CLS \"%s\"", directory );
 	}
 	return dir;
 }
@@ -602,50 +602,50 @@ valerie_dir valerie_dir_init( valerie this, const char *directory )
 /** Return the error code associated to the dir.
 */
 
-valerie_error_code valerie_dir_get_error_code( valerie_dir dir )
+mvcp_error_code mvcp_dir_get_error_code( mvcp_dir dir )
 {
 	if ( dir != NULL )
-		return valerie_get_error_code( NULL, dir->response );
+		return mvcp_get_error_code( NULL, dir->response );
 	else
-		return valerie_malloc_failed;
+		return mvcp_malloc_failed;
 }
 
 /** Get a particular file entry in the directory.
 */
 
-valerie_error_code valerie_dir_get( valerie_dir dir, int index, valerie_dir_entry entry )
+mvcp_error_code mvcp_dir_get( mvcp_dir dir, int index, mvcp_dir_entry entry )
 {
-	valerie_error_code error = valerie_ok;
-	memset( entry, 0, sizeof( valerie_dir_entry_t ) );
-	if ( index < valerie_dir_count( dir ) )
+	mvcp_error_code error = mvcp_ok;
+	memset( entry, 0, sizeof( mvcp_dir_entry_t ) );
+	if ( index < mvcp_dir_count( dir ) )
 	{
-		char *line = valerie_response_get_line( dir->response, index + 1 );
-		valerie_tokeniser tokeniser = valerie_tokeniser_init( );
-		valerie_tokeniser_parse_new( tokeniser, line, " " );
+		char *line = mvcp_response_get_line( dir->response, index + 1 );
+		mvcp_tokeniser tokeniser = mvcp_tokeniser_init( );
+		mvcp_tokeniser_parse_new( tokeniser, line, " " );
 
-		if ( valerie_tokeniser_count( tokeniser ) > 0 )
+		if ( mvcp_tokeniser_count( tokeniser ) > 0 )
 		{
-			valerie_util_strip( valerie_tokeniser_get_string( tokeniser, 0 ), '\"' );
+			mvcp_util_strip( mvcp_tokeniser_get_string( tokeniser, 0 ), '\"' );
 			strcpy( entry->full, dir->directory );
 			if ( entry->full[ strlen( entry->full ) - 1 ] != '/' )
 				strcat( entry->full, "/" );
-			strcpy( entry->name, valerie_tokeniser_get_string( tokeniser, 0 ) );
+			strcpy( entry->name, mvcp_tokeniser_get_string( tokeniser, 0 ) );
 			strcat( entry->full, entry->name );
 
-			switch ( valerie_tokeniser_count( tokeniser ) )
+			switch ( mvcp_tokeniser_count( tokeniser ) )
 			{
 				case 1:
 					entry->dir = 1;
 					break;
 				case 2:
-					entry->size = strtoull( valerie_tokeniser_get_string( tokeniser, 1 ), NULL, 10 );
+					entry->size = strtoull( mvcp_tokeniser_get_string( tokeniser, 1 ), NULL, 10 );
 					break;
 				default:
-					error = valerie_invalid_file;
+					error = mvcp_invalid_file;
 					break;
 			}
 		}
-		valerie_tokeniser_close( tokeniser );
+		mvcp_tokeniser_close( tokeniser );
 	}
 	return error;
 }
@@ -653,10 +653,10 @@ valerie_error_code valerie_dir_get( valerie_dir dir, int index, valerie_dir_entr
 /** Get the number of entries in the directory
 */
 
-int valerie_dir_count( valerie_dir dir )
+int mvcp_dir_count( mvcp_dir dir )
 {
-	if ( dir != NULL && valerie_response_count( dir->response ) >= 2 )
-		return valerie_response_count( dir->response ) - 2;
+	if ( dir != NULL && mvcp_response_count( dir->response ) >= 2 )
+		return mvcp_response_count( dir->response ) - 2;
 	else
 		return -1;
 }
@@ -664,12 +664,12 @@ int valerie_dir_count( valerie_dir dir )
 /** Close the directory structure.
 */
 
-void valerie_dir_close( valerie_dir dir )
+void mvcp_dir_close( mvcp_dir dir )
 {
 	if ( dir != NULL )
 	{
 		free( dir->directory );
-		valerie_response_close( dir->response );
+		mvcp_response_close( dir->response );
 		free( dir );
 	}
 }
@@ -677,14 +677,14 @@ void valerie_dir_close( valerie_dir dir )
 /** List the playlist of the specified unit.
 */
 
-valerie_list valerie_list_init( valerie this, int unit )
+mvcp_list mvcp_list_init( mvcp this, int unit )
 {
-	valerie_list list = calloc( 1, sizeof( valerie_list_t ) );
+	mvcp_list list = calloc( 1, sizeof( mvcp_list_t ) );
 	if ( list != NULL )
 	{
-		list->response = valerie_parser_executef( this->parser, "LIST U%d", unit );
-		if ( valerie_response_count( list->response ) >= 2 )
-			list->generation = atoi( valerie_response_get_line( list->response, 1 ) );
+		list->response = mvcp_parser_executef( this->parser, "LIST U%d", unit );
+		if ( mvcp_response_count( list->response ) >= 2 )
+			list->generation = atoi( mvcp_response_get_line( list->response, 1 ) );
 	}
 	return list;
 }
@@ -692,39 +692,39 @@ valerie_list valerie_list_init( valerie this, int unit )
 /** Return the error code associated to the list.
 */
 
-valerie_error_code valerie_list_get_error_code( valerie_list list )
+mvcp_error_code mvcp_list_get_error_code( mvcp_list list )
 {
 	if ( list != NULL )
-		return valerie_get_error_code( NULL, list->response );
+		return mvcp_get_error_code( NULL, list->response );
 	else
-		return valerie_malloc_failed;
+		return mvcp_malloc_failed;
 }
 
 /** Get a particular file entry in the list.
 */
 
-valerie_error_code valerie_list_get( valerie_list list, int index, valerie_list_entry entry )
+mvcp_error_code mvcp_list_get( mvcp_list list, int index, mvcp_list_entry entry )
 {
-	valerie_error_code error = valerie_ok;
-	memset( entry, 0, sizeof( valerie_list_entry_t ) );
-	if ( index < valerie_list_count( list ) )
+	mvcp_error_code error = mvcp_ok;
+	memset( entry, 0, sizeof( mvcp_list_entry_t ) );
+	if ( index < mvcp_list_count( list ) )
 	{
-		char *line = valerie_response_get_line( list->response, index + 2 );
-		valerie_tokeniser tokeniser = valerie_tokeniser_init( );
-		valerie_tokeniser_parse_new( tokeniser, line, " " );
+		char *line = mvcp_response_get_line( list->response, index + 2 );
+		mvcp_tokeniser tokeniser = mvcp_tokeniser_init( );
+		mvcp_tokeniser_parse_new( tokeniser, line, " " );
 
-		if ( valerie_tokeniser_count( tokeniser ) > 0 )
+		if ( mvcp_tokeniser_count( tokeniser ) > 0 )
 		{
-			entry->clip = atoi( valerie_tokeniser_get_string( tokeniser, 0 ) );
-			valerie_util_strip( valerie_tokeniser_get_string( tokeniser, 1 ), '\"' );
-			strcpy( entry->full, valerie_tokeniser_get_string( tokeniser, 1 ) );
-			entry->in = atol( valerie_tokeniser_get_string( tokeniser, 2 ) );
-			entry->out = atol( valerie_tokeniser_get_string( tokeniser, 3 ) );
-			entry->max = atol( valerie_tokeniser_get_string( tokeniser, 4 ) );
-			entry->size = atol( valerie_tokeniser_get_string( tokeniser, 5 ) );
-			entry->fps = atof( valerie_tokeniser_get_string( tokeniser, 6 ) );
+			entry->clip = atoi( mvcp_tokeniser_get_string( tokeniser, 0 ) );
+			mvcp_util_strip( mvcp_tokeniser_get_string( tokeniser, 1 ), '\"' );
+			strcpy( entry->full, mvcp_tokeniser_get_string( tokeniser, 1 ) );
+			entry->in = atol( mvcp_tokeniser_get_string( tokeniser, 2 ) );
+			entry->out = atol( mvcp_tokeniser_get_string( tokeniser, 3 ) );
+			entry->max = atol( mvcp_tokeniser_get_string( tokeniser, 4 ) );
+			entry->size = atol( mvcp_tokeniser_get_string( tokeniser, 5 ) );
+			entry->fps = atof( mvcp_tokeniser_get_string( tokeniser, 6 ) );
 		}
-		valerie_tokeniser_close( tokeniser );
+		mvcp_tokeniser_close( tokeniser );
 	}
 	return error;
 }
@@ -732,10 +732,10 @@ valerie_error_code valerie_list_get( valerie_list list, int index, valerie_list_
 /** Get the number of entries in the list
 */
 
-int valerie_list_count( valerie_list list )
+int mvcp_list_count( mvcp_list list )
 {
-	if ( list != NULL && valerie_response_count( list->response ) >= 3 )
-		return valerie_response_count( list->response ) - 3;
+	if ( list != NULL && mvcp_response_count( list->response ) >= 3 )
+		return mvcp_response_count( list->response ) - 3;
 	else
 		return -1;
 }
@@ -743,11 +743,11 @@ int valerie_list_count( valerie_list list )
 /** Close the list structure.
 */
 
-void valerie_list_close( valerie_list list )
+void mvcp_list_close( mvcp_list list )
 {
 	if ( list != NULL )
 	{
-		valerie_response_close( list->response );
+		mvcp_response_close( list->response );
 		free( list );
 	}
 }
@@ -755,13 +755,13 @@ void valerie_list_close( valerie_list list )
 /** List the currently connected nodes.
 */
 
-valerie_nodes valerie_nodes_init( valerie this )
+mvcp_nodes mvcp_nodes_init( mvcp this )
 {
-	valerie_nodes nodes = malloc( sizeof( valerie_nodes_t ) );
+	mvcp_nodes nodes = malloc( sizeof( mvcp_nodes_t ) );
 	if ( nodes != NULL )
 	{
-		memset( nodes, 0, sizeof( valerie_nodes_t ) );
-		nodes->response = valerie_parser_executef( this->parser, "NLS" );
+		memset( nodes, 0, sizeof( mvcp_nodes_t ) );
+		nodes->response = mvcp_parser_executef( this->parser, "NLS" );
 	}
 	return nodes;
 }
@@ -769,36 +769,36 @@ valerie_nodes valerie_nodes_init( valerie this )
 /** Return the error code associated to the nodes list.
 */
 
-valerie_error_code valerie_nodes_get_error_code( valerie_nodes nodes )
+mvcp_error_code mvcp_nodes_get_error_code( mvcp_nodes nodes )
 {
 	if ( nodes != NULL )
-		return valerie_get_error_code( NULL, nodes->response );
+		return mvcp_get_error_code( NULL, nodes->response );
 	else
-		return valerie_malloc_failed;
+		return mvcp_malloc_failed;
 }
 
 /** Get a particular node entry.
 */
 
-valerie_error_code valerie_nodes_get( valerie_nodes nodes, int index, valerie_node_entry entry )
+mvcp_error_code mvcp_nodes_get( mvcp_nodes nodes, int index, mvcp_node_entry entry )
 {
-	valerie_error_code error = valerie_ok;
-	memset( entry, 0, sizeof( valerie_node_entry_t ) );
-	if ( index < valerie_nodes_count( nodes ) )
+	mvcp_error_code error = mvcp_ok;
+	memset( entry, 0, sizeof( mvcp_node_entry_t ) );
+	if ( index < mvcp_nodes_count( nodes ) )
 	{
-		char *line = valerie_response_get_line( nodes->response, index + 1 );
-		valerie_tokeniser tokeniser = valerie_tokeniser_init( );
-		valerie_tokeniser_parse_new( tokeniser, line, " " );
+		char *line = mvcp_response_get_line( nodes->response, index + 1 );
+		mvcp_tokeniser tokeniser = mvcp_tokeniser_init( );
+		mvcp_tokeniser_parse_new( tokeniser, line, " " );
 
-		if ( valerie_tokeniser_count( tokeniser ) == 3 )
+		if ( mvcp_tokeniser_count( tokeniser ) == 3 )
 		{
-			entry->node = atoi( valerie_tokeniser_get_string( tokeniser, 0 ) );
-			strncpy( entry->guid, valerie_tokeniser_get_string( tokeniser, 1 ), sizeof( entry->guid ) );
-			valerie_util_strip( valerie_tokeniser_get_string( tokeniser, 2 ), '\"' );
-			strncpy( entry->name, valerie_tokeniser_get_string( tokeniser, 2 ), sizeof( entry->name ) );
+			entry->node = atoi( mvcp_tokeniser_get_string( tokeniser, 0 ) );
+			strncpy( entry->guid, mvcp_tokeniser_get_string( tokeniser, 1 ), sizeof( entry->guid ) );
+			mvcp_util_strip( mvcp_tokeniser_get_string( tokeniser, 2 ), '\"' );
+			strncpy( entry->name, mvcp_tokeniser_get_string( tokeniser, 2 ), sizeof( entry->name ) );
 		}
 
-		valerie_tokeniser_close( tokeniser );
+		mvcp_tokeniser_close( tokeniser );
 	}
 	return error;
 }
@@ -806,10 +806,10 @@ valerie_error_code valerie_nodes_get( valerie_nodes nodes, int index, valerie_no
 /** Get the number of nodes
 */
 
-int valerie_nodes_count( valerie_nodes nodes )
+int mvcp_nodes_count( mvcp_nodes nodes )
 {
-	if ( nodes != NULL && valerie_response_count( nodes->response ) >= 2 )
-		return valerie_response_count( nodes->response ) - 2;
+	if ( nodes != NULL && mvcp_response_count( nodes->response ) >= 2 )
+		return mvcp_response_count( nodes->response ) - 2;
 	else
 		return -1;
 }
@@ -817,11 +817,11 @@ int valerie_nodes_count( valerie_nodes nodes )
 /** Close the nodes structure.
 */
 
-void valerie_nodes_close( valerie_nodes nodes )
+void mvcp_nodes_close( mvcp_nodes nodes )
 {
 	if ( nodes != NULL )
 	{
-		valerie_response_close( nodes->response );
+		mvcp_response_close( nodes->response );
 		free( nodes );
 	}
 }
@@ -829,13 +829,13 @@ void valerie_nodes_close( valerie_nodes nodes )
 /** List the currently defined units.
 */
 
-valerie_units valerie_units_init( valerie this )
+mvcp_units mvcp_units_init( mvcp this )
 {
-	valerie_units units = malloc( sizeof( valerie_units_t ) );
+	mvcp_units units = malloc( sizeof( mvcp_units_t ) );
 	if ( units != NULL )
 	{
-		memset( units, 0, sizeof( valerie_units_t ) );
-		units->response = valerie_parser_executef( this->parser, "ULS" );
+		memset( units, 0, sizeof( mvcp_units_t ) );
+		units->response = mvcp_parser_executef( this->parser, "ULS" );
 	}
 	return units;
 }
@@ -843,36 +843,36 @@ valerie_units valerie_units_init( valerie this )
 /** Return the error code associated to the nodes list.
 */
 
-valerie_error_code valerie_units_get_error_code( valerie_units units )
+mvcp_error_code mvcp_units_get_error_code( mvcp_units units )
 {
 	if ( units != NULL )
-		return valerie_get_error_code( NULL, units->response );
+		return mvcp_get_error_code( NULL, units->response );
 	else
-		return valerie_malloc_failed;
+		return mvcp_malloc_failed;
 }
 
 /** Get a particular unit entry.
 */
 
-valerie_error_code valerie_units_get( valerie_units units, int index, valerie_unit_entry entry )
+mvcp_error_code mvcp_units_get( mvcp_units units, int index, mvcp_unit_entry entry )
 {
-	valerie_error_code error = valerie_ok;
-	memset( entry, 0, sizeof( valerie_unit_entry_t ) );
-	if ( index < valerie_units_count( units ) )
+	mvcp_error_code error = mvcp_ok;
+	memset( entry, 0, sizeof( mvcp_unit_entry_t ) );
+	if ( index < mvcp_units_count( units ) )
 	{
-		char *line = valerie_response_get_line( units->response, index + 1 );
-		valerie_tokeniser tokeniser = valerie_tokeniser_init( );
-		valerie_tokeniser_parse_new( tokeniser, line, " " );
+		char *line = mvcp_response_get_line( units->response, index + 1 );
+		mvcp_tokeniser tokeniser = mvcp_tokeniser_init( );
+		mvcp_tokeniser_parse_new( tokeniser, line, " " );
 
-		if ( valerie_tokeniser_count( tokeniser ) == 4 )
+		if ( mvcp_tokeniser_count( tokeniser ) == 4 )
 		{
-			entry->unit = atoi( valerie_tokeniser_get_string( tokeniser, 0 ) + 1 );
-			entry->node = atoi( valerie_tokeniser_get_string( tokeniser, 1 ) );
-			strncpy( entry->guid, valerie_tokeniser_get_string( tokeniser, 2 ), sizeof( entry->guid ) );
-			entry->online = atoi( valerie_tokeniser_get_string( tokeniser, 3 ) );
+			entry->unit = atoi( mvcp_tokeniser_get_string( tokeniser, 0 ) + 1 );
+			entry->node = atoi( mvcp_tokeniser_get_string( tokeniser, 1 ) );
+			strncpy( entry->guid, mvcp_tokeniser_get_string( tokeniser, 2 ), sizeof( entry->guid ) );
+			entry->online = atoi( mvcp_tokeniser_get_string( tokeniser, 3 ) );
 		}
 
-		valerie_tokeniser_close( tokeniser );
+		mvcp_tokeniser_close( tokeniser );
 	}
 	return error;
 }
@@ -880,10 +880,10 @@ valerie_error_code valerie_units_get( valerie_units units, int index, valerie_un
 /** Get the number of units
 */
 
-int valerie_units_count( valerie_units units )
+int mvcp_units_count( mvcp_units units )
 {
-	if ( units != NULL && valerie_response_count( units->response ) >= 2 )
-		return valerie_response_count( units->response ) - 2;
+	if ( units != NULL && mvcp_response_count( units->response ) >= 2 )
+		return mvcp_response_count( units->response ) - 2;
 	else
 		return -1;
 }
@@ -891,11 +891,11 @@ int valerie_units_count( valerie_units units )
 /** Close the units structure.
 */
 
-void valerie_units_close( valerie_units units )
+void mvcp_units_close( mvcp_units units )
 {
 	if ( units != NULL )
 	{
-		valerie_response_close( units->response );
+		mvcp_response_close( units->response );
 		free( units );
 	}
 }
@@ -903,7 +903,7 @@ void valerie_units_close( valerie_units units )
 /** Get the response of the last command executed.
 */
 
-valerie_response valerie_get_last_response( valerie this )
+mvcp_response mvcp_get_last_response( mvcp this )
 {
 	return this->last_response;
 }
@@ -911,59 +911,59 @@ valerie_response valerie_get_last_response( valerie this )
 /** Obtain a printable message associated to the error code provided.
 */
 
-const char *valerie_error_description( valerie_error_code error )
+const char *mvcp_error_description( mvcp_error_code error )
 {
 	const char *msg = "Unrecognised error";
 	switch( error )
 	{
-		case valerie_ok:
+		case mvcp_ok:
 			msg = "OK";
 			break;
-		case valerie_malloc_failed:
+		case mvcp_malloc_failed:
 			msg = "Memory allocation error";
 			break;
-		case valerie_unknown_error:
+		case mvcp_unknown_error:
 			msg = "Unknown error";
 			break;
-		case valerie_no_response:
+		case mvcp_no_response:
 			msg = "No response obtained";
 			break;
-		case valerie_invalid_command:
+		case mvcp_invalid_command:
 			msg = "Invalid command";
 			break;
-		case valerie_server_timeout:
+		case mvcp_server_timeout:
 			msg = "Communications with server timed out";
 			break;
-		case valerie_missing_argument:
+		case mvcp_missing_argument:
 			msg = "Missing argument";
 			break;
-		case valerie_server_unavailable:
+		case mvcp_server_unavailable:
 			msg = "Unable to communicate with server";
 			break;
-		case valerie_unit_creation_failed:
+		case mvcp_unit_creation_failed:
 			msg = "Unit creation failed";
 			break;
-		case valerie_unit_unavailable:
+		case mvcp_unit_unavailable:
 			msg = "Unit unavailable";
 			break;
-		case valerie_invalid_file:
+		case mvcp_invalid_file:
 			msg = "Invalid file";
 			break;
-		case valerie_invalid_position:
+		case mvcp_invalid_position:
 			msg = "Invalid position";
 			break;
 	}
 	return msg;
 }
 
-/** Close the valerie structure.
+/** Close the mvcp structure.
 */
 
-void valerie_close( valerie this )
+void mvcp_close( mvcp this )
 {
 	if ( this != NULL )
 	{
-		valerie_set_last_response( this, NULL );
+		mvcp_set_last_response( this, NULL );
 		free( this );
 	}
 }

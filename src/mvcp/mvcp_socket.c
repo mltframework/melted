@@ -1,6 +1,6 @@
 /*
- * valerie_socket.c -- Client Socket
- * Copyright (C) 2002-2003 Ushodaya Enterprises Limited
+ * mvcp_socket.c -- Client Socket
+ * Copyright (C) 2002-2009 Ushodaya Enterprises Limited
  * Author: Charles Yates <charles.yates@pandora.be>
  *
  * This library is free software; you can redistribute it and/or
@@ -36,17 +36,17 @@
 #include <sys/time.h>
 
 /* Application header files */
-#include "valerie_socket.h"
+#include "mvcp_socket.h"
 
 /** Initialise the socket.
 */
 
-valerie_socket valerie_socket_init( char *server, int port )
+mvcp_socket mvcp_socket_init( char *server, int port )
 {
-	valerie_socket socket = malloc( sizeof( valerie_socket_t ) );
+	mvcp_socket socket = malloc( sizeof( mvcp_socket_t ) );
 	if ( socket != NULL )
 	{
-		memset( socket, 0, sizeof( valerie_socket_t ) );
+		memset( socket, 0, sizeof( mvcp_socket_t ) );
 		socket->fd = -1;
 		socket->server = strdup( server );
 		socket->port = port;
@@ -57,7 +57,7 @@ valerie_socket valerie_socket_init( char *server, int port )
 /** Connect to the server.
 */
 
-int valerie_socket_connect( valerie_socket connection )
+int mvcp_socket_connect( mvcp_socket connection )
 {
 	int ret = 0;
     struct hostent *host;
@@ -84,12 +84,12 @@ int valerie_socket_connect( valerie_socket connection )
 /** Convenience constructor for a connected file descriptor.
 */
 
-valerie_socket valerie_socket_init_fd( int fd )
+mvcp_socket mvcp_socket_init_fd( int fd )
 {
-	valerie_socket socket = malloc( sizeof( valerie_socket_t ) );
+	mvcp_socket socket = malloc( sizeof( mvcp_socket_t ) );
 	if ( socket != NULL )
 	{
-		memset( socket, 0, sizeof( valerie_socket_t ) );
+		memset( socket, 0, sizeof( mvcp_socket_t ) );
 		socket->fd = fd;
 		socket->no_close = 1;
 	}
@@ -99,7 +99,7 @@ valerie_socket valerie_socket_init_fd( int fd )
 /** Read an arbitrarily formatted block of data from the server.
 */
 
-int valerie_socket_read_data( valerie_socket socket, char *data, int length )
+int mvcp_socket_read_data( mvcp_socket socket, char *data, int length )
 {
     struct timeval tv = { 1, 0 };
     fd_set rfds;
@@ -125,7 +125,7 @@ int valerie_socket_read_data( valerie_socket socket, char *data, int length )
 /** Write an arbitrarily formatted block of data to the server.
 */
 
-int valerie_socket_write_data( valerie_socket socket, const char *data, int length )
+int mvcp_socket_write_data( mvcp_socket socket, const char *data, int length )
 {
 	int used = 0;
 	
@@ -168,7 +168,7 @@ int valerie_socket_write_data( valerie_socket socket, const char *data, int leng
 /** Close the socket.
 */
 
-void valerie_socket_close( valerie_socket socket )
+void mvcp_socket_close( mvcp_socket socket )
 {
 	if ( socket->fd > 0 && !socket->no_close )
 		close( socket->fd );

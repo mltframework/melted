@@ -1,6 +1,6 @@
 /*
- * valerie_response.c -- Response
- * Copyright (C) 2002-2003 Ushodaya Enterprises Limited
+ * mvcp_response.c -- Response
+ * Copyright (C) 2002-2009 Ushodaya Enterprises Limited
  * Author: Charles Yates <charles.yates@pandora.be>
  *
  * This library is free software; you can redistribute it and/or
@@ -25,32 +25,32 @@
 #include <string.h>
 
 /* Application header files */
-#include "valerie_response.h"
+#include "mvcp_response.h"
 
-/** Construct a new dv response.
+/** Construct a new MVCP response.
 */
 
-valerie_response valerie_response_init( )
+mvcp_response mvcp_response_init( )
 {
-	valerie_response response = malloc( sizeof( valerie_response_t ) );
+	mvcp_response response = malloc( sizeof( mvcp_response_t ) );
 	if ( response != NULL )
-		memset( response, 0, sizeof( valerie_response_t ) );
+		memset( response, 0, sizeof( mvcp_response_t ) );
 	return response;
 }
 
-/** Clone a dv response
+/** Clone a MVCP response
 */
 
-valerie_response valerie_response_clone( valerie_response response )
+mvcp_response mvcp_response_clone( mvcp_response response )
 {
-	valerie_response clone = valerie_response_init( );
+	mvcp_response clone = mvcp_response_init( );
 	if ( clone != NULL && response != NULL )
 	{
 		int index = 0;
-		for ( index = 0; index < valerie_response_count( response ); index ++ )
+		for ( index = 0; index < mvcp_response_count( response ); index ++ )
 		{
-			char *line = valerie_response_get_line( response, index );
-			valerie_response_printf( clone, strlen( line ) + 2, "%s\n", line );
+			char *line = mvcp_response_get_line( response, index );
+			mvcp_response_printf( clone, strlen( line ) + 2, "%s\n", line );
 		}
 	}
 	return clone;
@@ -59,7 +59,7 @@ valerie_response valerie_response_clone( valerie_response response )
 /** Get the error code associated to the response.
 */
 
-int valerie_response_get_error_code( valerie_response response )
+int mvcp_response_get_error_code( mvcp_response response )
 {
 	int error_code = -1;
 	if ( response != NULL )
@@ -80,7 +80,7 @@ int valerie_response_get_error_code( valerie_response response )
 /** Get the error description associated to the response.
 */
 
-const char *valerie_response_get_error_string( valerie_response response )
+const char *mvcp_response_get_error_string( mvcp_response response )
 {
 	const char *error_string = "No message specified";
 	if ( response->count > 0 )
@@ -97,7 +97,7 @@ const char *valerie_response_get_error_string( valerie_response response )
 	the user of the returned data to use a LF or CR/LF as appropriate.
 */
 
-char *valerie_response_get_line( valerie_response response, int index )
+char *mvcp_response_get_line( mvcp_response response, int index )
 {
 	if ( index < response->count )
 		return response->array[ index ];
@@ -108,7 +108,7 @@ char *valerie_response_get_line( valerie_response response, int index )
 /** Return the number of lines of text in the response.
 */
 
-int valerie_response_count( valerie_response response )
+int mvcp_response_count( mvcp_response response )
 {
 	if ( response != NULL )
 		return response->count;
@@ -119,11 +119,11 @@ int valerie_response_count( valerie_response response )
 /** Set the error and description associated to the response.
 */
 
-void valerie_response_set_error( valerie_response response, int error_code, const char *error_string )
+void mvcp_response_set_error( mvcp_response response, int error_code, const char *error_string )
 {
 	if ( response->count == 0 )
 	{
-		valerie_response_printf( response, 10240, "%d %s\n", error_code, error_string );
+		mvcp_response_printf( response, 10240, "%d %s\n", error_code, error_string );
 	}
 	else
 	{
@@ -137,7 +137,7 @@ void valerie_response_set_error( valerie_response response, int error_code, cons
 /** Write formatted text to the response. 
 */
 
-int valerie_response_printf( valerie_response response, size_t size, const char *format, ... )
+int mvcp_response_printf( mvcp_response response, size_t size, const char *format, ... )
 {
 	int length = 0;
 	char *text = malloc( size );
@@ -147,7 +147,7 @@ int valerie_response_printf( valerie_response response, size_t size, const char 
 		va_start( list, format );
 		length = vsnprintf( text, size, format, list );
 		if ( length != 0 )
-			valerie_response_write( response, text, length );
+			mvcp_response_write( response, text, length );
 		va_end( list );
 		free( text );
 	}
@@ -157,7 +157,7 @@ int valerie_response_printf( valerie_response response, size_t size, const char 
 /** Write text to the reponse.
 */
 
-int valerie_response_write( valerie_response response, const char *text, int size )
+int mvcp_response_write( mvcp_response response, const char *text, int size )
 {
 	int ret = 0;
 	const char *ptr = text;
@@ -231,7 +231,7 @@ int valerie_response_write( valerie_response response, const char *text, int siz
 /** Close the response.
 */
 
-void valerie_response_close( valerie_response response )
+void mvcp_response_close( mvcp_response response )
 {
 	if ( response != NULL )
 	{

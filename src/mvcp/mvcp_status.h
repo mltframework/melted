@@ -1,6 +1,6 @@
 /*
- * valerie_status.h -- Unit Status Handling
- * Copyright (C) 2002-2003 Ushodaya Enterprises Limited
+ * mvcp_status.h -- Unit Status Handling
+ * Copyright (C) 2002-2009 Ushodaya Enterprises Limited
  * Author: Charles Yates <charles.yates@pandora.be>
  *
  * This library is free software; you can redistribute it and/or
@@ -18,8 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef _VALERIE_STATUS_H_
-#define _VALERIE_STATUS_H_
+#ifndef _MVCP_STATUS_H_
+#define _MVCP_STATUS_H_
 
 #include <stdint.h>
 
@@ -68,15 +68,15 @@ typedef struct
 	int clip_index;
 	int dummy;
 }
-*valerie_status, valerie_status_t;
+*mvcp_status, mvcp_status_t;
 
-/** DV1394 Status API
+/** MVCP Status API
 */
 
-extern void valerie_status_parse( valerie_status, char * );
-extern char *valerie_status_serialise( valerie_status, char *, int );
-extern int valerie_status_compare( valerie_status, valerie_status );
-extern valerie_status valerie_status_copy( valerie_status, valerie_status );
+extern void mvcp_status_parse( mvcp_status, char * );
+extern char *mvcp_status_serialise( mvcp_status, char *, int );
+extern int mvcp_status_compare( mvcp_status, mvcp_status );
+extern mvcp_status mvcp_status_copy( mvcp_status, mvcp_status );
 
 #ifdef __cplusplus
 }

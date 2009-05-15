@@ -1,6 +1,6 @@
 /*
- * valerie_remote.c -- Remote Parser
- * Copyright (C) 2002-2003 Ushodaya Enterprises Limited
+ * mvcp_remote.c -- Remote Parser
+ * Copyright (C) 2002-2009 Ushodaya Enterprises Limited
  * Author: Charles Yates <charles.yates@pandora.be>
  *
  * This library is free software; you can redistribute it and/or
@@ -28,12 +28,12 @@
 
 /* Application header files */
 #include <framework/mlt.h>
-#include "valerie_remote.h"
-#include "valerie_socket.h"
-#include "valerie_tokeniser.h"
-#include "valerie_util.h"
+#include "mvcp_remote.h"
+#include "mvcp_socket.h"
+#include "mvcp_tokeniser.h"
+#include "mvcp_util.h"
 
-/** Private valerie_remote structure.
+/** Private mvcp_remote structure.
 */
 
 typedef struct
@@ -41,40 +41,40 @@ typedef struct
 	int terminated;
 	char *server;
 	int port;
-	valerie_socket socket;
-	valerie_socket status;
+	mvcp_socket socket;
+	mvcp_socket status;
 	pthread_t thread;
-	valerie_parser parser;
+	mvcp_parser parser;
 	pthread_mutex_t mutex;
 	int connected;
 }
-*valerie_remote, valerie_remote_t;
+*mvcp_remote, mvcp_remote_t;
 
 /** Forward declarations.
 */
 
-static valerie_response valerie_remote_connect( valerie_remote );
-static valerie_response valerie_remote_execute( valerie_remote, char * );
-static valerie_response valerie_remote_receive( valerie_remote, char *, char * );
-static valerie_response valerie_remote_push( valerie_remote, char *, mlt_service );
-static void valerie_remote_close( valerie_remote );
-static int valerie_remote_read_response( valerie_socket, valerie_response );
+static mvcp_response mvcp_remote_connect( mvcp_remote );
+static mvcp_response mvcp_remote_execute( mvcp_remote, char * );
+static mvcp_response mvcp_remote_receive( mvcp_remote, char *, char * );
+static mvcp_response mvcp_remote_push( mvcp_remote, char *, mlt_service );
+static void mvcp_remote_close( mvcp_remote );
+static int mvcp_remote_read_response( mvcp_socket, mvcp_response );
 
-/** DV Parser constructor.
+/** MVCP Parser constructor.
 */
 
-valerie_parser valerie_parser_init_remote( char *server, int port )
+mvcp_parser mvcp_parser_init_remote( char *server, int port )
 {
-	valerie_parser parser = calloc( 1, sizeof( valerie_parser_t ) );
-	valerie_remote remote = calloc( 1, sizeof( valerie_remote_t ) );
+	mvcp_parser parser = calloc( 1, sizeof( mvcp_parser_t ) );
+	mvcp_remote remote = calloc( 1, sizeof( mvcp_remote_t ) );
 
 	if ( parser != NULL )
 	{
-		parser->connect = (parser_connect)valerie_remote_connect;
-		parser->execute = (parser_execute)valerie_remote_execute;
-		parser->push = (parser_push)valerie_remote_push;
-		parser->received = (parser_received)valerie_remote_receive;
-		parser->close = (parser_close)valerie_remote_close;
+		parser->connect = (parser_connect)mvcp_remote_connect;
+		parser->execute = (parser_execute)mvcp_remote_execute;
+		parser->push = (parser_push)mvcp_remote_push;
+		parser->received = (parser_received)mvcp_remote_receive;
+		parser->close = (parser_close)mvcp_remote_close;
 		parser->real = remote;
 
 		if ( remote != NULL )
@@ -91,21 +91,21 @@ valerie_parser valerie_parser_init_remote( char *server, int port )
 /** Thread for receiving and distributing the status information.
 */
 
-static void *valerie_remote_status_thread( void *arg )
+static void *mvcp_remote_status_thread( void *arg )
 {
-	valerie_remote remote = arg;
+	mvcp_remote remote = arg;
 	char temp[ 10240 ];
 	int length = 0;
 	int offset = 0;
-	valerie_tokeniser tokeniser = valerie_tokeniser_init( );
-	valerie_notifier notifier = valerie_parser_get_notifier( remote->parser );
-	valerie_status_t status;
+	mvcp_tokeniser tokeniser = mvcp_tokeniser_init( );
+	mvcp_notifier notifier = mvcp_parser_get_notifier( remote->parser );
+	mvcp_status_t status;
 	int index = 0;
 
-	valerie_socket_write_data( remote->status, "STATUS\r\n", 8 );
+	mvcp_socket_write_data( remote->status, "STATUS\r\n", 8 );
 
 	while ( !remote->terminated && 
-			( length = valerie_socket_read_data( remote->status, temp + offset, sizeof( temp ) ) ) >= 0 )
+			( length = mvcp_socket_read_data( remote->status, temp + offset, sizeof( temp ) ) ) >= 0 )
 	{
 		if ( strchr( temp, '\n' ) == NULL )
 		{
@@ -113,15 +113,15 @@ static void *valerie_remote_status_thread( void *arg )
 			continue;
 		}
 		offset = 0;
-		valerie_tokeniser_parse_new( tokeniser, temp, "\n" );
-		for ( index = 0; index < valerie_tokeniser_count( tokeniser ); index ++ )
+		mvcp_tokeniser_parse_new( tokeniser, temp, "\n" );
+		for ( index = 0; index < mvcp_tokeniser_count( tokeniser ); index ++ )
 		{
-			char *line = valerie_tokeniser_get_string( tokeniser, index );
+			char *line = mvcp_tokeniser_get_string( tokeniser, index );
 			if ( line[ strlen( line ) - 1 ] == '\r' )
 			{
-				valerie_util_chomp( line );
-				valerie_status_parse( &status, line );
-				valerie_notifier_put( notifier, &status );
+				mvcp_util_chomp( line );
+				mvcp_status_parse( &status, line );
+				mvcp_notifier_put( notifier, &status );
 			}
 			else
 			{
@@ -131,8 +131,8 @@ static void *valerie_remote_status_thread( void *arg )
 		}
 	}
 
-	valerie_notifier_disconnected( notifier );
-	valerie_tokeniser_close( tokeniser );
+	mvcp_notifier_disconnected( notifier );
+	mvcp_tokeniser_close( tokeniser );
 	remote->terminated = 1;
 
 	return NULL;
@@ -141,37 +141,37 @@ static void *valerie_remote_status_thread( void *arg )
 /** Forward reference.
 */
 
-static void valerie_remote_disconnect( valerie_remote remote );
+static void mvcp_remote_disconnect( mvcp_remote remote );
 
 /** Connect to the server.
 */
 
-static valerie_response valerie_remote_connect( valerie_remote remote )
+static mvcp_response mvcp_remote_connect( mvcp_remote remote )
 {
-	valerie_response response = NULL;
+	mvcp_response response = NULL;
 
-	valerie_remote_disconnect( remote );
+	mvcp_remote_disconnect( remote );
 
 	if ( !remote->connected )
 	{
 		signal( SIGPIPE, SIG_IGN );
 
-		remote->socket = valerie_socket_init( remote->server, remote->port );
-		remote->status = valerie_socket_init( remote->server, remote->port );
+		remote->socket = mvcp_socket_init( remote->server, remote->port );
+		remote->status = mvcp_socket_init( remote->server, remote->port );
 
-		if ( valerie_socket_connect( remote->socket ) == 0 )
+		if ( mvcp_socket_connect( remote->socket ) == 0 )
 		{
-			response = valerie_response_init( );
-			valerie_remote_read_response( remote->socket, response );
+			response = mvcp_response_init( );
+			mvcp_remote_read_response( remote->socket, response );
 		}
 
-		if ( response != NULL && valerie_socket_connect( remote->status ) == 0 )
+		if ( response != NULL && mvcp_socket_connect( remote->status ) == 0 )
 		{
-			valerie_response status_response = valerie_response_init( );
-			valerie_remote_read_response( remote->status, status_response );
-			if ( valerie_response_get_error_code( status_response ) == 100 )
-				pthread_create( &remote->thread, NULL, valerie_remote_status_thread, remote );
-			valerie_response_close( status_response );
+			mvcp_response status_response = mvcp_response_init( );
+			mvcp_remote_read_response( remote->status, status_response );
+			if ( mvcp_response_get_error_code( status_response ) == 100 )
+				pthread_create( &remote->thread, NULL, mvcp_remote_status_thread, remote );
+			mvcp_response_close( status_response );
 			remote->connected = 1;
 		}
 	}
@@ -182,15 +182,15 @@ static valerie_response valerie_remote_connect( valerie_remote remote )
 /** Execute the command.
 */
 
-static valerie_response valerie_remote_execute( valerie_remote remote, char *command )
+static mvcp_response mvcp_remote_execute( mvcp_remote remote, char *command )
 {
-	valerie_response response = NULL;
+	mvcp_response response = NULL;
 	pthread_mutex_lock( &remote->mutex );
-	if ( valerie_socket_write_data( remote->socket, command, strlen( command ) ) == strlen( command ) )
+	if ( mvcp_socket_write_data( remote->socket, command, strlen( command ) ) == strlen( command ) )
 	{
-		response = valerie_response_init( );
-		valerie_socket_write_data( remote->socket, "\r\n", 2 );
-		valerie_remote_read_response( remote->socket, response );
+		response = mvcp_response_init( );
+		mvcp_socket_write_data( remote->socket, "\r\n", 2 );
+		mvcp_remote_read_response( remote->socket, response );
 	}
 	pthread_mutex_unlock( &remote->mutex );
 	return response;
@@ -199,22 +199,22 @@ static valerie_response valerie_remote_execute( valerie_remote remote, char *com
 /** Push a westley document to the server.
 */
 
-static valerie_response valerie_remote_receive( valerie_remote remote, char *command, char *buffer )
+static mvcp_response mvcp_remote_receive( mvcp_remote remote, char *command, char *buffer )
 {
-	valerie_response response = NULL;
+	mvcp_response response = NULL;
 	pthread_mutex_lock( &remote->mutex );
-	if ( valerie_socket_write_data( remote->socket, command, strlen( command ) ) == strlen( command ) )
+	if ( mvcp_socket_write_data( remote->socket, command, strlen( command ) ) == strlen( command ) )
 	{
 		char temp[ 20 ];
 		int length = strlen( buffer );
-		response = valerie_response_init( );
-		valerie_socket_write_data( remote->socket, "\r\n", 2 );
+		response = mvcp_response_init( );
+		mvcp_socket_write_data( remote->socket, "\r\n", 2 );
 		sprintf( temp, "%d", length );
-		valerie_socket_write_data( remote->socket, temp, strlen( temp ) );
-		valerie_socket_write_data( remote->socket, "\r\n", 2 );
-		valerie_socket_write_data( remote->socket, buffer, length );
-		valerie_socket_write_data( remote->socket, "\r\n", 2 );
-		valerie_remote_read_response( remote->socket, response );
+		mvcp_socket_write_data( remote->socket, temp, strlen( temp ) );
+		mvcp_socket_write_data( remote->socket, "\r\n", 2 );
+		mvcp_socket_write_data( remote->socket, buffer, length );
+		mvcp_socket_write_data( remote->socket, "\r\n", 2 );
+		mvcp_remote_read_response( remote->socket, response );
 	}
 	pthread_mutex_unlock( &remote->mutex );
 	return response;
@@ -223,9 +223,9 @@ static valerie_response valerie_remote_receive( valerie_remote remote, char *com
 /** Push a producer to the server.
 */
 
-static valerie_response valerie_remote_push( valerie_remote remote, char *command, mlt_service service )
+static mvcp_response mvcp_remote_push( mvcp_remote remote, char *command, mlt_service service )
 {
-	valerie_response response = NULL;
+	mvcp_response response = NULL;
 	if ( service != NULL )
 	{
 		mlt_consumer consumer = mlt_factory_consumer( NULL, "westley", "buffer" );
@@ -236,7 +236,7 @@ static valerie_response valerie_remote_push( valerie_remote remote, char *comman
 		mlt_consumer_connect( consumer, service );
 		mlt_consumer_start( consumer );
 		buffer = mlt_properties_get( properties, "buffer" );
-		response = valerie_remote_receive( remote, command, buffer );
+		response = mvcp_remote_receive( remote, command, buffer );
 		mlt_consumer_close( consumer );
 	}
 	return response;
@@ -245,14 +245,14 @@ static valerie_response valerie_remote_push( valerie_remote remote, char *comman
 /** Disconnect.
 */
 
-static void valerie_remote_disconnect( valerie_remote remote )
+static void mvcp_remote_disconnect( mvcp_remote remote )
 {
 	if ( remote != NULL && remote->terminated )
 	{
 		if ( remote->connected )
 			pthread_join( remote->thread, NULL );
-		valerie_socket_close( remote->status );
-		valerie_socket_close( remote->socket );
+		mvcp_socket_close( remote->status );
+		mvcp_socket_close( remote->socket );
 		remote->connected = 0;
 		remote->terminated = 0;
 	}
@@ -261,12 +261,12 @@ static void valerie_remote_disconnect( valerie_remote remote )
 /** Close the parser.
 */
 
-static void valerie_remote_close( valerie_remote remote )
+static void mvcp_remote_close( mvcp_remote remote )
 {
 	if ( remote != NULL )
 	{
 		remote->terminated = 1;
-		valerie_remote_disconnect( remote );
+		mvcp_remote_disconnect( remote );
 		pthread_mutex_destroy( &remote->mutex );
 		free( remote->server );
 		free( remote );
@@ -276,28 +276,28 @@ static void valerie_remote_close( valerie_remote remote )
 /** Read response. 
 */
 
-static int valerie_remote_read_response( valerie_socket socket, valerie_response response )
+static int mvcp_remote_read_response( mvcp_socket socket, mvcp_response response )
 {
 	char temp[ 10240 ];
 	int length;
 	int terminated = 0;
 
-	while ( !terminated && ( length = valerie_socket_read_data( socket, temp, 10240 ) ) >= 0 )
+	while ( !terminated && ( length = mvcp_socket_read_data( socket, temp, 10240 ) ) >= 0 )
 	{
 		int position = 0;
 		temp[ length ] = '\0';
-		valerie_response_write( response, temp, length );
-		position = valerie_response_count( response ) - 1;
+		mvcp_response_write( response, temp, length );
+		position = mvcp_response_count( response ) - 1;
 		if ( position < 0 || temp[ strlen( temp ) - 1 ] != '\n' )
 			continue;
-		switch( valerie_response_get_error_code( response ) )
+		switch( mvcp_response_get_error_code( response ) )
 		{
 			case 201:
 			case 500:
-				terminated = !strcmp( valerie_response_get_line( response, position ), "" );
+				terminated = !strcmp( mvcp_response_get_line( response, position ), "" );
 				break;
 			case 202:
-				terminated = valerie_response_count( response ) >= 2;
+				terminated = mvcp_response_count( response ) >= 2;
 				break;
 			default:
 				terminated = 1;

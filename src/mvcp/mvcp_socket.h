@@ -1,6 +1,6 @@
 /*
- * valerie_socket.h -- Client Socket
- * Copyright (C) 2002-2003 Ushodaya Enterprises Limited
+ * mvcp_socket.h -- Client Socket
+ * Copyright (C) 2002-2009 Ushodaya Enterprises Limited
  * Author: Charles Yates <charles.yates@pandora.be>
  *
  * This library is free software; you can redistribute it and/or
@@ -19,8 +19,8 @@
  * Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef _VALERIE_SOCKET_H_
-#define _VALERIE_SOCKET_H_
+#ifndef _MVCP_SOCKET_H_
+#define _MVCP_SOCKET_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -37,17 +37,17 @@ typedef struct
 	int fd;
 	int no_close;
 }
-*valerie_socket, valerie_socket_t;
+*mvcp_socket, mvcp_socket_t;
 
 /** Remote parser API.
 */
 
-extern valerie_socket valerie_socket_init( char *, int );
-extern int valerie_socket_connect( valerie_socket );
-extern valerie_socket valerie_socket_init_fd( int );
-extern int valerie_socket_read_data( valerie_socket, char *, int );
-extern int valerie_socket_write_data( valerie_socket, const char *, int );
-extern void valerie_socket_close( valerie_socket );
+extern mvcp_socket mvcp_socket_init( char *, int );
+extern int mvcp_socket_connect( mvcp_socket );
+extern mvcp_socket mvcp_socket_init_fd( int );
+extern int mvcp_socket_read_data( mvcp_socket, char *, int );
+extern int mvcp_socket_write_data( mvcp_socket, const char *, int );
+extern void mvcp_socket_close( mvcp_socket );
 
 #ifdef __cplusplus
 }
