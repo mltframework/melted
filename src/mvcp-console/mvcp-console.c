@@ -1,6 +1,6 @@
 /*
- * albino.c -- Local Valerie/Miracle Test Utility
- * Copyright (C) 2002-2003 Ushodaya Enterprises Limited
+ * mvcp-console.c -- Local MVCP Test Utility
+ * Copyright (C) 2002-2009 Ushodaya Enterprises Limited
  * Author: Charles Yates <charles.yates@pandora.be>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -29,9 +29,9 @@
 #endif
 
 /* Application header files */
-#include <miracle/miracle_local.h>
-#include <valerie/valerie_remote.h>
-#include <valerie/valerie_util.h>
+#include <melted/melted_local.h>
+#include <mvcp/mvcp_remote.h>
+#include <mvcp/mvcp_util.h>
 
 char *prompt( char *command, int length )
 {
@@ -39,33 +39,33 @@ char *prompt( char *command, int length )
 	return fgets( command, length, stdin );
 }
 
-void report( valerie_response response )
+void report( mvcp_response response )
 {
 	int index = 0;
 	if ( response != NULL )
-		for ( index = 0; index < valerie_response_count( response ); index ++ )
-			printf( "%4d: %s\n", index, valerie_response_get_line( response, index ) );
+		for ( index = 0; index < mvcp_response_count( response ); index ++ )
+			printf( "%4d: %s\n", index, mvcp_response_get_line( response, index ) );
 }
 
 int main( int argc, char **argv  )
 {
-	valerie_parser parser = NULL;
-	valerie_response response = NULL;
+	mvcp_parser parser = NULL;
+	mvcp_response response = NULL;
 	char temp[ 1024 ];
 	int index = 1;
 
 	if ( argc > 2 && !strcmp( argv[ 1 ], "-s" ) )
 	{
-		printf( "Miracle Client Instance\n" );
-		parser = valerie_parser_init_remote( argv[ 2 ], 5250 );
-		response = valerie_parser_connect( parser );
+		printf( "Melted Client Instance\n" );
+		parser = mvcp_parser_init_remote( argv[ 2 ], 5250 );
+		response = mvcp_parser_connect( parser );
 		index = 3;
 	}
 	else
 	{
-		printf( "Miracle Standalone Instance\n" );
-		parser = miracle_parser_init_local( );
-		response = valerie_parser_connect( parser );
+		printf( "Melted Standalone Instance\n" );
+		parser = melted_parser_init_local( );
+		response = mvcp_parser_connect( parser );
 	}
 
 	if ( response != NULL )
@@ -73,33 +73,33 @@ int main( int argc, char **argv  )
 		/* process files on command lines before going into console mode */
 		for ( ; index < argc; index ++ )
 		{
-			valerie_response_close( response );
-			response = valerie_parser_run( parser, argv[ index ] );
+			mvcp_response_close( response );
+			response = mvcp_parser_run( parser, argv[ index ] );
 			report( response );
 		}
 	
 		while ( response != NULL && prompt( temp, 1024 ) )
 		{
-			valerie_util_trim( valerie_util_chomp( temp ) );
+			mvcp_util_trim( mvcp_util_chomp( temp ) );
 			if ( !strcasecmp( temp, "BYE" ) )
 			{
 				break;
 			}
 			else if ( strcmp( temp, "" ) )
 			{
-				valerie_response_close( response );
-				response = valerie_parser_execute( parser, temp );
+				mvcp_response_close( response );
+				response = mvcp_parser_execute( parser, temp );
 				report( response );
 			}
 		}
 	}
 	else
 	{
-		fprintf( stderr, "Unable to connect to a Miracle instance.\n" );
+		fprintf( stderr, "Unable to connect to a melted instance.\n" );
 	}
 
 	printf( "\n" );
-	valerie_parser_close( parser );
+	mvcp_parser_close( parser );
 
 	return 0;
 }
