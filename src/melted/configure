@@ -1,0 +1,2 @@
+#!/bin/sh
+echo "melted	-I$prefix/include/mlt -D_REENTRANT	-L$libdir -lmelted" >> ../../packages.dat

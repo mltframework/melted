@@ -1,12 +1,12 @@
 #!/bin/sh
 
 export version=0.3.9
-export soversion=1
+export soversion=2
 
 show_help()
 {
 	cat << EOF
-Non-autotool config script for MLT.
+Non-autotool config script for Melted.
 
 Help options:
 
@@ -20,7 +20,7 @@ General build options:
   --disable-debug         - Compile without debug support (default: on)
   --disable-mmx           - Compile without MMX support (default: on)
   --disable-sse           - Compile without SSE support (default: on)
-  --arch='arch'             - Compile for a specific architecture (default: none)
+  --arch='arch'           - Compile for a specific architecture (default: none)
   --cpu='cpu'             - Compile for a specific CPU (default: none)
 
 Module disables options:
@@ -91,24 +91,18 @@ build_config()
 		;;
 		esac
 		echo "LIBSUF=$LIBSUF"
+		
+		echo "CFLAGS += `pkg-config --cflags mlt-framework`"
+		echo "LDFLAGS += `pkg-config --libs mlt-framework`"
+
 	) > config.mak
-
-	echo "#!/bin/sh" > mlt-config
-	(
-		echo export version=$version
-		echo export prefix=$prefix
-		echo export libdir=$libdir
-		echo export bindir=$prefix/bin
-	) >> mlt-config
-
-	cat < mlt-config-template >> mlt-config
 
 	echo -n > packages.dat
 }
 
 build_pkgconfig()
 {
-	for i in framework valerie miracle
+	for i in mvcp melted melted++
 	do
 		echo prefix="$prefix" > mlt-$i.pc
 		(
@@ -225,16 +219,19 @@ else
 fi
 
 # Iterate through each of the components
-for i in framework modules inigo valerie miracle humperdink
+for i in mvcp melted melted++ mvcp-client modules
 do
-	if [ -x src/$i/configure ]
+	if [ "$gpl" = "true" -o ! -f src/$i/gpl ]
 	then
-		[ $help = 0 ] && echo "Configuring `basename $i`:"
-		olddir=`pwd`
-		cd src/$i
-		./configure "$@"
-		[ $? != 0 ] && exit 1
-		cd $olddir
+		if [ -x src/$i/configure ]
+		then
+			[ $help = 0 ] && echo "Configuring `basename $i`:"
+			olddir=`pwd`
+			cd src/$i
+			./configure "$@"
+			[ $? != 0 ] && exit 1
+			cd $olddir
+		fi
 	fi
 done
 

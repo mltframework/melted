@@ -1,36 +1,36 @@
 include ../../config.mak
 
 ifneq ($(targetos), Darwin)
-NAME = libvalerie$(LIBSUF)
+NAME = libmvcp$(LIBSUF)
 TARGET = $(NAME).$(version)
 SONAME = $(NAME).$(soversion)
 SHFLAGS += -Wl,-soname,$(SONAME)
 else
-NAME = libvalerie$(LIBSUF)
-TARGET = libvalerie.$(version)$(LIBSUF)
-SONAME = libvalerie.$(soversion)$(LIBSUF)
+NAME = libmvcp$(LIBSUF)
+TARGET = libmvcp.$(version)$(LIBSUF)
+SONAME = libmvcp.$(soversion)$(LIBSUF)
 SHFLAGS += -install_name $(libdir)/$(SONAME) -current_version $(version) -compatibility_version $(soversion)
 endif
 
-OBJS = valerie.o \
-	   valerie_notifier.o \
-	   valerie_parser.o \
-	   valerie_response.o \
-	   valerie_status.o \
-	   valerie_tokeniser.o \
-	   valerie_util.o \
-	   valerie_remote.o \
-	   valerie_socket.o
+OBJS = mvcp.o \
+	   mvcp_notifier.o \
+	   mvcp_parser.o \
+	   mvcp_response.o \
+	   mvcp_status.o \
+	   mvcp_tokeniser.o \
+	   mvcp_util.o \
+	   mvcp_remote.o \
+	   mvcp_socket.o
 
-INCS = valerie.h \
-	   valerie_notifier.h \
-	   valerie_parser.h \
-	   valerie_remote.h \
-	   valerie_response.h \
-	   valerie_socket.h \
-	   valerie_status.h \
-	   valerie_tokeniser.h \
-	   valerie_util.h
+INCS = mvcp.h \
+	   mvcp_notifier.h \
+	   mvcp_parser.h \
+	   mvcp_remote.h \
+	   mvcp_response.h \
+	   mvcp_socket.h \
+	   mvcp_status.h \
+	   mvcp_tokeniser.h \
+	   mvcp_util.h
 
 SRCS := $(OBJS:.o=.c)
 
@@ -58,14 +58,14 @@ install: 	all
 	install -m 755 $(TARGET) $(DESTDIR)$(libdir)
 	ln -sf $(TARGET) $(DESTDIR)$(libdir)/$(SONAME)
 	ln -sf $(TARGET) $(DESTDIR)$(libdir)/$(NAME)
-	mkdir -p "$(DESTDIR)$(prefix)/include/mlt/valerie"
-	install -m 644 $(INCS) "$(DESTDIR)$(prefix)/include/mlt/valerie"
+	mkdir -p "$(DESTDIR)$(prefix)/include/mlt/mvcp"
+	install -m 644 $(INCS) "$(DESTDIR)$(prefix)/include/mlt/mvcp"
 
 uninstall:
 	rm -f "$(DESTDIR)$(libdir)/$(TARGET)"
 	rm -f "$(DESTDIR)$(libdir)/$(SONAME)"
 	rm -f "$(DESTDIR)$(libdir)/$(NAME)"
-	rm -rf "$(DESTDIR)$(prefix)/include/mlt/valerie"
+	rm -rf "$(DESTDIR)$(prefix)/include/mlt/mvcp"
 
 ifneq ($(wildcard .depend),)
 include .depend

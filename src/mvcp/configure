@@ -1,0 +1,2 @@
+#!/bin/sh
+echo "mvcp	-I$prefix/include/mlt -D_REENTRANT	-L$libdir -lmvcp" >> ../../packages.dat

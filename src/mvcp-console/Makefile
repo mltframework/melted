@@ -1,14 +1,14 @@
 include ../../config.mak
 
-TARGET = albino
+TARGET = mvcp-console
 
-OBJS = albino.o
+OBJS = mvcp-console.o
 
 CFLAGS += -I.. $(RDYNAMIC)
 
-LDFLAGS += -L../miracle -lmiracle
-LDFLAGS += -L../valerie -lvalerie
-LDFLAGS += -L../framework -lmlt -lpthread
+LDFLAGS += -L../melted -lmelted
+LDFLAGS += -L../mvcp -lmvcp
+LDFLAGS += -lpthread
 
 SRCS := $(OBJS:.o=.c)
 

@@ -1,0 +1,22 @@
+#!/bin/sh
+echo "soversion=0" > config.mak
+echo "melted++	-I$prefix/include -I$prefix/include/melted++ -D_REENTRANT	-L$libdir -lmelted++" >> ../../packages.dat
+
+WARNINGS="-W -Wwrite-strings -Wcast-qual -Wpointer-arith -Wcast-align -Wredundant-decls"
+
+targetos=$(uname -s)
+case $targetos in 
+	Darwin)
+		echo LIBSUF=.dylib
+		echo "CXXFLAGS+=-D__DARWIN__ -Wall -fPIC"
+		echo "LIBFLAGS=-dynamiclib -single_module"
+		;;
+	Linux|FreeBSD)
+		echo LIBSUF=.so
+		echo "CXXFLAGS+=-Wall $WARNINGS -fPIC -dPIC"
+		echo "LIBFLAGS=-shared"
+		;;
+esac >> config.mak
+
+echo "CXXFLAGS += `pkg-config --cflags mlt++`" >> config.mak
+echo "LDFLAGS += `pkg-config --libs mlt++`" >> config.mak

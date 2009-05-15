@@ -1,0 +1,7 @@
+
+Name: mlt-melted
+Description: C++ API for MLT Miracle
+Version: ${version}
+Requires:
+Libs: -L${libdir} ${libs}
+Cflags: ${cflags}

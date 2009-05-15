@@ -1,6 +1,6 @@
 include ../../config.mak
 
-TARGET = humperdink
+TARGET = mvcp-client
 
 OBJS = client.o \
 	   io.o \
@@ -8,8 +8,8 @@ OBJS = client.o \
 
 CFLAGS += -I.. $(RDYNAMIC)
 
-LDFLAGS += -L../valerie -lvalerie
-LDFLAGS += -L../framework -lmlt -lpthread
+LDFLAGS += -L../mvcp -lmvcp
+LDFLAGS += -lpthread
 
 SRCS := $(OBJS:.o=.c)
 
