@@ -1,7 +1,8 @@
 SUBDIRS = src/mvcp \
 		  src/melted \
-		  src/melted-client \
-		  src/melted-console \
+		  src/melted++ \
+		  src/mvcp-client \
+		  src/mvcp-console \
 		  src/modules
 
 all clean:
@@ -30,7 +31,6 @@ install:
 	install -d "$(DESTDIR)$(libdir)/mlt"
 	install -d "$(DESTDIR)$(libdir)/pkgconfig"
 	install -d "$(DESTDIR)$(prefix)/share/mlt"
-	install -c -m 755 mlt-config "$(DESTDIR)$(bindir)"
 	install -c -m 644 *.pc "$(DESTDIR)$(libdir)/pkgconfig"
 	list='$(SUBDIRS)'; \
 	for subdir in $$list; do \

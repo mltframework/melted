@@ -31,6 +31,9 @@ $(TARGET):	$(OBJS)
 	ln -sf $(TARGET) $(NAME)
 	ln -sf $(TARGET) $(SONAME)
 
+depend: $(SRCS)
+	$(CXX) -MM $(CXXFLAGS) $^ 1>.depend
+
 clean:
 	$(RM) $(OBJS) $(TARGET) $(NAME)
 
@@ -41,15 +44,15 @@ install:
 	$(INSTALL) -m 755 $(TARGET) $(DESTDIR)$(libdir)
 	ln -sf $(TARGET) $(DESTDIR)$(libdir)/$(NAME)
 	ln -sf $(TARGET) $(DESTDIR)$(libdir)/$(SONAME)
-	$(INSTALL) -d "$(DESTDIR)$(prefix)/include/melted++"
-	$(INSTALL) -m 644 $(HEADERS) "$(DESTDIR)$(prefix)/include/melted++"
+	$(INSTALL) -d "$(DESTDIR)$(prefix)/include/mlt/melted++"
+	$(INSTALL) -m 644 $(HEADERS) "$(DESTDIR)$(prefix)/include/mlt/melted++"
 	/sbin/ldconfig -n "$(DESTDIR)$(liobdir)" 2> /dev/null || true
 
 uninstall:
 	rm -f "$(DESTDIR)$(libdir)/$(TARGET)"
 	rm -f "$(DESTDIR)$(libdir)/$(NAME)"
 	rm -f "$(DESTDIR)$(libdir)/$(SONAME)"
-	rm -rf "$(DESTDIR)$(prefix)/include/melted++"
+	rm -rf "$(DESTDIR)$(prefix)/include/mlt/melted++"
 
 ifneq ($(wildcard .depend),)
 include .depend

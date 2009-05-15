@@ -1,6 +1,6 @@
 #!/bin/sh
 echo "soversion=0" > config.mak
-echo "melted++	-I$prefix/include -I$prefix/include/melted++ -D_REENTRANT	-L$libdir -lmelted++" >> ../../packages.dat
+echo "melted++	-I$prefix/include -I$prefix/include/mlt/melted++ -D_REENTRANT	-L$libdir -lmelted++" >> ../../packages.dat
 
 WARNINGS="-W -Wwrite-strings -Wcast-qual -Wpointer-arith -Wcast-align -Wredundant-decls"
 
