@@ -5,9 +5,11 @@
 using namespace std;
 
 #include <Mlt.h>
+#include <MltMelted.h>
+#include <MltResponse.h>
 using namespace Mlt;
 
-class Custom : public Miracle
+class Custom : public Melted
 {
 	private:
 		Event *event;
@@ -15,10 +17,10 @@ class Custom : public Miracle
 
 	public:
 		Custom( char *name = "Custom", int port = 5290, char *config = NULL ) :
-			Miracle( name, port, config ),
+			Melted( name, port, config ),
 			event( NULL )
 		{
-			// Ensure that we receive the westley document before it's deserialised
+			// Ensure that we receive the MLT XML document before it's deserialised
 			set( "push-parser-off", 1 );
 		}
 
@@ -27,11 +29,11 @@ class Custom : public Miracle
 			delete event;
 		}
 
-		// Optional step - receive the westley document and do something with it
+		// Optional step - receive the MLT XML document and do something with it
 		Response *received( char *command, char *document )
 		{
 			cerr << document << endl;
-			Producer producer( profile, "westley-xml", document );
+			Producer producer( profile, "xml-string", document );
 			return push( command, &producer );
 		}
 
@@ -75,7 +77,7 @@ class Custom : public Miracle
 			else
 			{
 				// Use the default command processing
-				response = Miracle::execute( command );
+				response = Melted::execute( command );
 			}
 
 			// If no event exists and the first unit has been added...
