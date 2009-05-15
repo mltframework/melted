@@ -52,7 +52,7 @@ distclean:	clean
 		rm -f .depend
 
 clean:	
-		rm -f $(OBJS) $(TARGET) $(NAME)
+		rm -f $(OBJS) $(TARGET) $(NAME) $(SONAME)
 
 install: 	all
 	install -m 755 $(TARGET) $(DESTDIR)$(libdir)

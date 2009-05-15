@@ -54,7 +54,7 @@ distclean:	clean
 			rm -f .depend
 
 clean:	
-			rm -f $(OBJS) $(TARGET) $(LIBNAME) $(LIBTARGET)
+			rm -f $(OBJS) $(TARGET) $(LIBNAME) $(LIBTARGET) $(LIBSONAME)
 
 install:	all
 	install -d "$(DESTDIR)$(bindir)"
