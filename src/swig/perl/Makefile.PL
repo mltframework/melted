@@ -3,14 +3,14 @@ use ExtUtils::MakeMaker;
 
 my $CXX = $ENV{'CXX'} || 'g++';
 
-system( "ln -sf ../mltpp.i ." );
-system( "swig -c++ -I../../src `pkg-config mlt-framework --cflags` -perl5 mltpp.i" ); 
+system( "ln -sf ../melted.i" );
+system( "swig -c++ -I../../melted++ `pkg-config mlt++ --cflags` -perl5 melted.i" ); 
 WriteMakefile(
-	'NAME'    => 'mltpp',
-	'CC'      => '${CXX} `pkg-config mlt-framework --cflags` -I../../src',
+	'NAME'    => 'melted',
+	'CC'      => '${CXX} `pkg-config mlt++ --cflags` -I../../melted++',
 	'OPTIMIZE' => '-O2 -g -pipe -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -m32 -march=i386',
-	'LIBS'    => ['-L../../src -lmlt++'],
-	'OBJECT'  => 'mltpp_wrap.o',
+	'LIBS'    => ['-L../../melted++ -lmelted++'],
+	'OBJECT'  => 'melted_wrap.o',
 	'DESTDIR' => $ENV{'DESTDIR'},
 );
 

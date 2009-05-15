@@ -1,6 +1,6 @@
 /**
  * melted.i - Swig Bindings for melted++
- * Copyright (C) 2004-2005 Charles Yates
+ * Copyright (C) 2004-2009 Charles Yates
  * Author: Charles Yates <charles.yates@pandora.be>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -23,7 +23,9 @@
 %array_class(unsigned char, unsignedCharArray);
 
 %{
-#include <melted++/MltMelted.h>
+#include <Mlt.h>
+#include <MltMelted.h>
+#include <MltResponse.h>
 %}
 
 /** These methods return objects which should be gc'd.
@@ -31,6 +33,7 @@
 
 namespace Mlt {
 %newobject Melted::execute( char * );
+%newobject Melted::received( char *, char * );
 %newobject Melted::push( char *, Service & );
 %newobject Melted::unit( int );
 }
@@ -38,5 +41,67 @@ namespace Mlt {
 /** Classes to wrap.
  */
 
-%include <MltMiracle.h>
+%include <MltMelted.h>
 %include <MltResponse.h>
+
+#if defined(SWIGRUBY)
+
+%{
+
+static void ruby_listener( mlt_properties owner, void *object );
+
+class RubyListener
+{
+	private:
+		VALUE callback;
+		Mlt::Event *event;
+
+	public:
+		RubyListener( Mlt::Properties &properties, char *id, VALUE callback ) : 
+			callback( callback ) 
+		{
+			event = properties.listen( id, this, ( mlt_listener )ruby_listener );
+		}
+
+		~RubyListener( )
+		{
+			delete event;
+		}
+
+    	void mark( ) 
+		{ 
+			((void (*)(VALUE))(rb_gc_mark))( callback ); 
+		}
+
+    	void doit( ) 
+		{
+        	ID method = rb_intern( "call" );
+        	rb_funcall( callback, method, 0 );
+    	}
+};
+
+static void ruby_listener( mlt_properties owner, void *object )
+{
+	RubyListener *o = static_cast< RubyListener * >( object );
+	o->doit( );
+}
+
+void markRubyListener( void* p ) 
+{
+    RubyListener *o = static_cast<RubyListener*>( p );
+    o->mark( );
+}
+
+%}
+
+// Ruby wrapper
+%rename( Listener )  RubyListener;
+%markfunc RubyListener "markRubyListener";
+
+class RubyListener 
+{
+	public:
+		RubyListener( Mlt::Properties &properties, char *id, VALUE callback );
+};
+
+#endif

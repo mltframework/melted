@@ -1,6 +1,6 @@
 #!/bin/sh
 
-ln -s ../mltpp.i
-swig -c++ -I../../src `pkg-config --cflags mlt-framework` -php5 -noproxy mltpp.i
-g++ -fPIC -DPIC -D_GNU_SOURCE -c -rdynamic -pthread `pkg-config --cflags mlt-framework` `php-config --includes` mltpp_wrap.cpp
-
+ln -s ../melted.i
+swig -c++ -I../../melted++ `pkg-config --cflags mlt++` -php5 -noproxy melted.i
+g++ -fPIC -DPIC -D_GNU_SOURCE -c -rdynamic -pthread -I../../melted++ `pkg-config --cflags mlt++` `php-config --includes` melted_wrap.cpp
+gcc -shared melted_wrap.o -L../../melted++ -lmelted++ -o melted.so || exit $?
