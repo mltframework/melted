@@ -1,6 +1,6 @@
 /*
- * unit_commands.h
- * Copyright (C) 2002-2003 Ushodaya Enterprises Limited
+ * melted_unit_commands.h
+ * Copyright (C) 2002-2009 Ushodaya Enterprises Limited
  * Author: Dan Dennedy <dan@dennedy.org>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,37 +22,37 @@
 #ifndef _UNIT_COMMANDS_H_
 #define _UNIT_COMMANDS_H_
 
-#include "miracle_connection.h"
+#include "melted_connection.h"
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-extern response_codes miracle_list( command_argument );
-extern response_codes miracle_load( command_argument );
-extern response_codes miracle_insert( command_argument );
-extern response_codes miracle_remove( command_argument );
-extern response_codes miracle_clean( command_argument );
-extern response_codes miracle_wipe( command_argument );
-extern response_codes miracle_clear( command_argument );
-extern response_codes miracle_move( command_argument );
-extern response_codes miracle_append( command_argument );
-extern response_codes miracle_play( command_argument );
-extern response_codes miracle_stop( command_argument );
-extern response_codes miracle_pause( command_argument );
-extern response_codes miracle_rewind( command_argument );
-extern response_codes miracle_step( command_argument );
-extern response_codes miracle_goto( command_argument );
-extern response_codes miracle_ff( command_argument );
-extern response_codes miracle_set_in_point( command_argument );
-extern response_codes miracle_set_out_point( command_argument );
-extern response_codes miracle_get_unit_status( command_argument );
-extern response_codes miracle_set_unit_property( command_argument );
-extern response_codes miracle_get_unit_property( command_argument );
-extern response_codes miracle_transfer( command_argument );
-extern response_codes miracle_push( command_argument, mlt_service );
-extern response_codes miracle_receive( command_argument, char * );
+extern response_codes melted_list( command_argument );
+extern response_codes melted_load( command_argument );
+extern response_codes melted_insert( command_argument );
+extern response_codes melted_remove( command_argument );
+extern response_codes melted_clean( command_argument );
+extern response_codes melted_wipe( command_argument );
+extern response_codes melted_clear( command_argument );
+extern response_codes melted_move( command_argument );
+extern response_codes melted_append( command_argument );
+extern response_codes melted_play( command_argument );
+extern response_codes melted_stop( command_argument );
+extern response_codes melted_pause( command_argument );
+extern response_codes melted_rewind( command_argument );
+extern response_codes melted_step( command_argument );
+extern response_codes melted_goto( command_argument );
+extern response_codes melted_ff( command_argument );
+extern response_codes melted_set_in_point( command_argument );
+extern response_codes melted_set_out_point( command_argument );
+extern response_codes melted_get_unit_status( command_argument );
+extern response_codes melted_set_unit_property( command_argument );
+extern response_codes melted_get_unit_property( command_argument );
+extern response_codes melted_transfer( command_argument );
+extern response_codes melted_push( command_argument, mlt_service );
+extern response_codes melted_receive( command_argument, char * );
 
 #ifdef __cplusplus
 }

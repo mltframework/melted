@@ -1,6 +1,6 @@
 /*
- * global_commands.h
- * Copyright (C) 2002-2003 Ushodaya Enterprises Limited
+ * melted_commands.h - global commands
+ * Copyright (C) 2002-2009 Ushodaya Enterprises Limited
  * Author: Dan Dennedy <dan@dennedy.org>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -19,31 +19,31 @@
  */
 
 
-#ifndef _GLOBAL_COMMANDS_H_
-#define _GLOBAL_COMMANDS_H_
+#ifndef _MELTED_COMMANDS_H_
+#define _MELTED_COMMANDS_H_
 
-#include <valerie/valerie_status.h>
-#include "miracle_unit.h"
-#include "miracle_connection.h"
+#include <mvcp/mvcp_status.h>
+#include "melted_unit.h"
+#include "melted_connection.h"
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-extern miracle_unit miracle_get_unit( int );
-extern void miracle_delete_unit( int );
-extern void miracle_delete_all_units( void );
-extern int miracle_unit_status( int n, valerie_status status, int root_offset );
+extern melted_unit melted_get_unit( int );
+extern void melted_delete_unit( int );
+extern void melted_delete_all_units( void );
+extern int melted_unit_status( int n, mvcp_status status, int root_offset );
 //extern void raw1394_start_service_threads( void );
 //extern void raw1394_stop_service_threads( void );
 
-extern response_codes miracle_add_unit( command_argument );
-extern response_codes miracle_list_nodes( command_argument );
-extern response_codes miracle_list_units( command_argument );
-extern response_codes miracle_list_clips( command_argument );
-extern response_codes miracle_set_global_property( command_argument );
-extern response_codes miracle_get_global_property( command_argument );
+extern response_codes melted_add_unit( command_argument );
+extern response_codes melted_list_nodes( command_argument );
+extern response_codes melted_list_units( command_argument );
+extern response_codes melted_list_clips( command_argument );
+extern response_codes melted_set_global_property( command_argument );
+extern response_codes melted_get_global_property( command_argument );
 
 #ifdef __cplusplus
 }

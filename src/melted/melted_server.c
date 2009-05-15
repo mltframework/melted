@@ -1,6 +1,6 @@
 /*
- * miracle_server.c
- * Copyright (C) 2002-2003 Ushodaya Enterprises Limited
+ * melted_server.c
+ * Copyright (C) 2002-20039 Ushodaya Enterprises Limited
  * Author: Charles Yates <charles.yates@pandora.be>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -37,42 +37,42 @@
 #include <arpa/inet.h>
 
 /* Application header files */
-#include "miracle_server.h"
-#include "miracle_connection.h"
-#include "miracle_local.h"
-#include "miracle_log.h"
-#include "miracle_commands.h"
-#include <valerie/valerie_remote.h>
-#include <valerie/valerie_tokeniser.h>
+#include "melted_server.h"
+#include "melted_connection.h"
+#include "melted_local.h"
+#include "melted_log.h"
+#include "melted_commands.h"
+#include <mvcp/mvcp_remote.h>
+#include <mvcp/mvcp_tokeniser.h>
 
-#define VERSION "0.0.1"
+#define VERSION "0.2.0"
 
-static void miracle_command_received( mlt_listener listener, mlt_properties owner, miracle_server this, void **args )
+static void melted_command_received( mlt_listener listener, mlt_properties owner, melted_server this, void **args )
 {
 	if ( listener != NULL )
-		listener( owner, this, ( valerie_response ** )args[ 0 ], ( char * )args[ 1 ] );
+		listener( owner, this, ( mvcp_response ** )args[ 0 ], ( char * )args[ 1 ] );
 }
 
-static void miracle_doc_received( mlt_listener listener, mlt_properties owner, miracle_server this, void **args )
+static void melted_doc_received( mlt_listener listener, mlt_properties owner, melted_server this, void **args )
 {
 	if ( listener != NULL )
-		listener( owner, this, ( valerie_response ** )args[ 0 ], ( char * )args[ 1 ], ( char * )args[ 2 ] );
+		listener( owner, this, ( mvcp_response ** )args[ 0 ], ( char * )args[ 1 ], ( char * )args[ 2 ] );
 }
 
-static void miracle_push_received( mlt_listener listener, mlt_properties owner, miracle_server this, void **args )
+static void melted_push_received( mlt_listener listener, mlt_properties owner, melted_server this, void **args )
 {
 	if ( listener != NULL )
-		listener( owner, this, ( valerie_response ** )args[ 0 ], ( char * )args[ 1 ], ( mlt_service )args[ 2 ] );
+		listener( owner, this, ( mvcp_response ** )args[ 0 ], ( char * )args[ 1 ], ( mlt_service )args[ 2 ] );
 }
 
 /** Initialise a server structure.
 */
 
-miracle_server miracle_server_init( char *id )
+melted_server melted_server_init( char *id )
 {
-	miracle_server server = malloc( sizeof( miracle_server_t ) );
+	melted_server server = malloc( sizeof( melted_server_t ) );
 	if ( server != NULL )
-		memset( server, 0, sizeof( miracle_server_t ) );
+		memset( server, 0, sizeof( melted_server_t ) );
 	if ( server != NULL && mlt_properties_init( &server->parent, server ) == 0 )
 	{
 		server->id = id;
@@ -80,19 +80,19 @@ miracle_server miracle_server_init( char *id )
 		server->socket = -1;
 		server->shutdown = 1;
 		mlt_events_init( &server->parent );
-		mlt_events_register( &server->parent, "command-received", ( mlt_transmitter )miracle_command_received );
-		mlt_events_register( &server->parent, "doc-received", ( mlt_transmitter )miracle_doc_received );
-		mlt_events_register( &server->parent, "push-received", ( mlt_transmitter )miracle_push_received );
+		mlt_events_register( &server->parent, "command-received", ( mlt_transmitter )melted_command_received );
+		mlt_events_register( &server->parent, "doc-received", ( mlt_transmitter )melted_doc_received );
+		mlt_events_register( &server->parent, "push-received", ( mlt_transmitter )melted_push_received );
 	}
 	return server;
 }
 
-const char *miracle_server_id( miracle_server server )
+const char *melted_server_id( melted_server server )
 {
-	return server != NULL && server->id != NULL ? server->id : "miracle";
+	return server != NULL && server->id != NULL ? server->id : "melted";
 }
 
-void miracle_server_set_config( miracle_server server, const char *config )
+void melted_server_set_config( melted_server server, const char *config )
 {
 	if ( server != NULL )
 	{
@@ -104,27 +104,27 @@ void miracle_server_set_config( miracle_server server, const char *config )
 /** Set the port of the server.
 */
 
-void miracle_server_set_port( miracle_server server, int port )
+void melted_server_set_port( melted_server server, int port )
 {
 	server->port = port;
 }
 
-void miracle_server_set_proxy( miracle_server server, char *proxy )
+void melted_server_set_proxy( melted_server server, char *proxy )
 {
-	valerie_tokeniser tokeniser = valerie_tokeniser_init( );
+	mvcp_tokeniser tokeniser = mvcp_tokeniser_init( );
 	server->proxy = 1;
 	server->remote_port = DEFAULT_TCP_PORT;
-	valerie_tokeniser_parse_new( tokeniser, proxy, ":" );
-	strcpy( server->remote_server, valerie_tokeniser_get_string( tokeniser, 0 ) );
-	if ( valerie_tokeniser_count( tokeniser ) == 2 )
-		server->remote_port = atoi( valerie_tokeniser_get_string( tokeniser, 1 ) );
-	valerie_tokeniser_close( tokeniser );
+	mvcp_tokeniser_parse_new( tokeniser, proxy, ":" );
+	strcpy( server->remote_server, mvcp_tokeniser_get_string( tokeniser, 0 ) );
+	if ( mvcp_tokeniser_count( tokeniser ) == 2 )
+		server->remote_port = atoi( mvcp_tokeniser_get_string( tokeniser, 1 ) );
+	mvcp_tokeniser_close( tokeniser );
 }
 
 /** Wait for a connection.
 */
 
-static int miracle_server_wait_for_connect( miracle_server server )
+static int melted_server_wait_for_connect( melted_server server )
 {
     struct timeval tv;
     fd_set rfds;
@@ -142,9 +142,9 @@ static int miracle_server_wait_for_connect( miracle_server server )
 /** Run the server thread.
 */
 
-static void *miracle_server_run( void *arg )
+static void *melted_server_run( void *arg )
 {
-	miracle_server server = arg;
+	melted_server server = arg;
 	pthread_t cmd_parse_info;
 	connection_t *tmp = NULL;
 	pthread_attr_t thread_attributes;
@@ -152,7 +152,7 @@ static void *miracle_server_run( void *arg )
 
 	socksize = sizeof( struct sockaddr );
 
-	miracle_log( LOG_NOTICE, "%s version %s listening on port %i", server->id, VERSION, server->port );
+	melted_log( LOG_NOTICE, "%s version %s listening on port %i", server->id, VERSION, server->port );
 
 	/* Create the initial thread. We want all threads to be created detached so
 	   their resources get freed automatically. (CY: ... hmmph...) */
@@ -162,7 +162,7 @@ static void *miracle_server_run( void *arg )
 	while ( !server->shutdown )
 	{
 		/* Wait for a new connection. */
-		if ( miracle_server_wait_for_connect( server ) )
+		if ( melted_server_wait_for_connect( server ) )
 		{
 			/* Create a new block of data to hold a copy of the incoming connection for
 			   our server thread. The thread should free this when it terminates. */
@@ -178,7 +178,7 @@ static void *miracle_server_run( void *arg )
 		}
 	}
 
-	miracle_log( LOG_NOTICE, "%s version %s server terminated.", server->id, VERSION );
+	melted_log( LOG_NOTICE, "%s version %s server terminated.", server->id, VERSION );
 
 	return NULL;
 }
@@ -186,10 +186,10 @@ static void *miracle_server_run( void *arg )
 /** Execute the server thread.
 */
 
-int miracle_server_execute( miracle_server server )
+int melted_server_execute( melted_server server )
 {
 	int error = 0;
-	valerie_response response = NULL;
+	mvcp_response response = NULL;
 	int index = 0;
 	struct sockaddr_in ServerAddr;
 	int flag = 1;
@@ -208,7 +208,7 @@ int miracle_server_execute( miracle_server server )
 	{
 		server->shutdown = 1;
 		perror( "socket" );
-		miracle_log( LOG_ERR, "%s unable to create socket.", server->id );
+		melted_log( LOG_ERR, "%s unable to create socket.", server->id );
 		return -1;
 	}
 
@@ -218,7 +218,7 @@ int miracle_server_execute( miracle_server server )
 	{
 		server->shutdown = 1;
 		perror( "bind" );
-		miracle_log( LOG_ERR, "%s unable to bind to port %d.", server->id, server->port );
+		melted_log( LOG_ERR, "%s unable to bind to port %d.", server->id, server->port );
 		return -1;
 	}
 
@@ -226,7 +226,7 @@ int miracle_server_execute( miracle_server server )
 	{
 		server->shutdown = 1;
 		perror( "listen" );
-		miracle_log( LOG_ERR, "%s unable to listen on port %d.", server->id, server->port );
+		melted_log( LOG_ERR, "%s unable to listen on port %d.", server->id, server->port );
 		return -1;
 	}
 
@@ -234,49 +234,49 @@ int miracle_server_execute( miracle_server server )
 
 	if ( !server->proxy )
 	{
-		miracle_log( LOG_NOTICE, "Starting server on %d.", server->port );
-		server->parser = miracle_parser_init_local( );
+		melted_log( LOG_NOTICE, "Starting server on %d.", server->port );
+		server->parser = melted_parser_init_local( );
 	}
 	else
 	{
-		miracle_log( LOG_NOTICE, "Starting proxy for %s:%d on %d.", server->remote_server, server->remote_port, server->port );
-		server->parser = valerie_parser_init_remote( server->remote_server, server->remote_port );
+		melted_log( LOG_NOTICE, "Starting proxy for %s:%d on %d.", server->remote_server, server->remote_port, server->port );
+		server->parser = mvcp_parser_init_remote( server->remote_server, server->remote_port );
 	}
 
-	response = valerie_parser_connect( server->parser );
+	response = mvcp_parser_connect( server->parser );
 
-	if ( response != NULL && valerie_response_get_error_code( response ) == 100 )
+	if ( response != NULL && mvcp_response_get_error_code( response ) == 100 )
 	{
 		/* read configuration file */
 		if ( response != NULL && !server->proxy && server->config != NULL )
 		{
-			valerie_response_close( response );
-			response = valerie_parser_run( server->parser, server->config );
+			mvcp_response_close( response );
+			response = mvcp_parser_run( server->parser, server->config );
 
-			if ( valerie_response_count( response ) > 1 )
+			if ( mvcp_response_count( response ) > 1 )
 			{
-				if ( valerie_response_get_error_code( response ) > 299 )
-					miracle_log( LOG_ERR, "Error evaluating server configuration. Processing stopped." );
-				for ( index = 0; index < valerie_response_count( response ); index ++ )
-					miracle_log( LOG_DEBUG, "%4d: %s", index, valerie_response_get_line( response, index ) );
+				if ( mvcp_response_get_error_code( response ) > 299 )
+					melted_log( LOG_ERR, "Error evaluating server configuration. Processing stopped." );
+				for ( index = 0; index < mvcp_response_count( response ); index ++ )
+					melted_log( LOG_DEBUG, "%4d: %s", index, mvcp_response_get_line( response, index ) );
 			}
 		}
 
 		if ( response != NULL )
 		{
 			int result;
-			valerie_response_close( response );
-			result = pthread_create( &server->thread, NULL, miracle_server_run, server );
+			mvcp_response_close( response );
+			result = pthread_create( &server->thread, NULL, melted_server_run, server );
 			if ( result )
 			{
-				miracle_log( LOG_CRIT, "Failed to launch TCP listener thread" );
+				melted_log( LOG_CRIT, "Failed to launch TCP listener thread" );
 				error = -1;
 			}
 		}
 	}
 	else
 	{
-		miracle_log( LOG_ERR, "Error connecting to parser. Processing stopped." );
+		melted_log( LOG_ERR, "Error connecting to parser. Processing stopped." );
 		server->shutdown = 1;
 		error = -1;
 	}
@@ -287,23 +287,23 @@ int miracle_server_execute( miracle_server server )
 /** Fetch a units properties
 */
 
-mlt_properties miracle_server_fetch_unit( miracle_server server, int index )
+mlt_properties melted_server_fetch_unit( melted_server server, int index )
 {
-	miracle_unit unit = miracle_get_unit( index );
+	melted_unit unit = melted_get_unit( index );
 	return unit != NULL ? unit->properties : NULL;
 }
 
 /** Shutdown the server.
 */
 
-void miracle_server_shutdown( miracle_server server )
+void melted_server_shutdown( melted_server server )
 {
 	if ( server != NULL && !server->shutdown )
 	{
 		server->shutdown = 1;
 		pthread_join( server->thread, NULL );
-		miracle_server_set_config( server, NULL );
-		valerie_parser_close( server->parser );
+		melted_server_set_config( server, NULL );
+		mvcp_parser_close( server->parser );
 		server->parser = NULL;
 		close( server->socket );
 	}
@@ -312,12 +312,12 @@ void miracle_server_shutdown( miracle_server server )
 /** Close the server.
 */
 
-void miracle_server_close( miracle_server server )
+void melted_server_close( melted_server server )
 {
 	if ( server != NULL && mlt_properties_dec_ref( &server->parent ) <= 0 )
 	{
 		mlt_properties_close( &server->parent );
-		miracle_server_shutdown( server );
+		melted_server_shutdown( server );
 		free( server );
 	}
 }

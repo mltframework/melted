@@ -1,6 +1,6 @@
 /*
- * miracle_log.c -- logging facility implementation
- * Copyright (C) 2002-2003 Ushodaya Enterprises Limited
+ * melted_log.c -- logging facility implementation
+ * Copyright (C) 2002-2009 Ushodaya Enterprises Limited
  * Author: Dan Dennedy <dan@dennedy.org>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,21 +22,21 @@
 #include <syslog.h>
 #include <stdio.h>
 
-#include "miracle_log.h"
+#include "melted_log.h"
 
 static int log_output = log_stderr;
 static int threshold = LOG_DEBUG;
 
-void miracle_log_init( enum log_output method, int new_threshold )
+void melted_log_init( enum log_output method, int new_threshold )
 {
 	log_output = method;
 	threshold = new_threshold;
 	if (method == log_syslog)
-		openlog( "miracle", LOG_CONS, LOG_DAEMON );
+		openlog( "melted", LOG_CONS, LOG_DAEMON );
 
 }
 
-void miracle_log( int priority, const char *format, ... )
+void melted_log( int priority, const char *format, ... )
 {
 	va_list list;
 	va_start( list, format );

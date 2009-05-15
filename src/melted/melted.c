@@ -1,7 +1,7 @@
 /*
- * miracle.c -- MLT Video TCP Server
+ * melted.c -- MLT Video TCP Server
  *
- * Copyright (C) 2002-2003 Ushodaya Enterprises Limited
+ * Copyright (C) 2002-2009 Ushodaya Enterprises Limited
  * Authors:
  *     Dan Dennedy <dan@dennedy.org>
  *     Charles Yates <charles.yates@pandora.be>
@@ -33,20 +33,20 @@
 #include <framework/mlt.h>
 
 /* Application header files */
-#include "miracle_server.h"
-#include "miracle_log.h"
+#include "melted_server.h"
+#include "melted_log.h"
 
-/** Our dv server.
+/** Our server context.
 */
 
-static miracle_server server = NULL;
+static melted_server server = NULL;
 
 /** atexit shutdown handler for the server.
 */
 
 static void main_cleanup( )
 {
-	miracle_server_close( server );
+	melted_server_close( server );
 }
 
 /** Report usage and exit.
@@ -78,14 +78,14 @@ int main( int argc, char **argv )
 
 	mlt_factory_init( NULL );
 
-	server = miracle_server_init( argv[ 0 ] );
+	server = melted_server_init( argv[ 0 ] );
 
 	for ( index = 1; index < argc; index ++ )
 	{
 		if ( !strcmp( argv[ index ], "-port" ) )
-			miracle_server_set_port( server, atoi( argv[ ++ index ] ) );
+			melted_server_set_port( server, atoi( argv[ ++ index ] ) );
 		else if ( !strcmp( argv[ index ], "-proxy" ) )
-			miracle_server_set_proxy( server, argv[ ++ index ] );
+			melted_server_set_proxy( server, argv[ ++ index ] );
 		else if ( !strcmp( argv[ index ], "-test" ) )
 			background = 0;
 		else
@@ -99,20 +99,20 @@ int main( int argc, char **argv )
 		if ( fork() )
 			return 0;
 		setsid();
-		miracle_log_init( log_syslog, LOG_INFO );
+		melted_log_init( log_syslog, LOG_INFO );
 	}
 	else
 	{
-		miracle_log_init( log_stderr, LOG_DEBUG );
+		melted_log_init( log_stderr, LOG_DEBUG );
 	}
 
 	atexit( main_cleanup );
 
 	/* Set the config script */
-	miracle_server_set_config( server, "/etc/miracle.conf" );
+	melted_server_set_config( server, "/etc/melted.conf" );
 
 	/* Execute the server */
-	error = miracle_server_execute( server );
+	error = melted_server_execute( server );
 
 	/* We need to wait until we're exited.. */
 	while ( !server->shutdown )

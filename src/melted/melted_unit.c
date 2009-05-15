@@ -1,6 +1,6 @@
 /*
- * miracle_unit.c -- Transmission Unit Implementation
- * Copyright (C) 2002-2003 Ushodaya Enterprises Limited
+ * melted_unit.c -- Playout Implementation
+ * Copyright (C) 2002-2009 Ushodaya Enterprises Limited
  * Author: Dan Dennedy <dan@dennedy.org>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -37,23 +37,23 @@
 
 #include <sys/mman.h>
 
-#include "miracle_unit.h"
-#include "miracle_log.h"
-#include "miracle_local.h"
+#include "melted_unit.h"
+#include "melted_log.h"
+#include "melted_local.h"
 
 #include <framework/mlt.h>
 
 /* Forward references */
-static void miracle_unit_status_communicate( miracle_unit );
+static void melted_unit_status_communicate( melted_unit );
 
-/** Allocate a new DV transmission unit.
+/** Allocate a new playout unit.
 
-    \return A new miracle_unit handle.
+    \return A new melted_unit handle.
 */
 
-miracle_unit miracle_unit_init( int index, char *constructor )
+melted_unit melted_unit_init( int index, char *constructor )
 {
-	miracle_unit this = NULL;
+	melted_unit this = NULL;
 	mlt_consumer consumer = NULL;
 
 	char *id = strdup( constructor );
@@ -67,7 +67,7 @@ miracle_unit miracle_unit_init( int index, char *constructor )
 	if ( consumer != NULL )
 	{
 		mlt_playlist playlist = mlt_playlist_init( );
-		this = calloc( sizeof( miracle_unit_t ), 1 );
+		this = calloc( sizeof( melted_unit_t ), 1 );
 		this->properties = mlt_properties_new( );
 		mlt_properties_init( this->properties, this );
 		mlt_properties_set_int( this->properties, "unit", index );
@@ -83,7 +83,7 @@ miracle_unit miracle_unit_init( int index, char *constructor )
 	return this;
 }
 
-static char *strip_root( miracle_unit unit, char *file )
+static char *strip_root( melted_unit unit, char *file )
 {
 	mlt_properties properties = unit->properties;
 	char *root = mlt_properties_get( properties, "root" );
@@ -101,25 +101,25 @@ static char *strip_root( miracle_unit unit, char *file )
 /** Communicate the current status to all threads waiting on the notifier.
 */
 
-static void miracle_unit_status_communicate( miracle_unit unit )
+static void melted_unit_status_communicate( melted_unit unit )
 {
 	if ( unit != NULL )
 	{
 		mlt_properties properties = unit->properties;
 		char *root_dir = mlt_properties_get( properties, "root" );
-		valerie_notifier notifier = mlt_properties_get_data( properties, "notifier", NULL );
-		valerie_status_t status;
+		mvcp_notifier notifier = mlt_properties_get_data( properties, "notifier", NULL );
+		mvcp_status_t status;
 
 		if ( root_dir != NULL && notifier != NULL )
 		{
-			if ( miracle_unit_get_status( unit, &status ) == 0 )
+			if ( melted_unit_get_status( unit, &status ) == 0 )
 				/* if ( !( ( status.status == unit_playing || status.status == unit_paused ) &&
 						strcmp( status.clip, "" ) && 
 				    	!strcmp( status.tail_clip, "" ) && 
 						status.position == 0 && 
 						status.in == 0 && 
 						status.out == 0 ) ) */
-					valerie_notifier_put( notifier, &status );
+					mvcp_notifier_put( notifier, &status );
 		}
 	}
 }
@@ -127,7 +127,7 @@ static void miracle_unit_status_communicate( miracle_unit unit )
 /** Set the notifier info
 */
 
-void miracle_unit_set_notifier( miracle_unit this, valerie_notifier notifier, char *root_dir )
+void melted_unit_set_notifier( melted_unit this, mvcp_notifier notifier, char *root_dir )
 {
 	mlt_properties properties = this->properties;
 	mlt_playlist playlist = mlt_properties_get_data( properties, "playlist", NULL );
@@ -136,15 +136,15 @@ void miracle_unit_set_notifier( miracle_unit this, valerie_notifier notifier, ch
 	mlt_properties_set( properties, "root", root_dir );
 	mlt_properties_set_data( properties, "notifier", notifier, 0, NULL, NULL );
 	mlt_properties_set_data( playlist_properties, "notifier_arg", this, 0, NULL, NULL );
-	mlt_properties_set_data( playlist_properties, "notifier", miracle_unit_status_communicate, 0, NULL, NULL );
+	mlt_properties_set_data( playlist_properties, "notifier", melted_unit_status_communicate, 0, NULL, NULL );
 
-	miracle_unit_status_communicate( this );
+	melted_unit_status_communicate( this );
 }
 
 /** Create or locate a producer for the file specified.
 */
 
-static mlt_producer locate_producer( miracle_unit unit, char *file )
+static mlt_producer locate_producer( melted_unit unit, char *file )
 {
 	// Try to get the profile from the consumer
 	mlt_consumer consumer = mlt_properties_get_data( unit->properties, "consumer", NULL );
@@ -160,7 +160,7 @@ static mlt_producer locate_producer( miracle_unit unit, char *file )
 /** Update the generation count.
 */
 
-static void update_generation( miracle_unit unit )
+static void update_generation( melted_unit unit )
 {
 	mlt_properties properties = unit->properties;
 	int generation = mlt_properties_get_int( properties, "generation" );
@@ -170,7 +170,7 @@ static void update_generation( miracle_unit unit )
 /** Wipe all clips on the playlist for this unit.
 */
 
-static void clear_unit( miracle_unit unit )
+static void clear_unit( melted_unit unit )
 {
 	mlt_properties properties = unit->properties;
 	mlt_playlist playlist = mlt_properties_get_data( properties, "playlist", NULL );
@@ -187,7 +187,7 @@ static void clear_unit( miracle_unit unit )
 /** Wipe all but the playing clip from the unit.
 */
 
-static void clean_unit( miracle_unit unit )
+static void clean_unit( melted_unit unit )
 {
 	mlt_properties properties = unit->properties;
 	mlt_playlist playlist = mlt_properties_get_data( properties, "playlist", NULL );
@@ -217,7 +217,7 @@ static void clean_unit( miracle_unit unit )
 /** Remove everything up to the current clip from the unit.
 */
 
-static void wipe_unit( miracle_unit unit )
+static void wipe_unit( melted_unit unit )
 {
 	mlt_properties properties = unit->properties;
 	mlt_playlist playlist = mlt_properties_get_data( properties, "playlist", NULL );
@@ -238,14 +238,14 @@ static void wipe_unit( miracle_unit unit )
 /** Generate a report on all loaded clips.
 */
 
-void miracle_unit_report_list( miracle_unit unit, valerie_response response )
+void melted_unit_report_list( melted_unit unit, mvcp_response response )
 {
 	int i;
 	mlt_properties properties = unit->properties;
 	int generation = mlt_properties_get_int( properties, "generation" );
 	mlt_playlist playlist = mlt_properties_get_data( properties, "playlist", NULL );
 
-	valerie_response_printf( response, 1024, "%d\n", generation );
+	mvcp_response_printf( response, 1024, "%d\n", generation );
 		
 	for ( i = 0; i < mlt_playlist_count( playlist ); i ++ )
 	{
@@ -255,7 +255,7 @@ void miracle_unit_report_list( miracle_unit unit, valerie_response response )
 		title = mlt_properties_get( MLT_PRODUCER_PROPERTIES( info.producer ), "title" );
 		if ( title == NULL )
 			title = strip_root( unit, info.resource );
-		valerie_response_printf( response, 10240, "%d \"%s\" %d %d %d %d %.2f\n", 
+		mvcp_response_printf( response, 10240, "%d \"%s\" %d %d %d %d %.2f\n", 
 								 i, 
 								 title,
 								 info.frame_in, 
@@ -264,19 +264,19 @@ void miracle_unit_report_list( miracle_unit unit, valerie_response response )
 								 info.length, 
 								 info.fps );
 	}
-	valerie_response_printf( response, 1024, "\n" );
+	mvcp_response_printf( response, 1024, "\n" );
 }
 
 /** Load a clip into the unit clearing existing play list.
 
     \todo error handling
-    \param unit A miracle_unit handle.
+    \param unit A melted_unit handle.
     \param clip The absolute file name of the clip to load.
     \param in   The starting frame (-1 for 0)
 	\param out  The ending frame (-1 for maximum)
 */
 
-valerie_error_code miracle_unit_load( miracle_unit unit, char *clip, int32_t in, int32_t out, int flush )
+mvcp_error_code melted_unit_load( melted_unit unit, char *clip, int32_t in, int32_t out, int flush )
 {
 	// Now try to create a producer
 	mlt_producer instance = locate_producer( unit, clip );
@@ -290,17 +290,17 @@ valerie_error_code miracle_unit_load( miracle_unit unit, char *clip, int32_t in,
 		mlt_playlist_append_io( playlist, instance, in, out );
 		mlt_playlist_remove_region( playlist, 0, original );
 		mlt_service_unlock( MLT_PLAYLIST_SERVICE( playlist ) );
-		miracle_log( LOG_DEBUG, "loaded clip %s", clip );
+		melted_log( LOG_DEBUG, "loaded clip %s", clip );
 		update_generation( unit );
-		miracle_unit_status_communicate( unit );
+		melted_unit_status_communicate( unit );
 		mlt_producer_close( instance );
-		return valerie_ok;
+		return mvcp_ok;
 	}
 
-	return valerie_invalid_file;
+	return mvcp_invalid_file;
 }
 
-valerie_error_code miracle_unit_insert( miracle_unit unit, char *clip, int index, int32_t in, int32_t out )
+mvcp_error_code melted_unit_insert( melted_unit unit, char *clip, int index, int32_t in, int32_t out )
 {
 	mlt_producer instance = locate_producer( unit, clip );
 
@@ -312,78 +312,78 @@ valerie_error_code miracle_unit_insert( miracle_unit unit, char *clip, int index
 		mlt_service_lock( MLT_PLAYLIST_SERVICE( playlist ) );
 		mlt_playlist_insert( playlist, instance, index, in, out );
 		mlt_service_unlock( MLT_PLAYLIST_SERVICE( playlist ) );
-		miracle_log( LOG_DEBUG, "inserted clip %s at %d", clip, index );
+		melted_log( LOG_DEBUG, "inserted clip %s at %d", clip, index );
 		update_generation( unit );
-		miracle_unit_status_communicate( unit );
+		melted_unit_status_communicate( unit );
 		mlt_producer_close( instance );
-		return valerie_ok;
+		return mvcp_ok;
 	}
 
-	return valerie_invalid_file;
+	return mvcp_invalid_file;
 }
 
-valerie_error_code miracle_unit_remove( miracle_unit unit, int index )
+mvcp_error_code melted_unit_remove( melted_unit unit, int index )
 {
 	mlt_properties properties = unit->properties;
 	mlt_playlist playlist = mlt_properties_get_data( properties, "playlist", NULL );
 	mlt_service_lock( MLT_PLAYLIST_SERVICE( playlist ) );
 	mlt_playlist_remove( playlist, index );
 	mlt_service_unlock( MLT_PLAYLIST_SERVICE( playlist ) );
-	miracle_log( LOG_DEBUG, "removed clip at %d", index );
+	melted_log( LOG_DEBUG, "removed clip at %d", index );
 	update_generation( unit );
-	miracle_unit_status_communicate( unit );
-	return valerie_ok;
+	melted_unit_status_communicate( unit );
+	return mvcp_ok;
 }
 
-valerie_error_code miracle_unit_clean( miracle_unit unit )
+mvcp_error_code melted_unit_clean( melted_unit unit )
 {
 	clean_unit( unit );
-	miracle_log( LOG_DEBUG, "Cleaned playlist" );
-	miracle_unit_status_communicate( unit );
-	return valerie_ok;
+	melted_log( LOG_DEBUG, "Cleaned playlist" );
+	melted_unit_status_communicate( unit );
+	return mvcp_ok;
 }
 
-valerie_error_code miracle_unit_wipe( miracle_unit unit )
+mvcp_error_code melted_unit_wipe( melted_unit unit )
 {
 	wipe_unit( unit );
-	miracle_log( LOG_DEBUG, "Wiped playlist" );
-	miracle_unit_status_communicate( unit );
-	return valerie_ok;
+	melted_log( LOG_DEBUG, "Wiped playlist" );
+	melted_unit_status_communicate( unit );
+	return mvcp_ok;
 }
 
-valerie_error_code miracle_unit_clear( miracle_unit unit )
+mvcp_error_code melted_unit_clear( melted_unit unit )
 {
 	mlt_consumer consumer = mlt_properties_get_data( unit->properties, "consumer", NULL );
 	clear_unit( unit );
 	mlt_consumer_purge( consumer );
-	miracle_log( LOG_DEBUG, "Cleared playlist" );
-	miracle_unit_status_communicate( unit );
-	return valerie_ok;
+	melted_log( LOG_DEBUG, "Cleared playlist" );
+	melted_unit_status_communicate( unit );
+	return mvcp_ok;
 }
 
-valerie_error_code miracle_unit_move( miracle_unit unit, int src, int dest )
+mvcp_error_code melted_unit_move( melted_unit unit, int src, int dest )
 {
 	mlt_properties properties = unit->properties;
 	mlt_playlist playlist = mlt_properties_get_data( properties, "playlist", NULL );
 	mlt_service_lock( MLT_PLAYLIST_SERVICE( playlist ) );
 	mlt_playlist_move( playlist, src, dest );
 	mlt_service_unlock( MLT_PLAYLIST_SERVICE( playlist ) );
-	miracle_log( LOG_DEBUG, "moved clip %d to %d", src, dest );
+	melted_log( LOG_DEBUG, "moved clip %d to %d", src, dest );
 	update_generation( unit );
-	miracle_unit_status_communicate( unit );
-	return valerie_ok;
+	melted_unit_status_communicate( unit );
+	return mvcp_ok;
 }
 
 /** Add a clip to the unit play list.
 
     \todo error handling
-    \param unit A miracle_unit handle.
+    \param unit A melted_unit handle.
     \param clip The absolute file name of the clip to load.
     \param in   The starting frame (-1 for 0)
 	\param out  The ending frame (-1 for maximum)
 */
 
-valerie_error_code miracle_unit_append( miracle_unit unit, char *clip, int32_t in, int32_t out )
+mvcp_error_code melted_unit_append( melted_unit unit, char *clip, int32_t in, int32_t out )
 {
 	mlt_producer instance = locate_producer( unit, clip );
 
@@ -393,45 +393,45 @@ valerie_error_code miracle_unit_append( miracle_unit unit, char *clip, int32_t i
 		mlt_playlist playlist = mlt_properties_get_data( properties, "playlist", NULL );
 		mlt_service_lock( MLT_PLAYLIST_SERVICE( playlist ) );
 		mlt_playlist_append_io( playlist, instance, in, out );
-		miracle_log( LOG_DEBUG, "appended clip %s", clip );
+		melted_log( LOG_DEBUG, "appended clip %s", clip );
 		mlt_service_unlock( MLT_PLAYLIST_SERVICE( playlist ) );
 		update_generation( unit );
-		miracle_unit_status_communicate( unit );
+		melted_unit_status_communicate( unit );
 		mlt_producer_close( instance );
-		return valerie_ok;
+		return mvcp_ok;
 	}
 
-	return valerie_invalid_file;
+	return mvcp_invalid_file;
 }
 
 /** Add an mlt_service to the playlist
 
-    \param unit A miracle_unit handle.
+    \param unit A melted_unit handle.
     \param service the service to add
 */
 
-valerie_error_code miracle_unit_append_service( miracle_unit unit, mlt_service service )
+mvcp_error_code melted_unit_append_service( melted_unit unit, mlt_service service )
 {
 	mlt_properties properties = unit->properties;
 	mlt_playlist playlist = mlt_properties_get_data( properties, "playlist", NULL );
 	mlt_service_lock( MLT_PLAYLIST_SERVICE( playlist ) );
 	mlt_playlist_append( playlist, ( mlt_producer )service );
 	mlt_service_unlock( MLT_PLAYLIST_SERVICE( playlist ) );
-	miracle_log( LOG_DEBUG, "appended clip" );
+	melted_log( LOG_DEBUG, "appended clip" );
 	update_generation( unit );
-	miracle_unit_status_communicate( unit );
-	return valerie_ok;
+	melted_unit_status_communicate( unit );
+	return mvcp_ok;
 }
 
 /** Start playing the unit.
 
     \todo error handling
-    \param unit A miracle_unit handle.
+    \param unit A melted_unit handle.
     \param speed An integer that specifies the playback rate as a
                  percentage multiplied by 100.
 */
 
-void miracle_unit_play( miracle_unit_t *unit, int speed )
+void melted_unit_play( melted_unit_t *unit, int speed )
 {
 	mlt_properties properties = unit->properties;
 	mlt_playlist playlist = mlt_properties_get_data( properties, "playlist", NULL );
@@ -439,33 +439,33 @@ void miracle_unit_play( miracle_unit_t *unit, int speed )
 	mlt_consumer consumer = mlt_properties_get_data( unit->properties, "consumer", NULL );
 	mlt_producer_set_speed( producer, ( double )speed / 1000 );
 	mlt_consumer_start( consumer );
-	miracle_unit_status_communicate( unit );
+	melted_unit_status_communicate( unit );
 }
 
 /** Stop playback.
 
-    Terminates the dv_pump and halts dv1394 transmission.
+    Terminates the consumer and halts playout.
 
-    \param unit A miracle_unit handle.
+    \param unit A melted_unit handle.
 */
 
-void miracle_unit_terminate( miracle_unit unit )
+void melted_unit_terminate( melted_unit unit )
 {
 	mlt_consumer consumer = mlt_properties_get_data( unit->properties, "consumer", NULL );
 	mlt_playlist playlist = mlt_properties_get_data( unit->properties, "playlist", NULL );
 	mlt_producer producer = MLT_PLAYLIST_PRODUCER( playlist );
 	mlt_producer_set_speed( producer, 0 );
 	mlt_consumer_stop( consumer );
-	miracle_unit_status_communicate( unit );
+	melted_unit_status_communicate( unit );
 }
 
 /** Query the status of unit playback.
 
-    \param unit A miracle_unit handle.
+    \param unit A melted_unit handle.
     \return 1 if the unit is not playing, 0 if playing.
 */
 
-int miracle_unit_has_terminated( miracle_unit unit )
+int melted_unit_has_terminated( melted_unit unit )
 {
 	mlt_consumer consumer = mlt_properties_get_data( unit->properties, "consumer", NULL );
 	return mlt_consumer_is_stopped( consumer );
@@ -474,7 +474,7 @@ int miracle_unit_has_terminated( miracle_unit unit )
 /** Transfer the currently loaded clip to another unit
 */
 
-int miracle_unit_transfer( miracle_unit dest_unit, miracle_unit src_unit )
+int melted_unit_transfer( melted_unit dest_unit, melted_unit src_unit )
 {
 	int i;
 	mlt_properties dest_properties = dest_unit->properties;
@@ -506,7 +506,7 @@ int miracle_unit_transfer( miracle_unit dest_unit, miracle_unit src_unit )
 	mlt_service_unlock( MLT_PLAYLIST_SERVICE( dest_playlist ) );
 
 	update_generation( dest_unit );
-	miracle_unit_status_communicate( dest_unit );
+	melted_unit_status_communicate( dest_unit );
 
 	mlt_playlist_close( tmp_playlist );
 
@@ -516,7 +516,7 @@ int miracle_unit_transfer( miracle_unit dest_unit, miracle_unit src_unit )
 /** Determine if unit is offline.
 */
 
-int miracle_unit_is_offline( miracle_unit unit )
+int melted_unit_is_offline( melted_unit unit )
 {
 	return 0;
 }
@@ -524,11 +524,11 @@ int miracle_unit_is_offline( miracle_unit unit )
 /** Obtain the status for a given unit
 */
 
-int miracle_unit_get_status( miracle_unit unit, valerie_status status )
+int melted_unit_get_status( melted_unit unit, mvcp_status status )
 {
 	int error = unit == NULL;
 
-	memset( status, 0, sizeof( valerie_status_t ) );
+	memset( status, 0, sizeof( mvcp_status_t ) );
 
 	if ( !error )
 	{
@@ -564,7 +564,7 @@ int miracle_unit_get_status( miracle_unit unit, valerie_status status )
 
 		status->generation = mlt_properties_get_int( properties, "generation" );
 
-		if ( miracle_unit_has_terminated( unit ) )
+		if ( melted_unit_has_terminated( unit ) )
 			status->status = unit_stopped;
 		else if ( !strcmp( status->clip, "" ) )
 			status->status = unit_not_loaded;
@@ -586,7 +586,7 @@ int miracle_unit_get_status( miracle_unit unit, valerie_status status )
 /** Change position in the playlist.
 */
 
-void miracle_unit_change_position( miracle_unit unit, int clip, int32_t position )
+void melted_unit_change_position( melted_unit unit, int clip, int32_t position )
 {
 	mlt_properties properties = unit->properties;
 	mlt_playlist playlist = mlt_properties_get_data( properties, "playlist", NULL );
@@ -619,13 +619,13 @@ void miracle_unit_change_position( miracle_unit unit, int clip, int32_t position
 		mlt_producer_seek( producer, frame_start + frame_offset - info.frame_in );
 	}
 
-	miracle_unit_status_communicate( unit );
+	melted_unit_status_communicate( unit );
 }
 
 /** Get the index of the current clip.
 */
 
-int	miracle_unit_get_current_clip( miracle_unit unit )
+int	melted_unit_get_current_clip( melted_unit unit )
 {
 	mlt_properties properties = unit->properties;
 	mlt_playlist playlist = mlt_properties_get_data( properties, "playlist", NULL );
@@ -636,7 +636,7 @@ int	miracle_unit_get_current_clip( miracle_unit unit )
 /** Set a clip's in point
 */
 
-int miracle_unit_set_clip_in( miracle_unit unit, int index, int32_t position )
+int melted_unit_set_clip_in( melted_unit unit, int index, int32_t position )
 {
 	mlt_properties properties = unit->properties;
 	mlt_playlist playlist = mlt_properties_get_data( properties, "playlist", NULL );
@@ -645,12 +645,12 @@ int miracle_unit_set_clip_in( miracle_unit unit, int index, int32_t position )
 
 	if ( error == 0 )
 	{
-		miracle_unit_play( unit, 0 );
+		melted_unit_play( unit, 0 );
 		mlt_service_lock( MLT_PLAYLIST_SERVICE( playlist ) );
 		error = mlt_playlist_resize_clip( playlist, index, position, info.frame_out );
 		mlt_service_unlock( MLT_PLAYLIST_SERVICE( playlist ) );
 		update_generation( unit );
-		miracle_unit_change_position( unit, index, 0 );
+		melted_unit_change_position( unit, index, 0 );
 	}
 
 	return error;
@@ -659,7 +659,7 @@ int miracle_unit_set_clip_in( miracle_unit unit, int index, int32_t position )
 /** Set a clip's out point.
 */
 
-int miracle_unit_set_clip_out( miracle_unit unit, int index, int32_t position )
+int melted_unit_set_clip_out( melted_unit unit, int index, int32_t position )
 {
 	mlt_properties properties = unit->properties;
 	mlt_playlist playlist = mlt_properties_get_data( properties, "playlist", NULL );
@@ -668,13 +668,13 @@ int miracle_unit_set_clip_out( miracle_unit unit, int index, int32_t position )
 
 	if ( error == 0 )
 	{
-		miracle_unit_play( unit, 0 );
+		melted_unit_play( unit, 0 );
 		mlt_service_lock( MLT_PLAYLIST_SERVICE( playlist ) );
 		error = mlt_playlist_resize_clip( playlist, index, info.frame_in, position );
 		mlt_service_unlock( MLT_PLAYLIST_SERVICE( playlist ) );
 		update_generation( unit );
-		miracle_unit_status_communicate( unit );
-		miracle_unit_change_position( unit, index, -1 );
+		melted_unit_status_communicate( unit );
+		melted_unit_change_position( unit, index, -1 );
 	}
 
 	return error;
@@ -683,7 +683,7 @@ int miracle_unit_set_clip_out( miracle_unit unit, int index, int32_t position )
 /** Step by specified position.
 */
 
-void miracle_unit_step( miracle_unit unit, int32_t offset )
+void melted_unit_step( melted_unit unit, int32_t offset )
 {
 	mlt_properties properties = unit->properties;
 	mlt_playlist playlist = mlt_properties_get_data( properties, "playlist", NULL );
@@ -695,43 +695,43 @@ void miracle_unit_step( miracle_unit unit, int32_t offset )
 /** Set the unit's clip mode regarding in and out points.
 */
 
-//void miracle_unit_set_mode( miracle_unit unit, dv_player_clip_mode mode )
+//void melted_unit_set_mode( melted_unit unit, dv_player_clip_mode mode )
 //{
-	//dv_player player = miracle_unit_get_dv_player( unit );
+	//dv_player player = melted_unit_get_dv_player( unit );
 	//if ( player != NULL )
 		//dv_player_set_clip_mode( player, mode );
-	//miracle_unit_status_communicate( unit );
+	//melted_unit_status_communicate( unit );
 //}
 
 /** Get the unit's clip mode regarding in and out points.
 */
 
-//dv_player_clip_mode miracle_unit_get_mode( miracle_unit unit )
+//dv_player_clip_mode melted_unit_get_mode( melted_unit unit )
 //{
-	//dv_player player = miracle_unit_get_dv_player( unit );
+	//dv_player player = melted_unit_get_dv_player( unit );
 	//return dv_player_get_clip_mode( player );
 //}
 
 /** Set the unit's clip mode regarding eof handling.
 */
 
-//void miracle_unit_set_eof_action( miracle_unit unit, dv_player_eof_action action )
+//void melted_unit_set_eof_action( melted_unit unit, dv_player_eof_action action )
 //{
-	//dv_player player = miracle_unit_get_dv_player( unit );
+	//dv_player player = melted_unit_get_dv_player( unit );
 	//dv_player_set_eof_action( player, action );
-	//miracle_unit_status_communicate( unit );
+	//melted_unit_status_communicate( unit );
 //}
 
 /** Get the unit's clip mode regarding eof handling.
 */
 
-//dv_player_eof_action miracle_unit_get_eof_action( miracle_unit unit )
+//dv_player_eof_action melted_unit_get_eof_action( melted_unit unit )
 //{
-	//dv_player player = miracle_unit_get_dv_player( unit );
+	//dv_player player = melted_unit_get_dv_player( unit );
 	//return dv_player_get_eof_action( player );
 //}
 
-int miracle_unit_set( miracle_unit unit, char *name_value )
+int melted_unit_set( melted_unit unit, char *name_value )
 {
 	mlt_properties properties = NULL;
 
@@ -750,7 +750,7 @@ int miracle_unit_set( miracle_unit unit, char *name_value )
 	return mlt_properties_parse( properties, name_value );
 }
 
-char *miracle_unit_get( miracle_unit unit, char *name )
+char *melted_unit_get( melted_unit unit, char *name )
 {
 	mlt_playlist playlist = mlt_properties_get_data( unit->properties, "playlist", NULL );
 	mlt_properties properties = MLT_PLAYLIST_PROPERTIES( playlist );
@@ -760,18 +760,17 @@ char *miracle_unit_get( miracle_unit unit, char *name )
 /** Release the unit
 
     \todo error handling
-    \param unit A miracle_unit handle.
+    \param unit A melted_unit handle.
 */
 
-void miracle_unit_close( miracle_unit unit )
+void melted_unit_close( melted_unit unit )
 {
 	if ( unit != NULL )
 	{
-		miracle_log( LOG_DEBUG, "closing unit..." );
-		miracle_unit_terminate( unit );
+		melted_log( LOG_DEBUG, "closing unit..." );
+		melted_unit_terminate( unit );
 		mlt_properties_close( unit->properties );
 		free( unit );
-		miracle_log( LOG_DEBUG, "... unit closed." );
+		melted_log( LOG_DEBUG, "... unit closed." );
 	}
 }
-

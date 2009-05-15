@@ -1,6 +1,6 @@
 /*
- * miracle_connection.h -- DV Connection Handler
- * Copyright (C) 2002-2003 Ushodaya Enterprises Limited
+ * melted_connection.h -- Connection Handler
+ * Copyright (C) 2002-2009 Ushodaya Enterprises Limited
  * Author: Charles Yates <charles.yates@pandora.be>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -18,15 +18,15 @@
  * Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef _DV_CONNECTION_H_
-#define _DV_CONNECTION_H_
+#ifndef _MELTED_CONNECTION_H_
+#define _MELTED_CONNECTION_H_
 
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-#include <valerie/valerie_parser.h>
-#include <valerie/valerie_tokeniser.h>
+#include <mvcp/mvcp_parser.h>
+#include <mvcp/mvcp_tokeniser.h>
 
 #ifdef __cplusplus
 extern "C"
@@ -41,7 +41,7 @@ typedef struct
 	mlt_properties owner;
 	int fd;
 	struct sockaddr_in sin;
-	valerie_parser parser;
+	mvcp_parser parser;
 } 
 connection_t;
 
@@ -69,9 +69,9 @@ response_codes;
 
 typedef struct 
 {
-	valerie_parser    parser;
-	valerie_response  response;
-	valerie_tokeniser tokeniser;
+	mvcp_parser    parser;
+	mvcp_response  response;
+	mvcp_tokeniser tokeniser;
 	char         *command;
 	int           unit;
 	void         *argument;

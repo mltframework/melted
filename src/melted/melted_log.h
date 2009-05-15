@@ -1,6 +1,6 @@
 /*
- * miracle_log.h -- logging facility header
- * Copyright (C) 2002-2003 Ushodaya Enterprises Limited
+ * melted_log.h -- logging facility header
+ * Copyright (C) 2002-2009 Ushodaya Enterprises Limited
  * Author: Dan Dennedy <dan@dennedy.org>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -18,8 +18,8 @@
  * Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef _LOG_H_
-#define _LOG_H_
+#ifndef _MELTED_LOG_H_
+#define _MELTED_LOG_H_
 
 #include <syslog.h>
 
@@ -33,8 +33,8 @@ enum log_output {
 	log_syslog
 };
 
-void miracle_log_init( enum log_output method, int threshold );
-void miracle_log( int priority, const char *format, ... );
+void melted_log_init( enum log_output method, int threshold );
+void melted_log( int priority, const char *format, ... );
 
 #ifdef __cplusplus
 }

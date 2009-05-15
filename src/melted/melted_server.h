@@ -1,6 +1,6 @@
 /*
- * miracle_server.h
- * Copyright (C) 2002-2003 Ushodaya Enterprises Limited
+ * melted_server.h
+ * Copyright (C) 2002-2009 Ushodaya Enterprises Limited
  * Author: Charles Yates <charles.yates@pandora.be>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -18,14 +18,14 @@
  * Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef _MIRACLE_SERVER_H_
-#define _MIRACLE_SERVER_H_
+#ifndef _MELTED_SERVER_H_
+#define _MELTED_SERVER_H_
 
 /* System header files */
 #include <pthread.h>
 
 /* Application header files */
-#include <valerie/valerie_parser.h>
+#include <mvcp/mvcp_parser.h>
 
 #ifdef __cplusplus
 extern "C"
@@ -46,7 +46,7 @@ typedef struct
 	char *id;
 	int port;
 	int socket;
-	valerie_parser parser;
+	mvcp_parser parser;
 	pthread_t thread;
 	int shutdown;
 	int proxy;
@@ -54,20 +54,20 @@ typedef struct
 	int remote_port;
 	char *config;
 }
-*miracle_server, miracle_server_t;
+*melted_server, melted_server_t;
 
 /** API for the server
 */
 
-extern miracle_server miracle_server_init( char * );
-extern const char *miracle_server_id( miracle_server );
-extern void miracle_server_set_config( miracle_server, const char * );
-extern void miracle_server_set_port( miracle_server, int );
-extern void miracle_server_set_proxy( miracle_server, char * );
-extern int miracle_server_execute( miracle_server );
-extern mlt_properties miracle_server_fetch_unit( miracle_server, int );
-extern void miracle_server_shutdown( miracle_server );
-extern void miracle_server_close( miracle_server );
+extern melted_server melted_server_init( char * );
+extern const char *melted_server_id( melted_server );
+extern void melted_server_set_config( melted_server, const char * );
+extern void melted_server_set_port( melted_server, int );
+extern void melted_server_set_proxy( melted_server, char * );
+extern int melted_server_execute( melted_server );
+extern mlt_properties melted_server_fetch_unit( melted_server, int );
+extern void melted_server_shutdown( melted_server );
+extern void melted_server_close( melted_server );
 
 #ifdef __cplusplus
 }

@@ -1,6 +1,6 @@
 /*
- * miracle_local.h -- Local Miracle Parser
- * Copyright (C) 2002-2003 Ushodaya Enterprises Limited
+ * melted_local.h -- Local Melted Parser
+ * Copyright (C) 2002-2009 Ushodaya Enterprises Limited
  * Author: Charles Yates <charles.yates@pandora.be>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -18,11 +18,11 @@
  * Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef _MIRACLE_LOCAL_H_
-#define _MIRACLE_LOCAL_H_
+#ifndef _MELTED_LOCAL_H_
+#define _MELTED_LOCAL_H_
 
 /* Application header files */
-#include <valerie/valerie_parser.h>
+#include <mvcp/mvcp_parser.h>
 
 #ifdef __cplusplus
 extern "C"
@@ -32,7 +32,7 @@ extern "C"
 /** Local parser API.
 */
 
-extern valerie_parser miracle_parser_init_local( );
+extern mvcp_parser melted_parser_init_local( );
 
 #ifdef __cplusplus
 }

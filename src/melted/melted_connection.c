@@ -1,6 +1,6 @@
 /*
- * miracle_connection.c -- DV Connection Handler
- * Copyright (C) 2002-2003 Ushodaya Enterprises Limited
+ * melted_connection.c -- Connection Handler
+ * Copyright (C) 2002-2009 Ushodaya Enterprises Limited
  * Author: Charles Yates <charles.yates@pandora.be>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -34,13 +34,13 @@
 #include <sys/socket.h> 
 #include <arpa/inet.h>
 
-#include <valerie/valerie_socket.h>
+#include <mvcp/mvcp_socket.h>
 
 /* Application header files */
-#include "miracle_commands.h"
-#include "miracle_connection.h"
-#include "miracle_server.h"
-#include "miracle_log.h"
+#include "melted_commands.h"
+#include "melted_connection.h"
+#include "melted_server.h"
+#include "melted_log.h"
 
 /** This is a generic replacement for fgets which operates on a file
    descriptor. Unlike fgets, we can also specify a line terminator. Maximum
@@ -81,46 +81,46 @@ int fdgetline( int fd, char *buf, int max, char line_terminator, int *eof_chk )
 }
 
 static int connection_initiate( int );
-static int connection_send( int, valerie_response );
+static int connection_send( int, mvcp_response );
 static int connection_read( int, char *, int );
 static void connection_close( int );
 
 static int connection_initiate( int fd )
 {
 	int error = 0;
-	valerie_response response = valerie_response_init( );
-	valerie_response_set_error( response, 100, "VTR Ready" );
+	mvcp_response response = mvcp_response_init( );
+	mvcp_response_set_error( response, 100, "VTR Ready" );
 	error = connection_send( fd, response );
-	valerie_response_close( response );
+	mvcp_response_close( response );
 	return error;
 }
 
-static int connection_send( int fd, valerie_response response )
+static int connection_send( int fd, mvcp_response response )
 {
 	int error = 0;
 	int index = 0;
-	int code = valerie_response_get_error_code( response );
+	int code = mvcp_response_get_error_code( response );
 
 	if ( code != -1 )
 	{
-		int items = valerie_response_count( response );
+		int items = mvcp_response_count( response );
 
 		if ( items == 0 )
-			valerie_response_set_error( response, 500, "Unknown error" );
+			mvcp_response_set_error( response, 500, "Unknown error" );
 
 		if ( code == 200 && items > 2 )
-			valerie_response_set_error( response, 201, "OK" );
+			mvcp_response_set_error( response, 201, "OK" );
 		else if ( code == 200 && items > 1 )
-			valerie_response_set_error( response, 202, "OK" );
+			mvcp_response_set_error( response, 202, "OK" );
 
-		code = valerie_response_get_error_code( response );
-		items = valerie_response_count( response );
+		code = mvcp_response_get_error_code( response );
+		items = mvcp_response_count( response );
 
 		for ( index = 0; !error && index < items; index ++ )
 		{
-			char *line = valerie_response_get_line( response, index );
+			char *line = mvcp_response_get_line( response, index );
 			int length = strlen( line );
-			if ( length == 0 && index != valerie_response_count( response ) - 1 && write( fd, " ", 1 ) != 1 )
+			if ( length == 0 && index != mvcp_response_count( response ) - 1 && write( fd, " ", 1 ) != 1 )
 				error = -1;
 			else if ( length > 0 && write( fd, line, length ) != length )
 				error = -1;
@@ -128,15 +128,15 @@ static int connection_send( int fd, valerie_response response )
 				error = -1;			
 		}
 
-		if ( ( code == 201 || code == 500 ) && strcmp( valerie_response_get_line( response, items - 1 ), "" ) )
+		if ( ( code == 201 || code == 500 ) && strcmp( mvcp_response_get_line( response, items - 1 ), "" ) )
 			if ( write( fd, "\r\n", 2 ) != 2 )
-				miracle_log( LOG_ERR, "write(\"\\r\\n\") failed!" );
+				melted_log( LOG_ERR, "write(\"\\r\\n\") failed!" );
 	}
 	else
 	{
 		const char *message = "500 Empty Response\r\n\r\n";
 		if ( write( fd, message, strlen( message ) ) != strlen( message ))
-			miracle_log( LOG_ERR, "write(%s) failed!", message );
+			melted_log( LOG_ERR, "write(%s) failed!", message );
 	}
 
 	return error;
@@ -154,27 +154,27 @@ static int connection_read( int fd, char *command, int length )
 	return nchars;
 }
 
-int connection_status( int fd, valerie_notifier notifier )
+int connection_status( int fd, mvcp_notifier notifier )
 {
 	int error = 0;
 	int index = 0;
-	valerie_status_t status;
+	mvcp_status_t status;
 	char text[ 10240 ];
-	valerie_socket socket = valerie_socket_init_fd( fd );
+	mvcp_socket socket = mvcp_socket_init_fd( fd );
 	
 	for ( index = 0; !error && index < MAX_UNITS; index ++ )
 	{
-		valerie_notifier_get( notifier, &status, index );
-		valerie_status_serialise( &status, text, sizeof( text ) );
-		error = valerie_socket_write_data( socket, text, strlen( text )  ) != strlen( text );
+		mvcp_notifier_get( notifier, &status, index );
+		mvcp_status_serialise( &status, text, sizeof( text ) );
+		error = mvcp_socket_write_data( socket, text, strlen( text )  ) != strlen( text );
 	}
 
 	while ( !error )
 	{
-		if ( valerie_notifier_wait( notifier, &status ) == 0 )
+		if ( mvcp_notifier_wait( notifier, &status ) == 0 )
 		{
-			valerie_status_serialise( &status, text, sizeof( text ) );
-			error = valerie_socket_write_data( socket, text, strlen( text ) ) != strlen( text );
+			mvcp_status_serialise( &status, text, sizeof( text ) );
+			error = mvcp_socket_write_data( socket, text, strlen( text ) ) != strlen( text );
 		}
 		else
 		{
@@ -189,7 +189,7 @@ int connection_status( int fd, valerie_notifier notifier )
 		}
 	}
 
-	valerie_socket_close( socket );
+	mvcp_socket_close( socket );
 	
 	return error;
 }
@@ -207,8 +207,8 @@ void *parser_thread( void *arg )
 	char address[ 512 ];
 	char command[ 1024 ];
 	int fd = connection->fd;
-	valerie_parser parser = connection->parser;
-	valerie_response response = NULL;
+	mvcp_parser parser = connection->parser;
+	mvcp_response response = NULL;
 
 	/* Get the connecting clients ip information */
 	he = gethostbyaddr( (char *) &( connection->sin.sin_addr.s_addr ), sizeof(u_int32_t), AF_INET); 
@@ -217,7 +217,7 @@ void *parser_thread( void *arg )
 	else
 		inet_ntop( AF_INET, &( connection->sin.sin_addr.s_addr), address, 32 );
 
-	miracle_log( LOG_NOTICE, "Connection established with %s (%d)", address, fd );
+	melted_log( LOG_NOTICE, "Connection established with %s (%d)", address, fd );
 
 	/* Execute the commands received. */
 	if ( connection_initiate( fd ) == 0 )
@@ -255,15 +255,15 @@ void *parser_thread( void *arg )
 						service = ( mlt_service )mlt_factory_producer( NULL, "westley-xml", buffer );
 						mlt_events_fire( owner, "push-received", &response, command, service, NULL );
 						if ( response == NULL )
-							response = valerie_parser_push( parser, command, service );
+							response = mvcp_parser_push( parser, command, service );
 					}
 					else
 					{
-						response = valerie_parser_received( parser, command, buffer );
+						response = mvcp_parser_received( parser, command, buffer );
 					}
 				}
 				error = connection_send( fd, response );
-				valerie_response_close( response );
+				mvcp_response_close( response );
 				mlt_service_close( service );
 				free( buffer );
 			}
@@ -271,14 +271,14 @@ void *parser_thread( void *arg )
 			{
 				mlt_events_fire( owner, "command-received", &response, command, NULL );
 				if ( response == NULL )
-					response = valerie_parser_execute( parser, command );
-				miracle_log( LOG_INFO, "%s \"%s\" %d", address, command, valerie_response_get_error_code( response ) );
+					response = mvcp_parser_execute( parser, command );
+				melted_log( LOG_INFO, "%s \"%s\" %d", address, command, mvcp_response_get_error_code( response ) );
 				error = connection_send( fd, response );
-				valerie_response_close( response );
+				mvcp_response_close( response );
 			}
 			else
 			{
-				error = connection_status( fd, valerie_parser_get_notifier( parser ) );
+				error = connection_status( fd, mvcp_parser_get_notifier( parser ) );
 			}
 		}
 	}
@@ -286,7 +286,7 @@ void *parser_thread( void *arg )
 	/* Free the resources associated with this connection. */
 	connection_close( fd );
 
-	miracle_log( LOG_NOTICE, "Connection with %s (%d) closed", address, fd );
+	melted_log( LOG_NOTICE, "Connection with %s (%d) closed", address, fd );
 
 	free( connection );
 

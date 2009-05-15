@@ -1,6 +1,6 @@
 /*
- * dvunit.h -- Transmission Unit Header
- * Copyright (C) 2002-2003 Ushodaya Enterprises Limited
+ * melted_unit.h -- Playout Unit Header
+ * Copyright (C) 2002-2009 Ushodaya Enterprises Limited
  * Author: Dan Dennedy <dan@dennedy.org>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -18,13 +18,13 @@
  * Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef _DV_UNIT_H_
-#define _DV_UNIT_H_
+#ifndef _MELTED_UNIT_H_
+#define _MELTED_UNIT_H_
 
 #include <pthread.h>
 
 #include <framework/mlt_properties.h>
-#include <valerie/valerie.h>
+#include <mvcp/mvcp.h>
 
 #ifdef __cplusplus
 extern "C"
@@ -35,44 +35,40 @@ typedef struct
 {
 	mlt_properties properties;
 } 
-miracle_unit_t, *miracle_unit;
+melted_unit_t, *melted_unit;
 
-extern miracle_unit         miracle_unit_init( int index, char *arg );
-extern void 				miracle_unit_report_list( miracle_unit unit, valerie_response response );
-extern void                 miracle_unit_allow_stdin( miracle_unit unit, int flag );
-extern valerie_error_code   miracle_unit_load( miracle_unit unit, char *clip, int32_t in, int32_t out, int flush );
-extern valerie_error_code 	miracle_unit_insert( miracle_unit unit, char *clip, int index, int32_t in, int32_t out );
-extern valerie_error_code   miracle_unit_append( miracle_unit unit, char *clip, int32_t in, int32_t out );
-extern valerie_error_code   miracle_unit_append_service( miracle_unit unit, mlt_service service );
-extern valerie_error_code 	miracle_unit_remove( miracle_unit unit, int index );
-extern valerie_error_code 	miracle_unit_clean( miracle_unit unit );
-extern valerie_error_code 	miracle_unit_wipe( miracle_unit unit );
-extern valerie_error_code 	miracle_unit_clear( miracle_unit unit );
-extern valerie_error_code 	miracle_unit_move( miracle_unit unit, int src, int dest );
-extern int                  miracle_unit_transfer( miracle_unit dest_unit, miracle_unit src_unit );
-extern void                 miracle_unit_play( miracle_unit_t *unit, int speed );
-extern void                 miracle_unit_terminate( miracle_unit );
-extern int                  miracle_unit_has_terminated( miracle_unit );
-extern int                  miracle_unit_get_nodeid( miracle_unit unit );
-extern int                  miracle_unit_get_channel( miracle_unit unit );
-extern int                  miracle_unit_is_offline( miracle_unit unit );
-extern void                 miracle_unit_set_notifier( miracle_unit, valerie_notifier, char * );
-extern int                  miracle_unit_get_status( miracle_unit, valerie_status );
-extern void                 miracle_unit_change_position( miracle_unit, int, int32_t position );
-extern void                 miracle_unit_change_speed( miracle_unit unit, int speed );
-extern int                  miracle_unit_set_clip_in( miracle_unit unit, int index, int32_t position );
-extern int                  miracle_unit_set_clip_out( miracle_unit unit, int index, int32_t position );
-//extern void                 miracle_unit_set_mode( miracle_unit unit, dv_player_clip_mode mode );
-//extern dv_player_clip_mode  miracle_unit_get_mode( miracle_unit unit );
-//extern void                 miracle_unit_set_eof_action( miracle_unit unit, dv_player_eof_action mode );
-//extern dv_player_eof_action miracle_unit_get_eof_action( miracle_unit unit );
-extern void                 miracle_unit_step( miracle_unit unit, int32_t offset );
-extern void                 miracle_unit_close( miracle_unit unit );
-extern void                 miracle_unit_suspend( miracle_unit );
-extern void                 miracle_unit_restore( miracle_unit );
-extern int					miracle_unit_set( miracle_unit, char *name_value );
-extern char *				miracle_unit_get( miracle_unit, char *name );
-extern int					miracle_unit_get_current_clip( miracle_unit );
+extern melted_unit         melted_unit_init( int index, char *arg );
+extern void 				melted_unit_report_list( melted_unit unit, mvcp_response response );
+extern void                 melted_unit_allow_stdin( melted_unit unit, int flag );
+extern mvcp_error_code   melted_unit_load( melted_unit unit, char *clip, int32_t in, int32_t out, int flush );
+extern mvcp_error_code 	melted_unit_insert( melted_unit unit, char *clip, int index, int32_t in, int32_t out );
+extern mvcp_error_code   melted_unit_append( melted_unit unit, char *clip, int32_t in, int32_t out );
+extern mvcp_error_code   melted_unit_append_service( melted_unit unit, mlt_service service );
+extern mvcp_error_code 	melted_unit_remove( melted_unit unit, int index );
+extern mvcp_error_code 	melted_unit_clean( melted_unit unit );
+extern mvcp_error_code 	melted_unit_wipe( melted_unit unit );
+extern mvcp_error_code 	melted_unit_clear( melted_unit unit );
+extern mvcp_error_code 	melted_unit_move( melted_unit unit, int src, int dest );
+extern int                  melted_unit_transfer( melted_unit dest_unit, melted_unit src_unit );
+extern void                 melted_unit_play( melted_unit_t *unit, int speed );
+extern void                 melted_unit_terminate( melted_unit );
+extern int                  melted_unit_has_terminated( melted_unit );
+extern int                  melted_unit_get_nodeid( melted_unit unit );
+extern int                  melted_unit_get_channel( melted_unit unit );
+extern int                  melted_unit_is_offline( melted_unit unit );
+extern void                 melted_unit_set_notifier( melted_unit, mvcp_notifier, char * );
+extern int                  melted_unit_get_status( melted_unit, mvcp_status );
+extern void                 melted_unit_change_position( melted_unit, int, int32_t position );
+extern void                 melted_unit_change_speed( melted_unit unit, int speed );
+extern int                  melted_unit_set_clip_in( melted_unit unit, int index, int32_t position );
+extern int                  melted_unit_set_clip_out( melted_unit unit, int index, int32_t position );
+extern void                 melted_unit_step( melted_unit unit, int32_t offset );
+extern void                 melted_unit_close( melted_unit unit );
+extern void                 melted_unit_suspend( melted_unit );
+extern void                 melted_unit_restore( melted_unit );
+extern int					melted_unit_set( melted_unit, char *name_value );
+extern char *				melted_unit_get( melted_unit, char *name );
+extern int					melted_unit_get_current_clip( melted_unit );
 
 
 #ifdef __cplusplus
