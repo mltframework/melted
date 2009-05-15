@@ -1,13 +1,13 @@
 include ../../../config.mak
 
-TARGET = ../libmltmvsp$(LIBSUF)
+TARGET = ../libmltmvcp$(LIBSUF)
 
 OBJS = factory.o \
-	   consumer_mvsp.o
+	   consumer_mvcp.o
 
 CFLAGS += -I../.. 
 
-LDFLAGS += -L../../mvsp -lmvsp
+LDFLAGS += -L../../mvcp -lmvcp
 LDFLAGS += -L../../framework -lmlt
 
 SRCS := $(OBJS:.o=.c)

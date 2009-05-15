@@ -21,9 +21,9 @@
 #include <string.h>
 #include <framework/mlt.h>
 
-extern mlt_consumer consumer_valerie_init( mlt_profile profile, mlt_service_type type, const char *id, char *arg );
+extern mlt_consumer consumer_mvcp_init( mlt_profile profile, mlt_service_type type, const char *id, char *arg );
 
 MLT_REPOSITORY
 {
-	MLT_REGISTER( consumer_type, "valerie", consumer_valerie_init );
+	MLT_REGISTER( consumer_type, "mvcp", consumer_mvcp_init );
 }

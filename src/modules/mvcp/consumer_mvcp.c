@@ -1,6 +1,6 @@
 /*
- * consumer_valerie.c -- pushes a service via valerie
- * Copyright (C) 2003-2004 Ushodaya Enterprises Limited
+ * consumer_mvcp.c -- pushes a service via MVCP
+ * Copyright (C) 2003-2009 Ushodaya Enterprises Limited
  * Author:  Charles Yates <charles.yates@telenet.be>
  *
  * This library is free software; you can redistribute it and/or
@@ -18,8 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include <valerie/valerie.h>
-#include <valerie/valerie_remote.h>
+#include <mvcp/mvcp.h>
+#include <mvcp/mvcp_remote.h>
 #include <framework/mlt.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -33,7 +33,7 @@ static int consumer_start( mlt_consumer this );
 /** This is what will be called by the factory
 */
 
-mlt_consumer consumer_valerie_init( mlt_profile profile, mlt_service_type type, const char *id, char *arg )
+mlt_consumer consumer_mvcp_init( mlt_profile profile, mlt_service_type type, const char *id, char *arg )
 {
 	// Create the consumer object
 	mlt_consumer this = calloc( sizeof( struct mlt_consumer_s ), 1 );
@@ -90,8 +90,8 @@ static int consumer_start( mlt_consumer this )
 	char *title = mlt_properties_get( properties, "title" );
 	char command[ 2048 ];
 
-	// If this is a reuse, then a valerie object will exist
-	valerie connection = mlt_properties_get_data( properties, "connection", NULL );
+	// If this is a reuse, then a mvcp object will exist
+	mvcp connection = mlt_properties_get_data( properties, "connection", NULL );
 
 	// Special case - we can get a doc too...
 	char *doc = mlt_properties_get( properties, "westley" );
@@ -119,19 +119,19 @@ static int consumer_start( mlt_consumer this )
 		// Initiate the connection if required
 		if ( connection == NULL )
 		{
-			valerie_parser parser = valerie_parser_init_remote( server, port );
-			connection = valerie_init( parser );
-			if ( valerie_connect( connection ) == valerie_ok )
+			mvcp_parser parser = mvcp_parser_init_remote( server, port );
+			connection = mvcp_init( parser );
+			if ( mvcp_connect( connection ) == mvcp_ok )
 			{
-				mlt_properties_set_data( properties, "connection", connection, 0, ( mlt_destructor )valerie_close, NULL );
-				mlt_properties_set_data( properties, "parser", parser, 0, ( mlt_destructor )valerie_parser_close, NULL );
+				mlt_properties_set_data( properties, "connection", connection, 0, ( mlt_destructor )mvcp_close, NULL );
+				mlt_properties_set_data( properties, "parser", parser, 0, ( mlt_destructor )mvcp_parser_close, NULL );
 			}
 			else
 			{
 				fprintf( stderr, "Unable to connect to the server at %s:%d\n", server, port );
 				mlt_properties_set_int( properties, "_error", 1 );
-				valerie_close( connection );
-				valerie_parser_close( parser );
+				mvcp_close( connection );
+				mvcp_parser_close( parser );
 				connection = NULL;
 			}
 		}
@@ -144,19 +144,19 @@ static int consumer_start( mlt_consumer this )
 				int error;
 
 				// Push the service
-				error = valerie_unit_push( connection, unit, command, service );
+				error = mvcp_unit_push( connection, unit, command, service );
 
 				// Report error
-				if ( error != valerie_ok )
+				if ( error != mvcp_ok )
 					fprintf( stderr, "Push failed on %s:%d %s u%d (%d)\n", server, port, command, unit, error );
 			}
 			else
 			{
 				// Push the service
-				int error = valerie_unit_receive( connection, unit, command, doc );
+				int error = mvcp_unit_receive( connection, unit, command, doc );
 
 				// Report error
-				if ( error != valerie_ok )
+				if ( error != mvcp_ok )
 					fprintf( stderr, "Send failed on %s:%d %s u%d (%d)\n", server, port, command, unit, error );
 			}
 		}
