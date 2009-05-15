@@ -1,6 +1,6 @@
 /*
- * client.h -- Valerie client demo
- * Copyright (C) 2002-2003 Ushodaya Enterprises Limited
+ * client.h -- MVCP client
+ * Copyright (C) 2002-2009 Ushodaya Enterprises Limited
  * Author: Charles Yates <charles.yates@pandora.be>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -18,12 +18,12 @@
  * Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef _DEMO_CLIENT_H_
-#define _DEMO_CLIENT_H_
+#ifndef _MVCP_CLIENT_H_
+#define _MVCP_CLIENT_H_
 
 #include <stdio.h>
 #include <pthread.h>
-#include <valerie/valerie.h>
+#include <mvcp/mvcp.h>
 
 /** Queue for unit playback
 */
@@ -38,7 +38,7 @@ typedef struct
 	char list[ 50 ][ PATH_MAX + NAME_MAX ];
 	int ignore;
 }
-*dv_demo_queue, dv_demo_queue_t;
+*client_queue, client_queue_t;
 
 /** Structure for storing app state. 
 */
@@ -46,21 +46,21 @@ typedef struct
 typedef struct
 {
 	int disconnected;
-	valerie_parser parser;
-	valerie dv;
-	valerie dv_status;
+	mvcp_parser parser;
+	mvcp dv;
+	mvcp dv_status;
 	int selected_unit;
 	char current_directory[ 512 ];
 	char last_directory[ 512 ];
 	int showing;
 	int terminated;
 	pthread_t thread;
-	dv_demo_queue_t queues[ MAX_UNITS ];
+	client_queue_t queues[ MAX_UNITS ];
 }
-*dv_demo, dv_demo_t;
+*client, client_t;
 
-extern dv_demo dv_demo_init( valerie_parser );
-extern void dv_demo_run( dv_demo );
-extern void dv_demo_close( dv_demo );
+extern client client_init( mvcp_parser );
+extern void client_run( client );
+extern void client_close( client );
 
 #endif

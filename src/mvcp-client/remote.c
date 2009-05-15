@@ -1,6 +1,6 @@
 /*
- * remote.c -- Remote Valerie client demo
- * Copyright (C) 2002-2003 Ushodaya Enterprises Limited
+ * remote.c -- Remote MVCP client
+ * Copyright (C) 2002-2009 Ushodaya Enterprises Limited
  * Author: Charles Yates <charles.yates@pandora.be>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
 #include <stdio.h>
 #include <stdint.h>
 
-#include <valerie/valerie_remote.h>
+#include <mvcp/mvcp_remote.h>
 
 /* Application header files */
 #include "client.h"
@@ -31,11 +31,11 @@
 /** Connect to a remote server.
 */
 
-static valerie_parser create_parser( )
+static mvcp_parser create_parser( )
 {
 	char server[ 132 ];
 	int port;
-	valerie_parser parser = NULL;
+	mvcp_parser parser = NULL;
 
 	printf( "Connecting to a Server\n\n" );
 
@@ -46,7 +46,7 @@ static valerie_parser create_parser( )
 		printf( "Port        [5250]: " );
 
 		if ( get_int( &port, 5250 ) != NULL )
-			parser = valerie_parser_init_remote( server, port );
+			parser = mvcp_parser_init_remote( server, port );
 	}
 
 	printf( "\n" );
@@ -59,14 +59,14 @@ static valerie_parser create_parser( )
 
 int main( int argc, char **argv )
 {
-	valerie_parser parser = create_parser( );
+	mvcp_parser parser = create_parser( );
 
 	if ( parser != NULL )
 	{
-		dv_demo demo = dv_demo_init( parser );
-		dv_demo_run( demo );
-		dv_demo_close( demo );
-		valerie_parser_close( parser );
+		client demo = client_init( parser );
+		client_run( demo );
+		client_close( demo );
+		mvcp_parser_close( parser );
 	}
 
 	return 0;

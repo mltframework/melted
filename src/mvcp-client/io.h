@@ -18,8 +18,8 @@
  * Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef _DEMO_IO_H_
-#define _DEMO_IO_H_
+#ifndef _MVCP_CLIENT_IO_H_
+#define _MVCP_CLIENT_IO_H_
 
 extern char *chomp( char * );
 extern char *trim( char * );
