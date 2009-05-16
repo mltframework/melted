@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 require 'mkmf'
-system( "ln -sf ../melted.i" )
-system( "swig -c++ -ruby -I../../melted++ `pkg-config mlt++ --cflags` melted.i" )
+system( "ln -sf ../mlt.i" )
+system( "swig -c++ -ruby -I../../melted++ `pkg-config mlt++ --cflags` mlt.i" )
 $CFLAGS += " -I../../melted++ `pkg-config mlt++ --cflags`"
 $LDFLAGS += " -L../../melted++ -lmelted++"
-create_makefile('melted')
+create_makefile('mlt')
 system( 'make' )

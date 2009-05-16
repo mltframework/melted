@@ -11,17 +11,17 @@ then
 	# Change this as needed
 	# export JAVA_INCLUDE="-I$path/include -I$path/include/linux"
 
-	ln -sf ../melted.i
+	ln -sf ../mlt.i
 
 	# Invoke swig
 	mkdir -p src_swig/org/mltframework
-	swig -c++ -I../../melted++ `pkg-config mlt++ --cflags` -java -outdir src_swig/org/mltframework -package org.mltframework melted.i || exit $?
+	swig -c++ -I../../melted++ `pkg-config mlt++ --cflags` -java -outdir src_swig/org/mltframework -package org.mltframework mlt.i || exit $?
 
 	# Compile the wrapper
-	g++ -D_GNU_SOURCE -c -rdynamic -pthread -I../../melted++ `pkg-config mlt++ --cflags` melted_wrap.cxx $JAVA_INCLUDE || exit $?
+	g++ -D_GNU_SOURCE -c -rdynamic -pthread -I../../melted++ `pkg-config mlt++ --cflags` mlt_wrap.cxx $JAVA_INCLUDE || exit $?
 	
 	# Create the module
-	gcc -shared melted_wrap.o -L../../melted++ -lmelted++ -o libmelted_java.so || exit $?
+	gcc -shared mlt_wrap.o -L../../melted++ -lmelted++ -o libmlt_java.so || exit $?
 
 	# Compile the test
 	javac `find src_swig -name '*.java'` || exit $?

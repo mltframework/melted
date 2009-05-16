@@ -9,16 +9,16 @@ then
 
 	[ ! -d "$PYTHON_INCLUDE" ] && echo python development missing && exit 1
 
-	ln -sf ../melted.i
+	ln -sf ../mlt.i
 
 	# Invoke swig
-	swig -c++ -I../../melted++ `pkg-config mlt++ --cflags` -python melted.i || exit $?
+	swig -c++ -I../../melted++ `pkg-config mlt++ --cflags` -python mlt.i || exit $?
 
 	# Compile the wrapper
-	g++ -fPIC -D_GNU_SOURCE -c -rdynamic -pthread -I../../melted++ `pkg-config mlt++ --cflags` -I$PYTHON_INCLUDE melted_wrap.cxx || exit $?
+	g++ -fPIC -D_GNU_SOURCE -c -rdynamic -pthread -I../../melted++ `pkg-config mlt++ --cflags` -I$PYTHON_INCLUDE mlt_wrap.cxx || exit $?
 
 	# Create the module
-	gcc -shared melted_wrap.o -L../../melted++ -lmelted++ -o _melted.so || exit $?
+	gcc -shared mlt_wrap.o -L../../melted++ -lmelted++ -o _mlt.so || exit $?
 else
 	echo Python not installed.
 	exit 1

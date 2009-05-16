@@ -18,7 +18,7 @@
  * Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-%module melted
+%module mlt
 %include "carrays.i"
 %array_class(unsigned char, unsignedCharArray);
 
@@ -32,6 +32,31 @@
  */
 
 namespace Mlt {
+%newobject Factory::init( const char * );
+%newobject Factory::producer( Profile &, char *, char * );
+%newobject Factory::filter( Profile &, char *, char * );
+%newobject Factory::transition( Profile &, char *, char * );
+%newobject Factory::consumer( Profile &, char *, char * );
+%newobject Properties::listen( char *, void *, mlt_listener );
+%newobject Service::producer( );
+%newobject Service::consumer( );
+%newobject Service::get_frame( int );
+%newobject Service::filter( int );
+%newobject Producer::filter( int );
+%newobject Producer::cut( int, int );
+%newobject Playlist::current( );
+%newobject Playlist::clip_info( int );
+%newobject Playlist::get_clip( int );
+%newobject Multitrack::track( int );
+%newobject Tractor::multitrack( );
+%newobject Tractor::field( );
+%newobject Tractor::track( int );
+%newobject Frame::get_original_producer( );
+%newobject Repository::consumers( );
+%newobject Repository::filters( );
+%newobject Repository::producers( );
+%newobject Repository::transitions( );
+%newobject Repository::metadata( mlt_service_type, const char * );
 %newobject Melted::execute( char * );
 %newobject Melted::received( char *, char * );
 %newobject Melted::push( char *, Service & );
@@ -41,6 +66,26 @@ namespace Mlt {
 /** Classes to wrap.
  */
 
+%include <framework/mlt_types.h>
+%include <framework/mlt_factory.h>
+%include <MltFactory.h>
+%include <MltRepository.h>
+%include <MltEvent.h>
+%include <MltProperties.h>
+%include <MltFrame.h>
+%include <MltGeometry.h>
+%include <MltService.h>
+%include <MltProducer.h>
+%include <MltProfile.h>
+%include <MltPlaylist.h>
+%include <MltConsumer.h>
+%include <MltFilter.h>
+%include <MltTransition.h>
+%include <MltMultitrack.h>
+%include <MltField.h>
+%include <MltTractor.h>
+%include <MltParser.h>
+%include <MltFilteredConsumer.h>
 %include <MltMelted.h>
 %include <MltResponse.h>
 
