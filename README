@@ -1,12 +1,12 @@
-MLT/Miracle README
-------------------
+MLT Melted README
+-----------------
 
 	Sponsored by Ushodaya Enterprises Limited
 	Written by Charles Yates <charles.yates@pandora.be>
 	and Dan Dennedy <dan@dennedy.org>
 
 	MLT is a LGPL multimedia framework designed for television broadcasting,
-	and Miracle is a GPL multi-unit video playout server with realtime
+	and Melted is a GPL multi-unit video playout server with realtime
 	effects.
 
 	This document provides a quick reference for the minimal configuration,
@@ -37,18 +37,6 @@ Compilation
 	    make
 
 	to compile the system.
-
-
-Testing
--------
-
-	To execute the mlt tools without installation, or to test a new version
-	on a system with an already installed mlt version, you should run:
-
-	    . setenv
-
-	NB: This applies to your current shell only and it assumes a bash or 
-	regular bourne shell is in use.
 
 
 Installation

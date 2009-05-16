@@ -1,8 +1,8 @@
-Valerie API Documentation 
+MLT libmvcp API Documentation 
 
-Copyright (C) 2004 Ushodaya Enterprised Limited 
+Copyright (C) 2004-2009 Ushodaya Enterprised Limited 
 Author: Charles Yates <charles.yates@pandora.be> 
-Last Revision: 2004-03-20
+Last Revision: 2009-05-15
 
 
 TABLE OF CONTENTS
@@ -18,7 +18,7 @@ TABLE OF CONTENTS
 	1.4. Closing the Parser
 	2. The High Level Parser Wrapper
 	2.1. Connecting
-	2.2. valerie_error_code
+	2.2. mvcp_error_code
 	2.3. Using the High Level Wrapper
 	2.4. Obtaining Directory Contents
 	2.5. Obtaining the Node List
@@ -30,7 +30,7 @@ TABLE OF CONTENTS
 	2.11. Examples
 	3. The Low Level Parser API
 	3.1. Executing a Command
-	3.2. Interpreting valerie_response
+	3.2. Interpreting mvcp_response
 	3.3. Accessing Unit Status
 	APPENDIX A - COMPILATION AND LINKING
 	APPENDIX B - COMPLETE HIGH LEVEL PARSER WRAPPER API LISTING
@@ -41,14 +41,14 @@ TABLE OF CONTENTS
 0. Overview 
 -----------
 
-	This document details how applications interface to DVCP functionality. 
+	This document details how applications interface to MVCP functionality. 
 
 
 0.1. Intended Audience
 ----------------------
 
-	This document draws heavily upon the DVCP design (1) and assumes a basic 
-	knowledge of the functionality provided by the DVCP core. 
+	This document draws heavily upon the MVCP design (1) and assumes a basic 
+	knowledge of the functionality provided by the MVCP core. 
 
 	It is aimed at developers who wish to use or maintain the API.
 
@@ -57,21 +57,21 @@ TABLE OF CONTENTS
 ----------------
 
 	The API is designed to allow client applications the ability to communicate
-	to a standalone miracle server or entirely embed the DVCP core in an 
+	to a standalone melted server or entirely embed the MVCP core in an 
 	instance of a client application. 
 
 	The distinction between the two is defined by the construction of the 
 	'parser'. 
 
-	This 'parser' can be used to issue DVCP commands and receive responses and 
+	This 'parser' can be used to issue MVCP commands and receive responses and 
 	a 'high level parser wrapper' is provided to simplify the usage and 
-	decouple the application from the DVCP command set.
+	decouple the application from the MVCP command set.
 
 
 1. Definition of a Parser 
 ------------------------- 
 
-	The parser provides a low level API which allows text DVCP commands to be 
+	The parser provides a low level API which allows text MVCP commands to be 
 	executed with responses being returned to the caller. Commands and 
 	responses are ASCII formatted text. 
 
@@ -81,7 +81,7 @@ TABLE OF CONTENTS
 	executes them. 
 
 	The remote parser is a network abstraction that forwards commands to a 
-	miracle instance that hosts a local parser. 
+	melted instance that hosts a local parser. 
 
 
 1.1. Construction of a Local Parser 
@@ -89,11 +89,11 @@ TABLE OF CONTENTS
 
 	To construct a local parser you must have:
 
-	    #include <miracle/miracle_local.h>
+	    #include <melted/melted_local.h>
 
 	and code to initialise the parser is as follows:
 
-	    valerie_parser parser = miracle_parser_init_local( );
+	    mvcp_parser parser = melted_parser_init_local( );
 
 	See Appendix A for compilation and linking details.
 
@@ -103,11 +103,11 @@ TABLE OF CONTENTS
 
 	To construct a remote parser you must have:
 
-	    #include <valerie/valerie_remote.h>
+	    #include <mvcp/mvcp_remote.h>
 
 	and code to initialise the parser is as follows:
 
-	    valerie_parser parser = valerie_parser_init_remote( "server", port );
+	    mvcp_parser parser = mvcp_parser_init_remote( "server", port );
 
 	See Appendix A for compilation and linking details.
 
@@ -136,20 +136,20 @@ TABLE OF CONTENTS
 	Regardless of use, it is the constructors responsibility to close the 
 	parser before it goes out of scope. This is done via:
 
-	    valerie_parser_close( parser );
+	    mvcp_parser_close( parser );
 
 
 2. The High Level Parser Wrapper
 --------------------------------
 
-	The recommended way to access the parser, is via the valerie API. To use 
+	The recommended way to access the parser, is via the mvcp API. To use 
 	this API, you must have:
 
-	    #include <valerie/valerie.h>
+	    #include <mvcp/mvcp.h>
 
 	and code to construct the wrapper is:
 
-	    valerie dv = valerie_init( parser );
+	    mvcp client = mvcp_init( parser );
 
 	Note that either remote or local parsers can be used here and there is no 
 	difference in usage, though some error returns will not be applicable to 
@@ -158,14 +158,14 @@ TABLE OF CONTENTS
 	It is recommended that applications honour and deal with the error returns 
 	of both as this allows applications to interchange parsers.
 
-	Also note that valerie is not threadsafe, so you should not use the same 
+	Also note that mvcp is not threadsafe, so you should not use the same 
 	structure in multiple threads. The correct solution to this is to create a
-	valerie per thread - you may safely use the same parser for each thread ie:
+	mvcp per thread - you may safely use the same parser for each thread ie:
 
-	    /* valerie for the application */
-	    valerie dv = valerie_init( parser );
-	    /* valerie for the status handling thread. */
-	    valerie dv_status = valerie_init( parser );
+	    /* mvcp for the application */
+	    mvcp client = mvcp_init( parser );
+	    /* mvcp for the status handling thread. */
+	    mvcp client_status = mvcp_init( parser );
 
 	For the purposes of simplification, the remainder of this section assumes 
 	that a remote parser is in use. 
@@ -176,65 +176,65 @@ TABLE OF CONTENTS
 
 	Once constructed, the next thing to do is 'connect':
 
-	    valerie_error_code error = valerie_connect( dv );
+	    mvcp_error_code error = mvcp_connect( client );
 
 	This function call initialises the parser (ie: if it's remote, it 
 	establishes a connection to the server, or if it's local, it initialises 
 	the state of the units and supporting objects).
 
-	Note that if you have multiple valerie instances on the same parser you 
+	Note that if you have multiple mvcp instances on the same parser you 
 	should only connect one of the instances.
 
 
-2.2. valerie_error_code
+2.2. mvcp_error_code
 ----------------------
 
-	All but a couple of the functions that make up the valerie API return a 
-	valerie_error_code.
+	All but a couple of the functions that make up the mvcp API return a 
+	mvcp_error_code.
 
 	These are defined as follows:
 
-	    valerie_ok = 0,
-	    valerie_malloc_failed,
-	    valerie_unknown_error,
-	    valerie_no_response,
-	    valerie_invalid_command,
-	    valerie_server_timeout,
-	    valerie_missing_argument,
-	    valerie_server_unavailable,
-	    valerie_unit_creation_failed,
-	    valerie_unit_unavailable,
-	    valerie_invalid_file,
-	    valerie_invalid_position
+	    mvcp_ok = 0,
+	    mvcp_malloc_failed,
+	    mvcp_unknown_error,
+	    mvcp_no_response,
+	    mvcp_invalid_command,
+	    mvcp_server_timeout,
+	    mvcp_missing_argument,
+	    mvcp_server_unavailable,
+	    mvcp_unit_creation_failed,
+	    mvcp_unit_unavailable,
+	    mvcp_invalid_file,
+	    mvcp_invalid_position
 
-	In most cases, it is sufficient to check on a return of valerie_ok.
+	In most cases, it is sufficient to check on a return of mvcp_ok.
 
 	To obtain a textual description of a particular error, you can use:
 
-	    char *valerie_error_description( valerie_error_code );
+	    char *mvcp_error_description( mvcp_error_code );
 
 
 2.3. Using the High Level Wrapper
 ---------------------------------
 
-	The following code snippet assumes that dv is an initialised and connected 
-	valerie structure:
+	The following code snippet assumes that client is an initialised and connected 
+	mvcp structure:
 
-	    valerie_error_code error = valerie_unit_play( dv, 0 );
-	    if ( error == valerie_ok )
+	    mvcp_error_code error = mvcp_unit_play( client, 0 );
+	    if ( error == mvcp_ok )
 	        fprintf( stderr, "Unit 0 is now playing\n" );
 	    else
 	        fprintf( stderr, "Play on unit 0 failed: %s\n",
-	                     valerie_error_description( error ) );
+	                     mvcp_error_description( error ) );
 
-	The complete interface to valerie is listed in Appendix B of this document.
+	The complete interface to mvcp is listed in Appendix B of this document.
 
 
 2.4. Obtaining Directory Contents
 --------------------------------
 
 	To obtain a list of files and subdirectories in a given directory relative 
-	to the ROOT property of the server, DVCP provides the CLS command. 
+	to the ROOT property of the server, MVCP provides the CLS command. 
 
 	A valid execution of CLS would be something like:
 
@@ -253,23 +253,23 @@ TABLE OF CONTENTS
 	of a subdirectory and the 3rd and 4th line lists two files that happen to 
 	exist in the directory.
 
-	valerie provides a high level view on this which automatically parses the 
-	response from the server correctly via the valerie_dir structures and 
+	mvcp provides a high level view on this which automatically parses the 
+	response from the server correctly via the mvcp_dir structures and 
 	related functions. 
 
 	An example of use is as follows:
 	
-	    valerie_dir dir = valerie_dir_init( dv, "/Stuff" );
-	    valerie_error_code error = valerie_dir_get_error_code( dir );
-	    if ( error == valerie_ok )
+	    mvcp_dir dir = mvcp_dir_init( client, "/Stuff" );
+	    mvcp_error_code error = mvcp_dir_get_error_code( dir );
+	    if ( error == mvcp_ok )
 	    {
-	        if ( valerie_dir_count( dir ) > 0 )
+	        if ( mvcp_dir_count( dir ) > 0 )
 	        {
-	            valerie_dir_entry_t entry;
+	            mvcp_dir_entry_t entry;
 	            int index = 0;
-	            for ( index = 0; index < valerie_dir_count( dir ); index ++ )
+	            for ( index = 0; index < mvcp_dir_count( dir ); index ++ )
 	            {
-	                valerie_dir_get( dir, index, &entry );
+	                mvcp_dir_get( dir, index, &entry );
 	                if ( entry.dir )
 	                    printf( "<%s>\n", entry.name );
 	                else
@@ -284,15 +284,15 @@ TABLE OF CONTENTS
 	    else
 	    {
 	        fprintf( stderr, "Directory listing failed: %s\n",
-	                         valerie_error_description( error ) );
+	                         mvcp_error_description( error ) );
 	    }
-	    valerie_dir_close( dir );
+	    mvcp_dir_close( dir );
 
 	Note that entry.name provides the name of the file or directory without the 
 	directory prefix. As a convenience, entry.full provides the prefixed name, 
 	so you could subsequently use:
 
-	    error = valerie_unit_load( dv, 0, entry.full );
+	    error = mvcp_unit_load( client, 0, entry.full );
 
 	to load unit 0 with an entry.
 
@@ -300,12 +300,12 @@ TABLE OF CONTENTS
 2.5. Obtaining the Node List
 ----------------------------
 
-	Currently not defined by miracle.
+	Currently not defined by melted.
 
 2.6. Obtaining the Unit List
 ----------------------------
 
-	To obtain a list of defined units, DVCP provides the ULS command.
+	To obtain a list of defined units, MVCP provides the ULS command.
 	
 	A valid execution of ULS would be:
 	
@@ -321,23 +321,23 @@ TABLE OF CONTENTS
 	The fields of each record in the response dictate unit, node, mlt consumer and 
 	online status respectively.
 	
-	valerie provides a high level view on this which automatically parses the 
-	response from the server correctly via the valerie_units structures and 
+	mvcp provides a high level view on this which automatically parses the 
+	response from the server correctly via the mvcp_units structures and 
 	related functions. 
 	
 	An example of use is as follows:
 	
-	    valerie_units units = valerie_units_init( dv );
-	    valerie_error_code error = valerie_units_get_error_code( units );
-	    if ( error == valerie_ok )
+	    mvcp_units units = mvcp_units_init( client );
+	    mvcp_error_code error = mvcp_units_get_error_code( units );
+	    if ( error == mvcp_ok )
 	    {
-	        if ( valerie_units_count( units ) > 0 )
+	        if ( mvcp_units_count( units ) > 0 )
 	        {
-	            valerie_unit_entry_t entry;
+	            mvcp_unit_entry_t entry;
 	            int index = 0;
-	            for ( index = 0; index < valerie_units_count( units ); index ++ )
+	            for ( index = 0; index < mvcp_units_count( units ); index ++ )
 	            {
-	                valerie_units_get( units, index, &entry );
+	                mvcp_units_get( units, index, &entry );
 	                printf( "U%d %02d %s %s\n", 
 	                        entry.unit,
 	                        entry.node,
@@ -353,9 +353,9 @@ TABLE OF CONTENTS
 	    else
 	    {
 	        fprintf( stderr, "Unit listing failed: %s\n",
-	                         valerie_error_description( error ) );
+	                         mvcp_error_description( error ) );
 	    }
-	    valerie_units_close( units );
+	    mvcp_units_close( units );
 	
 
 2.7. Unit Status Information
@@ -363,7 +363,7 @@ TABLE OF CONTENTS
 
 	There are two methods for a client to obtain unit status information.
 	
-	The first is via the DVCP USTA command, which would normally be accessed 
+	The first is via the MVCP USTA command, which would normally be accessed 
 	via: 
 
 	    USTA U0
@@ -396,12 +396,12 @@ TABLE OF CONTENTS
 	* Playlist generation
 	* Clip index
 	
-	Again, valerie provides a high level means for obtaining this via the 
-	valerie_unit_status function and valerie_status structures:
+	Again, mvcp provides a high level means for obtaining this via the 
+	mvcp_unit_status function and mvcp_status structures:
 	
-	    valerie_status_t status;
-	    valerie_error_code error = valerie_unit_status( dv, 0, &status );
-	    if ( error == valerie_ok )
+	    mvcp_status_t status;
+	    mvcp_error_code error = mvcp_unit_status( client, 0, &status );
+	    if ( error == mvcp_ok )
 	    {
 	        switch( status.status )
 	        {
@@ -433,32 +433,32 @@ TABLE OF CONTENTS
 	    else
 	    {
 	        fprintf( stderr, "Unit status failed: %s\n",
-	                         valerie_error_description( error ) );
+	                         mvcp_error_description( error ) );
 	    }
 	
 	The second approach for obtaining a units status is via automatic 
 	notification.
 	
-	This is done via the valerie_notifier API. To obtain the notifier from the 
+	This is done via the mvcp_notifier API. To obtain the notifier from the 
 	high level API, you can use:
 	
-	    valerie_notifier notifier = valerie_get_notifier( dv );
+	    mvcp_notifier notifier = mvcp_get_notifier( client );
 	
 	To obtain the last status associated to a unit, you can use:
 	
 	    int unit = 1;
-	    valerie_status_t status;
-	    valerie_notifier_get( notifier, &status, unit );
+	    mvcp_status_t status;
+	    mvcp_notifier_get( notifier, &status, unit );
 	
 	To wait for the next status from any unit, you can use:
 	
-	    valerie_notifier_wait( notifier, &status );
+	    mvcp_notifier_wait( notifier, &status );
 	
 	If you wish to trigger the action associated to your applications wait 
 	handling of a particular unit, you can use:
 	
-	    valerie_notifier_get( notifier, &status, unit );
-	    valerie_notifier_put( notifier, &status );
+	    mvcp_notifier_get( notifier, &status, unit );
+	    mvcp_notifier_put( notifier, &status );
 	
 	See Examples below for details on this.
 
@@ -523,20 +523,20 @@ TABLE OF CONTENTS
 	* set in/out points allows you to modify clip in and out points
 	
 	Backward compatability has been maintained by the addition of a clip-aware 
-	family of APIs which have the naming convention of valerie_unit_clip_*.
+	family of APIs which have the naming convention of mvcp_unit_clip_*.
 	
 	These are listed in Appendix B.
 	
 	The following shows an example of obtaining the clips queued on unit 0:
 	
-	    valerie_list list = valerie_list_init( dv, 0 );
-	    valerie_list_entry_t entry;
+	    mvcp_list list = mvcp_list_init( client, 0 );
+	    mvcp_list_entry_t entry;
 	    int index;
 	    
 	    printf( "Generation = %d\n", list->generation );
-	    for ( index = 0; index < valerie_list_count( list ); index ++ )
+	    for ( index = 0; index < mvcp_list_count( list ); index ++ )
 	    {
-	        valerie_list_get( list, index, &entry );
+	        mvcp_list_get( list, index, &entry );
 	        printf( "%d %s %d %d %d %d\n", 
 	                entry.clip, 
 	                entry.full,
@@ -545,24 +545,24 @@ TABLE OF CONTENTS
 	                entry.max,
 	                entry.size );
 	    }
-	    valerie_list_close( list );
+	    mvcp_list_close( list );
 	    
 	To load a clip on unit 0:
 	
-	    valerie_unit_load( dv, 0, "/path/clip.dv" );
+	    mvcp_unit_load( client, 0, "/path/clip.dv" );
 	    
 	To append a clip on unit 0:
 	
-	    valerie_unit_append( dv, 0, "/path/clip.dv", -1, -1 );
+	    mvcp_unit_append( client, 0, "/path/clip.dv", -1, -1 );
 	    
 	Note that the last two arguments specify the in and out points of the clip
 	with -1 denoting dfaults of the entirety of the file.
 	
 	To insert a clip at position 0 on unit 0, we can use the following:
 	
-	    valerie_unit_clip_insert( dv, 0, clip_absolute, 0, "/path/clip.dv", -1, -1 );
+	    mvcp_unit_clip_insert( client, 0, clip_absolute, 0, "/path/clip.dv", -1, -1 );
 	    
-	The 3rd and 4th arguments here are common to all the valerie_unit_clip functions.
+	The 3rd and 4th arguments here are common to all the mvcp_unit_clip functions.
 	They take the form of either [clip_absolute, n] to indicate an absolute clip
 	index, or [clip_relative, n] to indicate a clip index relative to the 
 	currently playing clip.
@@ -570,35 +570,35 @@ TABLE OF CONTENTS
 	So, to insert a clip immediately before the currently playing clip, we can
 	use:
 	
-	    valerie_unit_clip_insert( dv, 0, clip_relative, -1, "/path/clip.dv", -1, -1 );
+	    mvcp_unit_clip_insert( client, 0, clip_relative, -1, "/path/clip.dv", -1, -1 );
 	    
 	To move the current clip to the next position in the list:
 	
-	    valerie_unit_clip_move( dv, 0, clip_relative, 0, clip_relative, 1 );
+	    mvcp_unit_clip_move( client, 0, clip_relative, 0, clip_relative, 1 );
 	    
 	To remove a specific clip:
 	
-	    valerie_unit_clip_remove( dv, 0, clip_absolute, index );
+	    mvcp_unit_clip_remove( client, 0, clip_absolute, index );
 	    
 	To remove all but the currently playing clip:
 	
-	    valerie_unit_clean( dv, 0 );
+	    mvcp_unit_clean( client, 0 );
 	    
 	To goto the first frame in the first clip, you can use:
 	
-	    valerie_unit_clip_goto( dv, 0, clip_absolute, 0, 0 );
+	    mvcp_unit_clip_goto( client, 0, clip_absolute, 0, 0 );
 	    
 	To set the in and out points on the current clip:
 	
-	    valerie_unit_clip_set_in( dv, 0, clip_relative, 0, 0 );
-	    valerie_unit_clip_set_out( dv, 0, clip_relative, 0, 1000 );
+	    mvcp_unit_clip_set_in( client, 0, clip_relative, 0, 0 );
+	    mvcp_unit_clip_set_out( client, 0, clip_relative, 0, 1000 );
 	    
 	A more complete example of use of the server side can queuing can be found
 	at:
 	
 	    http://users.pandora.be/acp/rugen
 	    
-	The demo client provided with valerie is used for retaining backward 
+	The demo client provided with mvcp is used for retaining backward 
 	compatability with the client side queuing API.
 
 	
@@ -610,33 +610,34 @@ TABLE OF CONTENTS
 	
 	The methods are provided via a pair of high level methods:
 	
-	    valerie_error_code error = valerie_execute( dv, 1024, "USTA U%d", unit );
-	    valerie_response response = valerie_get_last_response( dv );
+	    mvcp_error_code error = mvcp_execute( client, 1024, "USTA U%d", unit );
+	    mvcp_response response = mvcp_get_last_response( client );
 	    int index = 0;
-	    for ( index = 0; index < valerie_response_count( response ); index ++ )
-	        printf( "%d: %s\n", index, valerie_response_get_line( response,index ) );
+	    for ( index = 0; index < mvcp_response_count( response ); index ++ )
+	        printf( "%d: %s\n", index, mvcp_response_get_line( response,index ) );
 	
-	More details on the valerie_response structure can be found in section 3 of this
+	More details on the mvcp_response structure can be found in section 3 of this
 	document.
 	
 
 2.10. Cleaning up
 -----------------
 
-	Before the valerie and parser go out of scope, you need to run:
+	Before the mvcp and parser go out of scope, you need to run:
 	
-	    valerie_close( dv );
-	    valerie_parser_close( parser );
+	    mvcp_close( client );
+	    mvcp_parser_close( parser );
 	
-	Note that you should close all valerie instances before closing the parser.
+	Note that you should close all mvcp instances before closing the parser.
 	
 
 2.11. Examples
 --------------
 
-	Please refer to albino and humperdink source for examples provided with
-	the project. Additional examples can be found via google with gdv1394 and
-	poldo.
+	Please refer to mvcp-console and mvcp-client source for examples provided with
+	the project. Rugen is another example:
+ 
+		http://users.pandora.be/acp/rugen
 
 
 3. The Low Level Parser API
@@ -653,49 +654,49 @@ TABLE OF CONTENTS
 ------------------------
 
 	All commands can be executed via the single variable argument function
-	valerie_parser_executef and this function returns a valerie_response, ie:
+	mvcp_parser_executef and this function returns a mvcp_response, ie:
 	
-	    valerie_response response = valerie_parser_executef( parser, "CLS \"%s\"", dir );
+	    mvcp_response response = mvcp_parser_executef( parser, "CLS \"%s\"", dir );
 	
 	Note that no carriage return/line feed is required (adding this is 
 	erroneous).
 	
 	It is the receiver of the response who is responsible for closing it.
 	
-	    valerie_response_close( response );
+	    mvcp_response_close( response );
 	
 
-3.2. Interpreting valerie_response
+3.2. Interpreting mvcp_response
 -----------------------------
 
 	The response received can be NULL, but it is safe to call:
 	
-	    int error = valerie_response_get_error_code( response );
+	    int error = mvcp_response_get_error_code( response );
 	
 	which will return:
 	
 	* -1 if response is NULL, 
 	* -2 if there is no content to the response, 
-	* 0 if the responses first line does not correspond to a valid DVCP response
-	* or the DVCP protocol error code returned on the first line of the response
+	* 0 if the responses first line does not correspond to a valid MVCP response
+	* or the MVCP protocol error code returned on the first line of the response
 	
-	A simple use of a valerie_response structure is as follows:
+	A simple use of a mvcp_response structure is as follows:
 	
-	    valerie_response response = valerie_parser_executef( parser, "CLS \"%s\"", dir );
-	    int error = valerie_response_get_error_code( response );
+	    mvcp_response response = mvcp_parser_executef( parser, "CLS \"%s\"", dir );
+	    int error = mvcp_response_get_error_code( response );
 	    if ( error >= 0 )
 	    {
 	        int index = 0;
-	        for ( index = 0; index < valerie_response_count( response ); index ++ )
-	            printf( "%3d: %s\n", index, valerie_response_get_line( response, index ) );
+	        for ( index = 0; index < mvcp_response_count( response ); index ++ )
+	            printf( "%3d: %s\n", index, mvcp_response_get_line( response, index ) );
 	    }
 	    else
 	    {
 	        /* interpret error */
 	    }
-	    valerie_response_close( response );
+	    mvcp_response_close( response );
 	
-	Note that it is safe to call valerie_response_close regardless of the error 
+	Note that it is safe to call mvcp_response_close regardless of the error 
 	condition indicated.
 	
 
@@ -703,8 +704,8 @@ TABLE OF CONTENTS
 --------------------------
 
 	As with the high level parser, there are two alternatives to obtain unit 
-	status information - either via the USTA DVCP command or via the 
-	valerie1394_notifier.
+	status information - either via the USTA MVCP command or via the 
+	mvcp_notifier.
 	
 	The latter is the recommended way for any applications which wish to extract
 	meaningful information from the status while avoiding the requirement to 
@@ -712,19 +713,19 @@ TABLE OF CONTENTS
 	
 	The notifier can be obtained by:
 	
-	valerie_notifier notifier = valerie_parser_get_notifier( parser );
+	mvcp_notifier notifier = mvcp_parser_get_notifier( parser );
 	
 	The use of the notifier with the low level parser is identical to that 
 	dictated in Section 2 - to obtain the last status associated to a unit, 
 	you can use: 
 
 	    int unit = 1;
-	    valerie_status_t status;
-	    valerie_notifier_get( notifier, &status, unit );
+	    mvcp_status_t status;
+	    mvcp_notifier_get( notifier, &status, unit );
 	    
 	To wait for the next status from any unit, you can use:
 	
-	    valerie_notifier_wait( notifier, &status );
+	    mvcp_notifier_wait( notifier, &status );
 	
 
 APPENDIX A - COMPILATION AND LINKING
@@ -738,11 +739,11 @@ APPENDIX A - COMPILATION AND LINKING
 
 	Linking flags for a client are:
 
-	    -L <prefix>/lib/ -lvalerie
+	    -L <prefix>/lib/ -lmvcp
 
 	Or for a local parser:
 
-	    -L <prefix>/lib/ -lmiracle
+	    -L <prefix>/lib/ -lmelted
 
 	Note that you never need both libs.
 
@@ -750,112 +751,112 @@ APPENDIX A - COMPILATION AND LINKING
 APPENDIX B - COMPLETE HIGH LEVEL PARSER WRAPPER API LISTING
 -----------------------------------------------------------
 
-	valerie valerie_init( valerie_parser );
+	mvcp mvcp_init( mvcp_parser );
 	
-	valerie_error_code valerie_connect( valerie );
+	mvcp_error_code mvcp_connect( mvcp );
 	
-	valerie_error_code valerie_set( valerie, char *, char * );
-	valerie_error_code valerie_get( valerie, char *, char *, int );
+	mvcp_error_code mvcp_set( mvcp, char *, char * );
+	mvcp_error_code mvcp_get( mvcp, char *, char *, int );
 	
-	valerie_error_code valerie_unit_add( valerie, char * );
-	valerie_error_code valerie_unit_load( valerie, int, char * );
-	valerie_error_code valerie_unit_load_clipped( valerie,int,char *,long,long );
-	valerie_error_code valerie_unit_load_back( valerie, int, char * );
-	valerie_error_code valerie_unit_load_back_clipped(valerie,int,char *,long,long)
-	valerie_error_code valerie_unit_play( valerie, int );
-	valerie_error_code valerie_unit_play_at_speed( valerie, int, int );
-	valerie_error_code valerie_unit_stop( valerie, int );
-	valerie_error_code valerie_unit_pause( valerie, int );
-	valerie_error_code valerie_unit_rewind( valerie, int );
-	valerie_error_code valerie_unit_fast_forward( valerie, int );
-	valerie_error_code valerie_unit_step( valerie, int, int );
-	valerie_error_code valerie_unit_goto( valerie, int, int );
-	valerie_error_code valerie_unit_set_in( valerie, int, int );
-	valerie_error_code valerie_unit_set_out( valerie, int, int );
-	valerie_error_code valerie_unit_clear_in( valerie, int );
-	valerie_error_code valerie_unit_clear_out( valerie, int );
-	valerie_error_code valerie_unit_clear_in_out( valerie, int );
-	valerie_error_code valerie_unit_set( valerie, int, char *, char * );
-	valerie_error_code valerie_unit_get( valerie, int, char * );
+	mvcp_error_code mvcp_unit_add( mvcp, char * );
+	mvcp_error_code mvcp_unit_load( mvcp, int, char * );
+	mvcp_error_code mvcp_unit_load_clipped( mvcp,int,char *,long,long );
+	mvcp_error_code mvcp_unit_load_back( mvcp, int, char * );
+	mvcp_error_code mvcp_unit_load_back_clipped(mvcp,int,char *,long,long)
+	mvcp_error_code mvcp_unit_play( mvcp, int );
+	mvcp_error_code mvcp_unit_play_at_speed( mvcp, int, int );
+	mvcp_error_code mvcp_unit_stop( mvcp, int );
+	mvcp_error_code mvcp_unit_pause( mvcp, int );
+	mvcp_error_code mvcp_unit_rewind( mvcp, int );
+	mvcp_error_code mvcp_unit_fast_forward( mvcp, int );
+	mvcp_error_code mvcp_unit_step( mvcp, int, int );
+	mvcp_error_code mvcp_unit_goto( mvcp, int, int );
+	mvcp_error_code mvcp_unit_set_in( mvcp, int, int );
+	mvcp_error_code mvcp_unit_set_out( mvcp, int, int );
+	mvcp_error_code mvcp_unit_clear_in( mvcp, int );
+	mvcp_error_code mvcp_unit_clear_out( mvcp, int );
+	mvcp_error_code mvcp_unit_clear_in_out( mvcp, int );
+	mvcp_error_code mvcp_unit_set( mvcp, int, char *, char * );
+	mvcp_error_code mvcp_unit_get( mvcp, int, char * );
 	
-	valerie_error_code valerie_unit_status( valerie, int, valerie_status );
-	valerie_notifier valerie_get_notifier( valerie );
+	mvcp_error_code mvcp_unit_status( mvcp, int, mvcp_status );
+	mvcp_notifier mvcp_get_notifier( mvcp );
 	
-	valerie_dir valerie_dir_init( valerie, char * );
-	valerie_error_code valerie_dir_get( valerie_dir, int, valerie_dir_entry );
-	int valerie_dir_count( valerie_dir );
-	void valerie_dir_close( valerie_dir );
+	mvcp_dir mvcp_dir_init( mvcp, char * );
+	mvcp_error_code mvcp_dir_get( mvcp_dir, int, mvcp_dir_entry );
+	int mvcp_dir_count( mvcp_dir );
+	void mvcp_dir_close( mvcp_dir );
 	
-	valerie_nodes valerie_nodes_init( valerie );
-	valerie_error_code valerie_nodes_get(valerie_nodes,int,valerie_node_entry);
-	int valerie_nodes_count( valerie_nodes );
-	void valerie_nodes_close( valerie_nodes );
+	mvcp_nodes mvcp_nodes_init( mvcp );
+	mvcp_error_code mvcp_nodes_get(mvcp_nodes,int,mvcp_node_entry);
+	int mvcp_nodes_count( mvcp_nodes );
+	void mvcp_nodes_close( mvcp_nodes );
 	
-	valerie_units valerie_units_init( valerie );
-	valerie_error_code valerie_units_get(valerie_units,int,valerie_unit_entry);
-	int valerie_units_count( valerie_units );
-	void valerie_units_close( valerie_units );
+	mvcp_units mvcp_units_init( mvcp );
+	mvcp_error_code mvcp_units_get(mvcp_units,int,mvcp_unit_entry);
+	int mvcp_units_count( mvcp_units );
+	void mvcp_units_close( mvcp_units );
 	
-	valerie_response valerie_get_last_response( valerie );
+	mvcp_response mvcp_get_last_response( mvcp );
 	
-	valerie_error_code valerie_execute( valerie, size_t, char *, ... );
+	mvcp_error_code mvcp_execute( mvcp, size_t, char *, ... );
 	
-	void valerie_close( valerie );
+	void mvcp_close( mvcp );
 	
 	Notifier Functions
 	------------------
 	
-	void valerie_notifier_get( valerie_notifier, valerie_status, int );
-	void valerie_notifier_put( valerie_notifier, valerie_status );
-	int valerie_notifier_wait( valerie_notifier, valerie_status );
-	void valerie_notifier_close( valerie_notifier );
+	void mvcp_notifier_get( mvcp_notifier, mvcp_status, int );
+	void mvcp_notifier_put( mvcp_notifier, mvcp_status );
+	int mvcp_notifier_wait( mvcp_notifier, mvcp_status );
+	void mvcp_notifier_close( mvcp_notifier );
 	
 	Server Side Queuing
 	-------------------
 
-	valerie_list valerie_list_init( valerie, int )
-	valerie_error_code valerie_list_get_error_code( valerie_list )
-	valerie_error_code valerie_list_get( valerie_list, int, valerie_list_entry )
-	int valerie_list_count( valerie_list )
-	void valerie_list_close( valerie_list )
+	mvcp_list mvcp_list_init( mvcp, int )
+	mvcp_error_code mvcp_list_get_error_code( mvcp_list )
+	mvcp_error_code mvcp_list_get( mvcp_list, int, mvcp_list_entry )
+	int mvcp_list_count( mvcp_list )
+	void mvcp_list_close( mvcp_list )
 	
-	valerie_error_code valerie_unit_clean( valerie dv, int unit )
-	valerie_error_code valerie_unit_append( valerie dv, int unit, char *file, int in, int out )
-	valerie_error_code valerie_unit_remove_current_clip( valerie dv, int unit )
+	mvcp_error_code mvcp_unit_clean( mvcp client, int unit )
+	mvcp_error_code mvcp_unit_append( mvcp client, int unit, char *file, int in, int out )
+	mvcp_error_code mvcp_unit_remove_current_clip( mvcp client, int unit )
 	
-	valerie_error_code valerie_unit_clip_goto( valerie dv, int unit, valerie_clip_offset offset, int clip, int position )
-	valerie_error_code valerie_unit_clip_set_in( valerie dv, int unit, valerie_clip_offset offset, int clip, int in )
-	valerie_error_code valerie_unit_clip_set_out( valerie dv, int unit, valerie_clip_offset offset, int clip, int in )
-	valerie_error_code valerie_unit_clip_move( valerie dv, int unit, valerie_clip_offset offset, int src, valerie_clip_offset offset, int dest )
-	valerie_error_code valerie_unit_clip_remove( valerie dv, int unit, valerie_clip_offset offset, int clip )
-	valerie_error_code valerie_unit_clip_insert( valerie dv, int unit, valerie_clip_offset offset, int clip, char *file, int in, int out )
+	mvcp_error_code mvcp_unit_clip_goto( mvcp client, int unit, mvcp_clip_offset offset, int clip, int position )
+	mvcp_error_code mvcp_unit_clip_set_in( mvcp client, int unit, mvcp_clip_offset offset, int clip, int in )
+	mvcp_error_code mvcp_unit_clip_set_out( mvcp client, int unit, mvcp_clip_offset offset, int clip, int in )
+	mvcp_error_code mvcp_unit_clip_move( mvcp client, int unit, mvcp_clip_offset offset, int src, mvcp_clip_offset offset, int dest )
+	mvcp_error_code mvcp_unit_clip_remove( mvcp client, int unit, mvcp_clip_offset offset, int clip )
+	mvcp_error_code mvcp_unit_clip_insert( mvcp client, int unit, mvcp_clip_offset offset, int clip, char *file, int in, int out )
 
 	
 
 APPENDIX C - COMPLETE LOW LEVEL PARSER API LISTING
 --------------------------------------------------
 
-	valerie_response valerie_parser_connect( valerie_parser );
-	valerie_response valerie_parser_execute( valerie_parser, char * );
-	valerie_response valerie_parser_executef( valerie_parser, char *, ... );
-	valerie_response valerie_parser_run( valerie_parser, char * );
-	valerie_notifier valerie_parser_get_notifier( valerie_parser );
-	void valerie_parser_close( valerie_parser );
+	mvcp_response mvcp_parser_connect( mvcp_parser );
+	mvcp_response mvcp_parser_execute( mvcp_parser, char * );
+	mvcp_response mvcp_parser_executef( mvcp_parser, char *, ... );
+	mvcp_response mvcp_parser_run( mvcp_parser, char * );
+	mvcp_notifier mvcp_parser_get_notifier( mvcp_parser );
+	void mvcp_parser_close( mvcp_parser );
 	
-	valerie_response valerie_response_init( );
-	valerie_response valerie_response_clone( valerie_response );
-	int valerie_response_get_error_code( valerie_response );
-	char *valerie_response_get_error_string( valerie_response );
-	char *valerie_response_get_line( valerie_response, int );
-	int valerie_response_count( valerie_response );
-	void valerie_response_set_error( valerie_response, int, char * );
-	int valerie_response_printf( valerie_response, size_t, char *, ... );
-	int valerie_response_write( valerie_response, char *, int );
-	void valerie_response_close( valerie_response );
+	mvcp_response mvcp_response_init( );
+	mvcp_response mvcp_response_clone( mvcp_response );
+	int mvcp_response_get_error_code( mvcp_response );
+	char *mvcp_response_get_error_string( mvcp_response );
+	char *mvcp_response_get_line( mvcp_response, int );
+	int mvcp_response_count( mvcp_response );
+	void mvcp_response_set_error( mvcp_response, int, char * );
+	int mvcp_response_printf( mvcp_response, size_t, char *, ... );
+	int mvcp_response_write( mvcp_response, char *, int );
+	void mvcp_response_close( mvcp_response );
 	
 
 APPENDIX D - REFERENCES
 -----------------------
 
-	(1) doc/dvcp.txt - DVCP protocol
+	(1) doc/mvcp.txt - MVCP protocol
 	(2) doc/testing.txt - Test procedures

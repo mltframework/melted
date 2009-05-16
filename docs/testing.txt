@@ -1,11 +1,11 @@
-Miracle Test Procedure
+Melted Test Procedure
 
-Copyright (C) 2003 Ushodaya Enterprised Limited
+Copyright (C) 2003-2009 Ushodaya Enterprised Limited
 Author: Dan Dennedy <dan@dennedy.org>
-Last Revision: 2004-03-20
+Last Revision: 2009-05-15
 
 
-NOTE: THIS DOCUMENT REQUIRES REVISION TO NEW, EXPECTED BEHAVIOR FROM MIRACLE.
+NOTE: THIS DOCUMENT REQUIRES REVISION TO NEW, EXPECTED BEHAVIOR FROM MELTED.
 
 Tests are divided into 9 sections:
 
@@ -51,7 +51,7 @@ resume the tests from that point onward - it is better to repeat from the
 beginning (but you can of course employ common sense in this situation).
 
 Before starting the final tests, please delete/backup your current
-/etc/dv139d.conf file. This (more or less) ensures that tests are carried out
+/etc/melted.conf file. This (more or less) ensures that tests are carried out
 for a virgin install.
 
 
@@ -60,23 +60,23 @@ for a virgin install.
 
 Run these from the top level project directory
 
-1.1.0 Start miracle in interactive mode: src/miracle/miracle -test
---> miracle starts interactively and reports:
+1.1.0 Start melted in interactive mode: src/melted/melted -test
+--> melted starts interactively and reports:
 (5) Starting server on 5250.
-(5) miracle version 0.0.1 listening on port 5250
+(5) melted version 0.0.1 listening on port 5250
 
 1.1.1 Stop the server by pressing Ctrl-C
---> miracle returns the following and returns control to the console:
-(5) miracle version 0.0.1 server terminated.
+--> melted returns the following and returns control to the console:
+(5) melted version 0.0.1 server terminated.
 
-1.2.2 Start miracle as a daemon: src/miracle/miracle
+1.2.2 Start melted as a daemon: src/melted/melted
 --> control returns to the console
 
-1.2.3 Verify miracle is running: ps ax
---> several miracle processes are running
+1.2.3 Verify melted is running: ps ax
+--> several melted processes are running
 
-1.2.4 Verify successful miracle startup using syslog: sudo tail /var/log/syslog
---> miracle: miracle version 0.0.1 listening on port 5250
+1.2.4 Verify successful melted startup using syslog: sudo tail /var/log/syslog
+--> melted: melted version 0.0.1 listening on port 5250
 
 1.2.5 Verify connectivity on port 5250: telnet localhost 5250
 --> 100 VTR Ready
@@ -84,16 +84,16 @@ Run these from the top level project directory
 1.2.6 Test clean disconnect: BYE
 --> Connection closed by foreign host.
 
-1.2.7 Stop the daemon: killall miracle
+1.2.7 Stop the daemon: killall melted
 --> no errors
 
 1.2.8 Verify a clean server shutdown: sudo tail /var/log/syslog
---> miracle: shutdown complete.
+--> melted: shutdown complete.
 
-1.3.0 Start miracle on a different port: src/miracle/miracle -port 5260
+1.3.0 Start melted on a different port: src/melted/melted -port 5260
 
-1.3.1 Verify successful miracle startup using syslog: sudo tail /var/log/syslog
---> miracle: miracle version 0.0.1 listening on port 5260
+1.3.1 Verify successful melted startup using syslog: sudo tail /var/log/syslog
+--> melted: melted version 0.0.1 listening on port 5260
 
 1.3.2 Verify connectivity on port 5260: telnet localhost 5260
 --> 100 VTR Ready
@@ -101,21 +101,21 @@ Run these from the top level project directory
 1.3.3 Test clean disconnect: BYE
 --> Connection closed by foreign host.
 
-1.3.4 Stop the daemon: killall miracle
+1.3.4 Stop the daemon: killall melted
 --> no errors
 
 
 2. Unit Management
 ------------------
 
-Start the miracle server and connect to it with telnet or a protocol-
-level client (albino). 
+Start the melted server and connect to it with telnet or a protocol-
+level client (mvcp-client). 
 
-2.1 List the AV/C devices on the bus: NLS
+2.1 List the playout devices on the host: NLS
 --> 201 OK
---> one or more lines listing devices with GUID in second column
+--> one or more lines listing devices with an ID in second column
 
-2.2 Add a device as a miracle unit: UADD {sdl, bluefish}
+2.2 Add a device as a melted unit: UADD {sdl, bluefish}
 --> 201 OK
 --> U0
 
@@ -149,7 +149,7 @@ level client (albino).
 3. Server Configuration
 -----------------------
 
-Start miracle if not already started from a previous test.
+Start melted if not already started from a previous test.
 
 3.1 Get the hard-coded default root property value: GET root
 --> 202 OK
@@ -194,7 +194,7 @@ XXX --> 400 Unknown command
 4. Simple Playback
 -------------------
 
-Start miracle or restart if already started.
+Start melted or restart if already started.
 Add an online unit.
 Set the server root property if desired.
 
@@ -252,7 +252,7 @@ Set the server root property if desired.
 5. Multi-unit Playback
 -----------------------
 
-Start miracle or restart if already started.
+Start melted or restart if already started.
 Add *2* online units.
 Set the server root property if desired.
 
@@ -280,7 +280,7 @@ Set the server root property if desired.
 6. Advanced Playback
 --------------------
 
-Start miracle or restart if already started.
+Start melted or restart if already started.
 Add *2* online units.
 Set the server root property if desired.
 
@@ -430,7 +430,7 @@ Transfer:
 7. Unit Configuration
 ---------------------
 
-Start miracle or restart if already started.
+Start melted or restart if already started.
 Add an online unit.
 Set the server root property if desired.
 
@@ -474,10 +474,10 @@ users are encouraged to test with multiple units online. It is assumed that a
 number of dv files are available for use in the servers ROOT directory - this
 document assumes that they are named test001.dv and up.
 
-9.1.0 Start miracle in interactive mode and add a unit (all tests will assume U0)
+9.1.0 Start melted in interactive mode and add a unit (all tests will assume U0)
 --> server started with unit 0 available
 
-9.1.1 Obtain a miracle shell (via telnet or albino).
+9.1.1 Obtain a melted shell (via telnet or mvcp-client).
 --> 100 VTR (if reported by the client)
 
 9.1.2 Load a clip with LOAD U0 test001.dv and PAUSE U0

@@ -1,20 +1,22 @@
-Miracle Control Protocol (DVCP) Reference Documentation
+MLT Video Control Protocol (MVCP) Reference Documentation
 
-Copyright (C) 2004 Ushodaya Enterprised Limited
+Copyright (C) 2004-2009 Ushodaya Enterprised Limited
 Author: Dan Dennedy <dan@dennedy.org>
-Last Revision: 2004-03-20
+Last Revision: 2009-05-15
 
 
 General Format
 --------------
-	DVCP is an ASCII-based request/response TCP protocol much like FTP and
-	inspired by the SGI MVCP (Multiport Video Computer Protocol). Each
+	MVCP is an ASCII-based request/response TCP protocol much like FTP and
+	inspired by the SGI MVCP [1] (Multiport Video Computer Protocol). Each
 	command is three to eight characters long followed by zero or more
 	arguments. Every item (command or argument) in the request is delimited
 	by a space and terminated with a new line. Arguments that contain spaces
 	must be surrounded by double quotation marks. The new line must contain
 	a line feed optionally preceeded by a carriage return. There are no
 	request header lines or body.
+
+	[1] http://techpubs.sgi.com/library/tpl/cgi-bin/getdoc.cgi?coll=0650&db=bks&fname=/SGI_EndUser/MSB3xx_UG/ch09.html
 
 
 Response Codes
@@ -56,8 +58,8 @@ Response Codes
 
 Establishing a Connection
 -------------------------
-	One can connect to the miracle server using telnet or a custom client,
-	preferrably one developed using the valerie client API. The default port
+	One can connect to the melted server using telnet or a custom client,
+	preferrably one developed using the libmvcp client API. The default port
 	is 5250. Connections can be broken at will or use the BYE command to
 	request the server to terminate the connection.
 
@@ -68,7 +70,7 @@ General Command Information
 	All commands are case insensitive. Arguments may or may not be case
 	sensitive. There are two categories of commands: global and unit. Global
 	commands operate at the server level. Unit commands address a specific
-	unit. miracle is a multi-unit system. Units are named as U? where ?
+	unit. melted is a multi-unit system. Units are named as U? where ?
 	is the unit number, for example, U0. As units are added to the server,
 	the unit number increases; the first unit is U0.
 	
@@ -131,14 +133,14 @@ STATUS
 
 Unit Management
 
-	The following global commands manage the DV units within the server.
+	The following global commands manage the playout units within the server.
 	Currently there is a maximum of four units, and units can not be
 	removed. Each unit may be in an online or offline state. Offline units
 	can not be used, and any unit commands issued against an offline unit
 	results in a 403 response. 
 	
 NLS
-	* NOT IMPLEMENTED IN MIRACLE YET *
+	* NOT IMPLEMENTED IN MELTED YET *
 
 
 UADD mlt-consumer[:argument]
@@ -156,7 +158,7 @@ ULS
 	server containing the following columns:
 	- unit name (one of U0, U1, U2, or U3)
 	- mlt-consumer[:argument] from uadd
-	- 1394 node GUID (defunt - always 0 with miracle for now)
+	- 1394 node GUID (defunt - always 0 with melted for now)
 	- online flag (1 = online, 0 = offline)
 
 SHUTDOWN
@@ -213,7 +215,7 @@ LOAD {unit} {filename} [in out]
 	Sets the current position to the first frame in the clip.
 	Preface the filename with '!' to tell the disk reader thread to remove only
 	duplicate frames from the tail of its buffer queue (from a previously loaded
-	and playing clip). Otherwise, miracle flushes all of its buffers upon LOAD
+	and playing clip). Otherwise, melted flushes all of its buffers upon LOAD
 	to make the effect of LOAD instantaneous. The LOAD !, USET eof=pause, and
 	extended USTA information can be used for client-side playlists (see the 
 	demo programs).
@@ -333,7 +335,3 @@ XFER {unit} {target-unit}
 	Transfer the unit's clip to the target unit.
 	The clip inherently includes the in- and out-point information.
 	The target unit's "points" configuration property is set to "use."
-
-
-
-
