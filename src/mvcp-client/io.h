@@ -1,6 +1,6 @@
 /*
- * io.h -- Valerie client demo input/output
- * Copyright (C) 2002-2003 Ushodaya Enterprises Limited
+ * io.h -- MVCP client input/output
+ * Copyright (C) 2002-2000 Ushodaya Enterprises Limited
  * Author: Charles Yates <charles.yates@pandora.be>
  *
  * This program is free software; you can redistribute it and/or modify

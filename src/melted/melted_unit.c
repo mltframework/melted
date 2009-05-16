@@ -154,7 +154,7 @@ static mlt_producer locate_producer( melted_unit unit, char *file )
 	{
 		profile = mlt_service_profile( MLT_CONSUMER_SERVICE( consumer ) );
 	}
-	return mlt_factory_producer( profile, "fezzik", file );
+	return mlt_factory_producer( profile, NULL, file );
 }
 
 /** Update the generation count.

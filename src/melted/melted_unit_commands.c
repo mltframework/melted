@@ -285,7 +285,7 @@ int melted_receive( command_argument cmd_arg, char *doc )
 		// Get the consumer's profile
 		mlt_consumer consumer = mlt_properties_get_data( unit->properties, "consumer", NULL );
 		mlt_profile profile = mlt_service_profile( MLT_CONSUMER_SERVICE( consumer ) );
-		mlt_producer producer = mlt_factory_producer( profile, "westley-xml", doc );
+		mlt_producer producer = mlt_factory_producer( profile, "xml-string", doc );
 		if ( producer != NULL )
 		{
 			if ( melted_unit_append_service( unit, MLT_PRODUCER_SERVICE( producer ) ) == mvcp_ok )

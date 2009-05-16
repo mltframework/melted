@@ -94,7 +94,7 @@ static int consumer_start( mlt_consumer this )
 	mvcp connection = mlt_properties_get_data( properties, "connection", NULL );
 
 	// Special case - we can get a doc too...
-	char *doc = mlt_properties_get( properties, "westley" );
+	char *doc = mlt_properties_get( properties, "xml" );
 
 	// Set the title if provided
 	if ( service != NULL )

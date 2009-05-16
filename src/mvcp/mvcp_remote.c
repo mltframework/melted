@@ -196,7 +196,7 @@ static mvcp_response mvcp_remote_execute( mvcp_remote remote, char *command )
 	return response;
 }
 
-/** Push a westley document to the server.
+/** Push a MLT XML document to the server.
 */
 
 static mvcp_response mvcp_remote_receive( mvcp_remote remote, char *command, char *buffer )
@@ -228,7 +228,7 @@ static mvcp_response mvcp_remote_push( mvcp_remote remote, char *command, mlt_se
 	mvcp_response response = NULL;
 	if ( service != NULL )
 	{
-		mlt_consumer consumer = mlt_factory_consumer( NULL, "westley", "buffer" );
+		mlt_consumer consumer = mlt_factory_consumer( NULL, "xml", "buffer" );
 		mlt_properties properties = MLT_CONSUMER_PROPERTIES( consumer );
 		char *buffer = NULL;
 		// Temporary hack

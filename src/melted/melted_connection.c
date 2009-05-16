@@ -252,7 +252,7 @@ void *parser_thread( void *arg )
 				{
 					if ( mlt_properties_get( owner, "push-parser-off" ) == 0 )
 					{
-						service = ( mlt_service )mlt_factory_producer( NULL, "westley-xml", buffer );
+						service = ( mlt_service )mlt_factory_producer( NULL, "xml-string", buffer );
 						mlt_events_fire( owner, "push-received", &response, command, service, NULL );
 						if ( response == NULL )
 							response = mvcp_parser_push( parser, command, service );
