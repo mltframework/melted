@@ -1,7 +1,7 @@
 
-Name: mlt-valerie
-Description: MLT Valerie client API
+Name: mlt-mvcp
+Description: MLT MVCP client API
 Version: ${version}
-Requires:
+Requires: mlt-framework
 Libs: -L${libdir} ${libs}
 Cflags: ${cflags}

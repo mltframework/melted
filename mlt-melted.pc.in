@@ -1,7 +1,7 @@
 
-Name: mlt-miracle
-Description: MLT Miracle server API
+Name: mlt-melted
+Description: MLT Melted server API
 Version: ${version}
-Requires:
+Requires: mlt-framework
 Libs: -L${libdir} ${libs}
 Cflags: ${cflags}
