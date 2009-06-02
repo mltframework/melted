@@ -34,7 +34,6 @@ extern "C"
 extern melted_unit melted_get_unit( int );
 extern void melted_delete_unit( int );
 extern void melted_delete_all_units( void );
-extern int melted_unit_status( int n, mvcp_status status, int root_offset );
 //extern void raw1394_start_service_threads( void );
 //extern void raw1394_stop_service_threads( void );
 

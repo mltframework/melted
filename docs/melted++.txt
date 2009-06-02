@@ -61,7 +61,7 @@ CUSTOMISATION
 	* the Response object
 	* pushing documents
 	* handling pushed documents
-	* accessiving events
+	* accessing events
 
 
 THE MELTED SERVER CLASS
