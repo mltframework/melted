@@ -31,10 +31,14 @@
 #include <sched.h>
 
 #include <framework/mlt.h>
+#include <mvcp/mvcp_notifier.h>
+#include <mvcp/mvcp_status.h>
 
 /* Application header files */
 #include "melted_server.h"
 #include "melted_log.h"
+#include "melted_commands.h"
+#include "melted_unit.h"
 
 /** Our server context.
 */
@@ -66,8 +70,13 @@ int main( int argc, char **argv )
 	int error = 0;
 	int index = 0;
 	int background = 1;
-	struct timespec tm = { 5, 0 };
+	struct timespec tm = { 1, 0 };
 	struct sched_param scp;
+	mvcp_status_t status;
+	struct {
+		int clip_index;
+		int is_logged;
+	} asrun[ MAX_UNITS ];
 
 	// Use realtime scheduling if possible
 	memset( &scp, '\0', sizeof( scp ) );
@@ -99,7 +108,7 @@ int main( int argc, char **argv )
 		if ( fork() )
 			return 0;
 		setsid();
-		melted_log_init( log_syslog, LOG_INFO );
+		melted_log_init( log_syslog, LOG_NOTICE );
 	}
 	else
 	{
@@ -114,9 +123,39 @@ int main( int argc, char **argv )
 	/* Execute the server */
 	error = melted_server_execute( server );
 
+	/* Initialize the as-run log tracking */
+	for ( index = 0; index < MAX_UNITS; index ++ )
+		asrun[ index ].clip_index = -1;
+
 	/* We need to wait until we're exited.. */
 	while ( !server->shutdown )
+	{
 		nanosleep( &tm, NULL );
+
+		/* As-run logging */
+		for ( index = 0; !error && index < MAX_UNITS; index ++ )
+		{
+			melted_unit unit = melted_get_unit( index );
+
+			if ( unit && melted_unit_get_status( unit, &status ) == 0 )
+			{
+				int length = status.length - 60;
+
+				/* Reset the logging if needed */
+				if ( status.clip_index != asrun[ index ].clip_index || status.position < length || status.status == unit_not_loaded )
+				{
+					asrun[ index ].clip_index = status.clip_index;
+					asrun[ index ].is_logged = 0;
+				}
+				/* Log as-run only once when near the end */
+				if ( ! asrun[ index ].is_logged && status.length > 0 && status.position > length )
+				{
+					melted_log( LOG_NOTICE, "AS-RUN U%d \"%s\" len %d pos %d", index, status.clip, status.length, status.position );
+					asrun[ index ].is_logged = 1;
+				}
+			}
+		}
+	}
 
 	return error;
 }
