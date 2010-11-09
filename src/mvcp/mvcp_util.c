@@ -71,7 +71,7 @@ char *mvcp_util_strip( char *input, char value )
 		if ( ptr != NULL )
 			*ptr = '\0';
 		if ( input[ 0 ] == value )
-			strcpy( input, input + 1 );
+			memmove( input, input + 1, strlen( input ) );
 	}
 	return input;
 }
