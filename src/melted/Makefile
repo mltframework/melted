@@ -30,7 +30,7 @@ INCS = melted_server.h \
 
 OBJS = $(APP_OBJS) $(LIB_OBJS)
 
-CFLAGS += -I.. $(RDYNAMIC)
+CFLAGS += -I.. $(RDYNAMIC) -DVERSION=\"$(version)\"
 
 LDFLAGS += -L../mvcp -lmvcp
 LDFLAGS += -lpthread

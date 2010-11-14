@@ -45,8 +45,6 @@
 #include <mvcp/mvcp_remote.h>
 #include <mvcp/mvcp_tokeniser.h>
 
-#define VERSION "0.2.0"
-
 static void melted_command_received( mlt_listener listener, mlt_properties owner, melted_server this, void **args )
 {
 	if ( listener != NULL )
