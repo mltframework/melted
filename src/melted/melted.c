@@ -58,7 +58,7 @@ static void main_cleanup( )
 
 void usage( char *app )
 {
-	fprintf( stderr, "Usage: %s [-test] [-port NNNN]\n", app );
+	fprintf( stderr, "Usage: %s [-test] [-port NNNN] [-c config-file]\n", app );
 	exit( 0 );
 }
 
@@ -77,6 +77,7 @@ int main( int argc, char **argv )
 		int clip_index;
 		int is_logged;
 	} asrun[ MAX_UNITS ];
+	const char *config_file = "/etc/melted.conf";
 
 	// Use realtime scheduling if possible
 	memset( &scp, '\0', sizeof( scp ) );
@@ -97,6 +98,8 @@ int main( int argc, char **argv )
 			melted_server_set_proxy( server, argv[ ++ index ] );
 		else if ( !strcmp( argv[ index ], "-test" ) )
 			background = 0;
+		else if ( !strcmp( argv[ index ], "-c" ) )
+			config_file = argv[ ++ index ];
 		else
 			usage( argv[ 0 ] );
 	}
@@ -118,7 +121,7 @@ int main( int argc, char **argv )
 	atexit( main_cleanup );
 
 	/* Set the config script */
-	melted_server_set_config( server, "/etc/melted.conf" );
+	melted_server_set_config( server, config_file );
 
 	/* Execute the server */
 	error = melted_server_execute( server );
