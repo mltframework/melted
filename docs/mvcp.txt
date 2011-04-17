@@ -1,8 +1,9 @@
 MLT Video Control Protocol (MVCP) Reference Documentation
 
 Copyright (C) 2004-2009 Ushodaya Enterprised Limited
+Copyright (C) 2010-2011 Dan R. Dennedy
 Author: Dan Dennedy <dan@dennedy.org>
-Last Revision: 2009-05-15
+Last Revision: 2011-04-17
 
 
 General Format
@@ -125,11 +126,11 @@ RUN {file}
 	The response body contains each command sent along with its arguments,
 	followed by each command's response status code and response body.
 
-
 STATUS
 	Responds with the output of USTA for each unit and accepts no further
 	input. Each time the state of the unit changes, a new row is returned by
 	the server containing the state of the unit. 
+
 
 Unit Management
 
@@ -141,7 +142,6 @@ Unit Management
 	
 NLS
 	* NOT IMPLEMENTED IN MELTED YET *
-
 
 UADD mlt-consumer[:argument]
 	Add a unit based upon the mlt-consumer id and optional constructor
@@ -233,7 +233,7 @@ REMOVE {unit} [ [+|-]clip ]
 	currently playing clip index.
 	
 CLEAN {unit}
-	Removes all by the playing clip.
+	Removes all but the playing clip.
 	
 WIPE {unit}
 	Removes all clips before the playing clip.
@@ -335,3 +335,11 @@ XFER {unit} {target-unit}
 	Transfer the unit's clip to the target unit.
 	The clip inherently includes the in- and out-point information.
 	The target unit's "points" configuration property is set to "use."
+
+PUSH {unit}
+{size}
+{XML}
+	Append an in-band MLT XML document to the unit.
+	Do note that the size and XML arguments are on new lines.
+	Size is the size of the XML payload in bytes.
+	Returns 404 if the XML is malformed or if the XML producer fails parsing.
