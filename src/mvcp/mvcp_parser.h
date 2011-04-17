@@ -65,6 +65,7 @@ extern mvcp_response mvcp_parser_push( mvcp_parser, char *, mlt_service );
 extern mvcp_response mvcp_parser_received( mvcp_parser, char *, char * );
 extern mvcp_response mvcp_parser_execute( mvcp_parser, char * );
 extern mvcp_response mvcp_parser_executef( mvcp_parser, const char *, ... );
+extern mvcp_response mvcp_parser_run_file( mvcp_parser parser, FILE *file );
 extern mvcp_response mvcp_parser_run( mvcp_parser, char * );
 extern mvcp_notifier mvcp_parser_get_notifier( mvcp_parser );
 extern void mvcp_parser_close( mvcp_parser );

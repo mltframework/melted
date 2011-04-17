@@ -79,46 +79,57 @@ mvcp_response mvcp_parser_executef( mvcp_parser parser, const char *format, ... 
 	return response;
 }
 
+/** Execute the contents of a file descriptor.
+*/
+
+mvcp_response mvcp_parser_run_file( mvcp_parser parser, FILE *file )
+{
+	mvcp_response response = mvcp_response_init( );
+	if ( response != NULL )
+	{
+		char command[ 1024 ];
+		mvcp_response_set_error( response, 201, "OK" );
+		while ( mvcp_response_get_error_code( response ) == 201 && fgets( command, 1024, file ) )
+		{
+			mvcp_util_trim( mvcp_util_chomp( command ) );
+			if ( strcmp( command, "" ) && command[ 0 ] != '#' )
+			{
+				mvcp_response temp = NULL;
+				mvcp_response_printf( response, 1024, "%s\n", command );
+				temp = mvcp_parser_execute( parser, command );
+				if ( temp != NULL )
+				{
+					int index = 0;
+					for ( index = 0; index < mvcp_response_count( temp ); index ++ )
+						mvcp_response_printf( response, 10240, "%s\n", mvcp_response_get_line( temp, index ) );
+					mvcp_response_close( temp );
+				}
+				else
+				{
+					mvcp_response_set_error( response, 500, "Batch execution failed" );
+				}
+			}
+		}
+	}
+	return response;
+}
+
 /** Execute the contents of a file. Note the special case mvcp_response returned.
 */
 
 mvcp_response mvcp_parser_run( mvcp_parser parser, char *filename )
 {
-	mvcp_response response = mvcp_response_init( );
-	if ( response != NULL )
+	mvcp_response response;
+	FILE *file = fopen( filename, "r" );
+	if ( file != NULL )
 	{
-		FILE *file = fopen( filename, "r" );
-		if ( file != NULL )
-		{
-			char command[ 1024 ];
-			mvcp_response_set_error( response, 201, "OK" );
-			while ( mvcp_response_get_error_code( response ) == 201 && fgets( command, 1024, file ) )
-			{
-				mvcp_util_trim( mvcp_util_chomp( command ) );
-				if ( strcmp( command, "" ) && command[ 0 ] != '#' )
-				{
-					mvcp_response temp = NULL;
-					mvcp_response_printf( response, 1024, "%s\n", command );
-					temp = mvcp_parser_execute( parser, command );
-					if ( temp != NULL )
-					{
-						int index = 0;
-						for ( index = 0; index < mvcp_response_count( temp ); index ++ )
-							mvcp_response_printf( response, 10240, "%s\n", mvcp_response_get_line( temp, index ) );
-						mvcp_response_close( temp );
-					}
-					else
-					{
-						mvcp_response_set_error( response, 500, "Batch execution failed" );
-					}
-				}
-			}
-			fclose( file );
-		}
-		else
-		{
-			mvcp_response_set_error( response, 404, "File not found." );
-		}
+		response = mvcp_parser_run_file( parser, file );
+		fclose( file );
+	}
+	else
+	{
+		response = mvcp_response_init( );
+		mvcp_response_set_error( response, 404, "File not found." );
 	}
 	return response;
 }
