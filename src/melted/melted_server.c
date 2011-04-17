@@ -228,7 +228,9 @@ int melted_server_execute( melted_server server )
 		return -1;
 	}
 
+#ifndef __DARWIN__
 	fcntl( server->socket, F_SETFL, O_NONBLOCK );
+#endif
 
 	if ( !server->proxy )
 	{
