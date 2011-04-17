@@ -228,8 +228,14 @@ void *parser_thread( void *arg )
 		{
 			response = NULL;
 
+			if ( !strcmp( command, "" ) )
+			{
+				// Ignore blank lines
+				continue;
+			}
 			if ( !strncmp( command, "PUSH ", 5 ) )
 			{
+				// Append XML as clip
 				char temp[ 20 ];
 				int bytes;
 				char *buffer = NULL;
@@ -252,16 +258,29 @@ void *parser_thread( void *arg )
 				{
 					if ( mlt_properties_get( owner, "push-parser-off" ) == 0 )
 					{
-						service = ( mlt_service )mlt_factory_producer( NULL, "xml-string", buffer );
-						mlt_events_fire( owner, "push-received", &response, command, service, NULL );
-						if ( response == NULL )
-							response = mvcp_parser_push( parser, command, service );
+						mlt_profile profile = mlt_profile_init( NULL );
+						profile->is_explicit = 1;
+						service = ( mlt_service )mlt_factory_producer( profile, "xml-string", buffer );
+						if ( service )
+						{
+							mlt_properties_set_data( MLT_SERVICE_PROPERTIES( service ), "melted_profile", profile,
+								0, (mlt_destructor) mlt_profile_close, NULL );
+							mlt_events_fire( owner, "push-received", &response, command, service, NULL );
+							if ( response == NULL )
+								response = mvcp_parser_push( parser, command, service );
+						}
+						else
+						{
+							response = mvcp_response_init();
+							mvcp_response_set_error( response, RESPONSE_BAD_FILE, "Failed to load XML" );
+						}
 					}
 					else
 					{
 						response = mvcp_parser_received( parser, command, buffer );
 					}
 				}
+				melted_log( LOG_INFO, "%s \"%s\" %d", address, command, mvcp_response_get_error_code( response ) );
 				error = connection_send( fd, response );
 				mvcp_response_close( response );
 				mlt_service_close( service );
@@ -269,6 +288,7 @@ void *parser_thread( void *arg )
 			}
 			else if ( strncmp( command, "STATUS", 6 ) )
 			{
+				// All other commands
 				mlt_events_fire( owner, "command-received", &response, command, NULL );
 				if ( response == NULL )
 					response = mvcp_parser_execute( parser, command );
@@ -278,6 +298,7 @@ void *parser_thread( void *arg )
 			}
 			else
 			{
+				// Start sending status repeatedly
 				error = connection_status( fd, mvcp_parser_get_notifier( parser ) );
 			}
 		}
