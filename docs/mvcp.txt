@@ -185,7 +185,7 @@ USET {unit} {key=value}
 	
 	Property "points" determines whether the playback engine restricts the
 	playback region to the in and out points. It takes one of the following
-	values: use, ignore.
+	values: use, ignore. (not currently implemented)
 	
 UGET {unit} {key}
 	Get a unit's configuration property.
@@ -262,12 +262,8 @@ REW {unit}
 	(200%).
 	If the unit is stopped, then the frame position is reset to the first
 	frame. First frame depends upon the "points" unit configuration property
-	and whether an in point has been established for the clip using the SIN
-	command.
-	Set the currently loaded clip's in point.
-	Frame is zero-based and absolute. It is not dependent upon the clip's
-	current in point.
-	A frame-number of -1, resets the in point to 0.
+	(not currently implemented)	and whether an in point has been established
+	for the clip using the SIN command.
 
 FF {unit}
 	Fast forward the unit.
@@ -275,8 +271,8 @@ FF {unit}
 	in reverse).
 	If the unit is stopped, then the frame position is reset to the first
 	frame. First frame depends upon the "points" unit configuration property
-	and whether an in point has been established for the clip using the SIN
-	command.
+	(not currently implemented) and whether an in point has been established
+	for the clip using the SIN command.
 
 STEP {unit} {number-of-frames}
 	Adjust the current frame position by the number of frames specified.

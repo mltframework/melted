@@ -343,7 +343,9 @@ int melted_rewind( command_argument cmd_arg )
 	melted_unit unit = melted_get_unit(cmd_arg->unit);
 	if ( unit == NULL )
 		return RESPONSE_INVALID_UNIT;
-	else 
+	else if ( melted_unit_has_terminated( unit ) )
+		melted_unit_change_position( unit, 0, 0 );
+	else
 		melted_unit_play( unit, -2000 );
 	return RESPONSE_SUCCESS;
 }
@@ -379,7 +381,9 @@ int melted_ff( command_argument cmd_arg )
 	melted_unit unit = melted_get_unit(cmd_arg->unit);
 	if ( unit == NULL )
 		return RESPONSE_INVALID_UNIT;
-	else 
+	else if ( melted_unit_has_terminated( unit ) )
+		melted_unit_change_position( unit, 0, 0 );
+	else
 		melted_unit_play( unit, 2000 );
 	return RESPONSE_SUCCESS;
 }
