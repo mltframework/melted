@@ -34,7 +34,6 @@
 #include <errno.h>
 #include <signal.h>
 #include <limits.h>
-#include <time.h>
 
 #include <sys/mman.h>
 
@@ -286,31 +285,15 @@ mvcp_error_code melted_unit_load( melted_unit unit, char *clip, int32_t in, int3
 	{
 		mlt_properties properties = unit->properties;
 		mlt_playlist playlist = mlt_properties_get_data( properties, "playlist", NULL );
-		mlt_producer producer = MLT_PLAYLIST_PRODUCER( playlist );
-		int original = mlt_producer_get_playtime( producer );
-		mlt_consumer consumer = mlt_properties_get_data( unit->properties, "consumer", NULL );
-		double speed = mlt_producer_get_speed( producer );
-		struct timespec tm = { 1, 0 };
-
+		int original = mlt_producer_get_playtime( MLT_PLAYLIST_PRODUCER( playlist ) );
 		mlt_service_lock( MLT_PLAYLIST_SERVICE( playlist ) );
 		mlt_playlist_append_io( playlist, instance, in, out );
+		mlt_playlist_remove_region( playlist, 0, original );
 		mlt_service_unlock( MLT_PLAYLIST_SERVICE( playlist ) );
-		// We try to ensure all frames from producers that will be removed are closed.
-		mlt_producer_seek( producer, original );
-		mlt_consumer_purge( consumer );
-
 		melted_log( LOG_DEBUG, "loaded clip %s", clip );
 		update_generation( unit );
 		melted_unit_status_communicate( unit );
 		mlt_producer_close( instance );
-
-		// Give more time for those frames to be closed - there could still be some
-		// in the consumer plugin that were not purged from the base consumer buffer.
-		nanosleep( &tm, NULL );
-		mlt_service_lock( MLT_PLAYLIST_SERVICE( playlist ) );
-		mlt_playlist_remove_region( playlist, 0, original );
-		mlt_service_unlock( MLT_PLAYLIST_SERVICE( playlist ) );
-
 		return mvcp_ok;
 	}
 
