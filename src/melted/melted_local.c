@@ -342,7 +342,7 @@ static mvcp_response melted_local_connect( melted_local local )
 	signal( SIGINT, signal_handler );
 	signal( SIGTERM, SIG_DFL );
 	signal( SIGSTOP, signal_handler );
-//	signal( SIGPIPE, signal_handler );
+	signal( SIGPIPE, signal_handler );
 	signal( SIGALRM, signal_handler );
 	signal( SIGCHLD, SIG_IGN );
 	if ( getenv( "MLT_SIGSEGV" ) )
