@@ -29,6 +29,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <sched.h>
+#include <signal.h>
 
 #include <framework/mlt.h>
 #include <mvcp/mvcp_notifier.h>

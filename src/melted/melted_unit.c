@@ -174,11 +174,13 @@ static void clear_unit( melted_unit unit )
 {
 	mlt_properties properties = unit->properties;
 	mlt_playlist playlist = mlt_properties_get_data( properties, "playlist", NULL );
+	mlt_consumer consumer = mlt_properties_get_data( unit->properties, "consumer", NULL );
 	mlt_producer producer = MLT_PLAYLIST_PRODUCER( playlist );
 
 	mlt_service_lock( MLT_PLAYLIST_SERVICE( playlist ) );
 	mlt_playlist_clear( playlist );
 	mlt_producer_seek( producer, 0 );
+	mlt_properties_set_int( MLT_CONSUMER_PROPERTIES(consumer), "refresh", 1 );
 	mlt_service_unlock( MLT_PLAYLIST_SERVICE( playlist ) );
 
 	update_generation( unit );
@@ -191,6 +193,7 @@ static void clean_unit( melted_unit unit )
 {
 	mlt_properties properties = unit->properties;
 	mlt_playlist playlist = mlt_properties_get_data( properties, "playlist", NULL );
+	mlt_consumer consumer = mlt_properties_get_data( properties, "consumer", NULL );
 	mlt_playlist_clip_info info;
 	int current = mlt_playlist_current_clip( playlist );
 	mlt_producer producer = MLT_PLAYLIST_PRODUCER( playlist );
@@ -207,6 +210,7 @@ static void clean_unit( melted_unit unit )
 		mlt_playlist_append_io( playlist, info.producer, info.frame_in, info.frame_out );
 		mlt_producer_seek( producer, position );
 		mlt_producer_set_speed( producer, speed );
+		mlt_properties_set_int( MLT_CONSUMER_PROPERTIES(consumer), "refresh", 1 );
 		mlt_service_unlock( MLT_PLAYLIST_SERVICE( playlist ) );
 		mlt_producer_close( info.producer );
 	}
@@ -439,6 +443,7 @@ void melted_unit_play( melted_unit_t *unit, int speed )
 	mlt_consumer consumer = mlt_properties_get_data( unit->properties, "consumer", NULL );
 	mlt_producer_set_speed( producer, ( double )speed / 1000 );
 	mlt_consumer_start( consumer );
+	mlt_properties_set_int( MLT_CONSUMER_PROPERTIES(consumer), "refresh", 1 );
 	melted_unit_status_communicate( unit );
 }
 
@@ -608,6 +613,7 @@ void melted_unit_change_position( melted_unit unit, int clip, int32_t position )
 	{
 		int32_t frame_start = info.start;
 		int32_t frame_offset = position;
+		mlt_consumer consumer = mlt_properties_get_data( unit->properties, "consumer", NULL );
 
 		if ( frame_offset < 0 )
 			frame_offset = info.frame_out;
@@ -617,6 +623,7 @@ void melted_unit_change_position( melted_unit unit, int clip, int32_t position )
 			frame_offset = info.frame_out;
 		
 		mlt_producer_seek( producer, frame_start + frame_offset - info.frame_in );
+		mlt_properties_set_int( MLT_CONSUMER_PROPERTIES(consumer), "refresh", 1 );
 	}
 
 	melted_unit_status_communicate( unit );
@@ -688,8 +695,10 @@ void melted_unit_step( melted_unit unit, int32_t offset )
 	mlt_properties properties = unit->properties;
 	mlt_playlist playlist = mlt_properties_get_data( properties, "playlist", NULL );
 	mlt_producer producer = MLT_PLAYLIST_PRODUCER( playlist );
+	mlt_consumer consumer = mlt_properties_get_data( unit->properties, "consumer", NULL );
 	mlt_position position = mlt_producer_frame( producer );
 	mlt_producer_seek( producer, position + offset );
+	mlt_properties_set_int( MLT_CONSUMER_PROPERTIES(consumer), "refresh", 1 );
 }
 
 /** Set the unit's clip mode regarding in and out points.

@@ -47,6 +47,13 @@ void report( mvcp_response response )
 			printf( "%4d: %s\n", index, mvcp_response_get_line( response, index ) );
 }
 
+static void cleanup()
+{
+	int i;
+	for ( i = 0; i < MAX_UNITS; i++ )
+		melted_unit_close( melted_get_unit(i) );
+}
+
 int main( int argc, char **argv  )
 {
 	mvcp_parser parser = NULL;
@@ -54,6 +61,7 @@ int main( int argc, char **argv  )
 	char temp[ 1024 ];
 	int index = 1;
 
+	atexit( cleanup );
 	if ( argc > 2 && !strcmp( argv[ 1 ], "-s" ) )
 	{
 		printf( "Melted Client Instance\n" );
