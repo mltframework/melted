@@ -123,7 +123,7 @@ extern mvcp_error_code mvcp_unit_clear_in( mvcp, int );
 extern mvcp_error_code mvcp_unit_clear_out( mvcp, int );
 extern mvcp_error_code mvcp_unit_clear_in_out( mvcp, int );
 extern mvcp_error_code mvcp_unit_set( mvcp, int, const char *, const char * );
-extern mvcp_error_code mvcp_unit_get( mvcp, int, char * );
+extern mvcp_error_code mvcp_unit_get( mvcp, int, char *, char *, int );
 extern mvcp_error_code mvcp_unit_status( mvcp, int, mvcp_status );
 extern mvcp_error_code mvcp_unit_transfer( mvcp, int, int );
 

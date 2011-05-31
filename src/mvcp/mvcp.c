@@ -542,9 +542,15 @@ mvcp_error_code mvcp_unit_set( mvcp this, int unit, const char *name, const char
 /** Get a unit configuration property.
 */
 
-mvcp_error_code mvcp_unit_get( mvcp this, int unit, char *name )
+mvcp_error_code mvcp_unit_get( mvcp this, int unit, char *name, char *value, int length )
 {
-	return mvcp_execute( this, 1024, "UGET U%d %s", unit, name );
+	mvcp_error_code error = mvcp_execute( this, 1024, "UGET U%d %s", unit, name );
+	if ( error == mvcp_ok )
+	{
+		mvcp_response response = mvcp_get_last_response( this );
+		strncpy( value, mvcp_response_get_line( response, 1 ), length );
+	}
+	return error;
 }
 
 /** Get a units status.
