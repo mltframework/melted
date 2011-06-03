@@ -271,7 +271,9 @@ int melted_append( command_argument cmd_arg )
 int melted_push( command_argument cmd_arg, mlt_service service )
 {
 	melted_unit unit = melted_get_unit(cmd_arg->unit);
-	if ( unit != NULL && service != NULL )
+	if ( !unit )
+		return RESPONSE_INVALID_UNIT;
+	if ( service != NULL )
 		if ( melted_unit_append_service( unit, service ) == mvcp_ok )
 			return RESPONSE_SUCCESS;
 	return RESPONSE_BAD_FILE;
@@ -280,7 +282,9 @@ int melted_push( command_argument cmd_arg, mlt_service service )
 int melted_receive( command_argument cmd_arg, char *doc )
 {
 	melted_unit unit = melted_get_unit(cmd_arg->unit);
-	if ( unit != NULL )
+	if ( unit == NULL )
+		return RESPONSE_INVALID_UNIT;
+	else
 	{
 		// Get the consumer's profile
 		mlt_consumer consumer = mlt_properties_get_data( unit->properties, "consumer", NULL );
@@ -465,11 +469,16 @@ int melted_get_unit_property( command_argument cmd_arg )
 {
 	melted_unit unit = melted_get_unit(cmd_arg->unit);
 	char *name = (char*) cmd_arg->argument;
-	char *value = melted_unit_get( unit, name );
 	if (unit == NULL)
+	{
 		return RESPONSE_INVALID_UNIT;
-	else if ( value != NULL )
-		mvcp_response_printf( cmd_arg->response, 1024, "%s\n", value );
+	}
+	else
+	{
+		char *value = melted_unit_get( unit, name );
+		if ( value != NULL )
+			mvcp_response_printf( cmd_arg->response, 1024, "%s\n", value );
+	}
 	return RESPONSE_SUCCESS;
 }
 
