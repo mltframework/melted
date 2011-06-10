@@ -115,6 +115,7 @@ int main( int argc, char **argv )
 	}
 	else
 	{
+		mlt_log_set_level( MLT_LOG_VERBOSE );
 		melted_log_init( log_stderr, LOG_DEBUG );
 	}
 
