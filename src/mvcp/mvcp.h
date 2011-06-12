@@ -180,7 +180,7 @@ typedef struct
 	int32_t out;
 	int32_t max;
 	int32_t size;
-	int32_t fps;
+	float fps;
 }
 *mvcp_list_entry, mvcp_list_entry_t;
 
