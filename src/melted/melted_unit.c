@@ -553,7 +553,7 @@ int melted_unit_get_status( melted_unit unit, mvcp_status status )
 				title = strip_root( unit, info.resource );
 			strncpy( status->clip, title, sizeof( status->clip ) );
 			status->speed = (int)( mlt_producer_get_speed( producer ) * 1000.0 );
-			status->fps = mlt_producer_get_fps( producer );
+			status->fps = info.fps;
 			status->in = info.frame_in;
 			status->out = info.frame_out;
 			status->position = mlt_producer_frame( clip );
