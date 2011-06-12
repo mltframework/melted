@@ -30,6 +30,8 @@
 
 /* Application header files */
 #include <melted/melted_local.h>
+#include <melted/melted_commands.h>
+#include <melted/melted_unit.h>
 #include <mvcp/mvcp_remote.h>
 #include <mvcp/mvcp_util.h>
 
