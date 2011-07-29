@@ -58,7 +58,7 @@ static void main_cleanup( )
 
 void usage( char *app )
 {
-	fprintf( stderr, "Usage: %s [-test] [-port NNNN] [-c config-file]\n", app );
+	fprintf( stderr, "Usage: %s [-prio NNNN|max] [-test] [-port NNNN] [-c config-file]\n", app );
 	exit( 0 );
 }
 
@@ -71,7 +71,6 @@ int main( int argc, char **argv )
 	int index = 0;
 	int background = 1;
 	struct timespec tm = { 1, 0 };
-	struct sched_param scp;
 	mvcp_status_t status;
 	struct {
 		int clip_index;
@@ -79,11 +78,24 @@ int main( int argc, char **argv )
 	} asrun[ MAX_UNITS ];
 	const char *config_file = "/etc/melted.conf";
 
-	// Use realtime scheduling if possible
-	memset( &scp, '\0', sizeof( scp ) );
-	scp.sched_priority = sched_get_priority_max( SCHED_FIFO ) - 1;
 #ifndef __DARWIN__
-	sched_setscheduler( 0, SCHED_FIFO, &scp );
+	for ( index = 1; index < argc; index ++ )
+	{
+		if ( !strcmp( argv[ index ], "-prio" ) )
+		{
+			struct sched_param scp;
+			char* prio = argv[ ++ index ];
+
+			memset( &scp, 0, sizeof( scp ) );
+
+			if( !strcmp( prio, "max" ) )
+				scp.sched_priority = sched_get_priority_max( SCHED_FIFO ) - 1;
+			else
+				scp.sched_priority = atoi(prio);
+
+			sched_setscheduler( 0, SCHED_FIFO, &scp );
+		}
+	}
 #endif
 
 	mlt_factory_init( NULL );
@@ -100,6 +112,8 @@ int main( int argc, char **argv )
 			background = 0;
 		else if ( !strcmp( argv[ index ], "-c" ) )
 			config_file = argv[ ++ index ];
+		else if ( !strcmp( argv[ index ], "-prio" ) )
+			index++;
 		else
 			usage( argv[ 0 ] );
 	}
