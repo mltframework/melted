@@ -34,40 +34,45 @@
 #include "melted_commands.h"
 #include "melted_log.h"
 
-int melted_load( command_argument cmd_arg )
+
+void get_fullname( command_argument cmd_arg, char *fullname, size_t len, char *filename )
 {
-	melted_unit unit = melted_get_unit(cmd_arg->unit);
-	char *filename = (char*) cmd_arg->argument;
-	char fullname[1024];
-	int flush = 1;
-	char *service;
+	char *service = strchr( filename, ':' );
 
-	if ( filename[0] == '!' )
-	{
-		flush = 0;
-		filename ++;
-	}
-
-	service = strchr( filename, ':' );
 	if ( service != NULL )
 	{
 		service = filename;
 		filename = strchr( service, ':' );
 		*filename ++ = '\0';
-		
+
 		if ( strlen( cmd_arg->root_dir ) && filename[0] == '/' )
 			filename++;
-	
-		snprintf( fullname, 1023, "%s:%s%s", service, cmd_arg->root_dir, filename );
+
+		snprintf( fullname, len, "%s:%s%s", service, cmd_arg->root_dir, filename );
 	}
 	else
 	{
 		if ( strlen( cmd_arg->root_dir ) && filename[0] == '/' )
 			filename++;
 
-		snprintf( fullname, 1023, "%s%s", cmd_arg->root_dir, filename );
+		snprintf( fullname, len, "%s%s", cmd_arg->root_dir, filename );
 	}
-	
+}
+
+int melted_load( command_argument cmd_arg )
+{
+	melted_unit unit = melted_get_unit(cmd_arg->unit);
+	char *filename = (char*) cmd_arg->argument;
+	char fullname[1024];
+	int flush = 1;
+
+	if ( filename[0] == '!' )
+	{
+		flush = 0;
+		filename ++;
+	}
+	get_fullname( cmd_arg, fullname, sizeof(fullname), filename );
+
 	if (unit == NULL)
 		return RESPONSE_INVALID_UNIT;
 	else
@@ -122,11 +127,8 @@ int melted_insert( command_argument cmd_arg )
 	char *filename = (char*) cmd_arg->argument;
 	char fullname[1024];
 
-	if ( strlen( cmd_arg->root_dir ) && filename[0] == '/' )
-		filename++;
+	get_fullname( cmd_arg, fullname, sizeof(fullname), filename );
 
-	snprintf( fullname, 1023, "%s%s", cmd_arg->root_dir, filename );
-	
 	if (unit == NULL)
 		return RESPONSE_INVALID_UNIT;
 	else
@@ -242,11 +244,8 @@ int melted_append( command_argument cmd_arg )
 	char *filename = (char*) cmd_arg->argument;
 	char fullname[1024];
 
-	if ( strlen( cmd_arg->root_dir ) && filename[0] == '/' )
-		filename++;
+	get_fullname( cmd_arg, fullname, sizeof(fullname), filename );
 
-	snprintf( fullname, 1023, "%s%s", cmd_arg->root_dir, filename );
-	
 	if (unit == NULL)
 		return RESPONSE_INVALID_UNIT;
 	else
