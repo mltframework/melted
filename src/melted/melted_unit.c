@@ -75,6 +75,7 @@ melted_unit melted_unit_init( int index, char *constructor )
 		mlt_properties_set( this->properties, "constructor", constructor );
 		mlt_properties_set( this->properties, "id", id );
 		mlt_properties_set( this->properties, "arg", arg );
+		mlt_properties_set_data( this->properties, "producer", mlt_properties_new( ), 0, ( mlt_destructor )mlt_properties_close, NULL );
 		mlt_properties_set_data( this->properties, "consumer", consumer, 0, ( mlt_destructor )mlt_consumer_close, NULL );
 		mlt_properties_set_data( this->properties, "playlist", playlist, 0, ( mlt_destructor )mlt_playlist_close, NULL );
 		mlt_consumer_connect( consumer, MLT_PLAYLIST_SERVICE( playlist ) );
@@ -148,13 +149,23 @@ static mlt_producer locate_producer( melted_unit unit, char *file )
 {
 	// Try to get the profile from the consumer
 	mlt_consumer consumer = mlt_properties_get_data( unit->properties, "consumer", NULL );
+	mlt_properties m_prop = mlt_properties_get_data( unit->properties, "producer", NULL );
+	mlt_producer producer;
 	mlt_profile profile = NULL;
 
 	if ( consumer != NULL )
 	{
 		profile = mlt_service_profile( MLT_CONSUMER_SERVICE( consumer ) );
 	}
-	return mlt_factory_producer( profile, NULL, file );
+
+	producer = mlt_factory_producer( profile, NULL, file );
+	if( producer )
+	{
+		mlt_properties p_prop = mlt_producer_properties( producer );
+		mlt_properties_inherit ( p_prop, m_prop );
+	}
+
+	return producer;
 }
 
 /** Update the generation count.
@@ -746,8 +757,16 @@ int melted_unit_set( melted_unit unit, char *name_value )
 
 	if ( strncmp( name_value, "consumer.", 9 ) )
 	{
-		mlt_playlist playlist = mlt_properties_get_data( unit->properties, "playlist", NULL );
-		properties = MLT_PLAYLIST_PROPERTIES( playlist );
+		if ( strncmp( name_value, "producer.", 9 ) )
+		{
+			mlt_playlist playlist = mlt_properties_get_data( unit->properties, "playlist", NULL );
+			properties = MLT_PLAYLIST_PROPERTIES( playlist );
+		}
+		else
+		{
+			properties = mlt_properties_get_data( unit->properties, "producer", NULL );
+			name_value += 9;
+		}
 	}
 	else
 	{
