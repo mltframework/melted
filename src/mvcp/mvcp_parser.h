@@ -22,7 +22,11 @@
 #define _MVCP_PARSER_H_
 
 /* MLT Header files */
+#ifndef MVCP_EMBEDDED
 #include <framework/mlt.h>
+#else
+#define mlt_service void *
+#endif
 
 /* Application header files */
 #include "mvcp_response.h"

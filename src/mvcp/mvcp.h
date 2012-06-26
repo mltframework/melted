@@ -25,7 +25,11 @@
 #include <limits.h>
 
 /* MLT Header files. */
+#ifndef MVCP_EMBEDDED
 #include <framework/mlt.h>
+#else
+#define mlt_service void *
+#endif
 
 /* Application header files */
 #include "mvcp_parser.h"

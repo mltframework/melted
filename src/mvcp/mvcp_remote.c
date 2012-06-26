@@ -27,7 +27,11 @@
 #include <pthread.h>
 
 /* Application header files */
+#ifndef MVCP_EMBEDDED
 #include <framework/mlt.h>
+#else
+#define mlt_service void *
+#endif
 #include "mvcp_remote.h"
 #include "mvcp_socket.h"
 #include "mvcp_tokeniser.h"
@@ -226,6 +230,7 @@ static mvcp_response mvcp_remote_receive( mvcp_remote remote, char *command, cha
 static mvcp_response mvcp_remote_push( mvcp_remote remote, char *command, mlt_service service )
 {
 	mvcp_response response = NULL;
+#ifndef MVCP_EMBEDDED
 	if ( service != NULL )
 	{
 		mlt_consumer consumer = mlt_factory_consumer( NULL, "xml", "buffer" );
@@ -239,6 +244,7 @@ static mvcp_response mvcp_remote_push( mvcp_remote remote, char *command, mlt_se
 		response = mvcp_remote_receive( remote, command, buffer );
 		mlt_consumer_close( consumer );
 	}
+#endif
 	return response;
 }
 
