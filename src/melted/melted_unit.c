@@ -55,6 +55,7 @@ melted_unit melted_unit_init( int index, char *constructor )
 {
 	melted_unit this = NULL;
 	mlt_consumer consumer = NULL;
+	mlt_profile profile = mlt_profile_init( NULL );
 
 	char *id = strdup( constructor );
 	char *arg = strchr( id, ':' );
@@ -62,7 +63,8 @@ melted_unit melted_unit_init( int index, char *constructor )
 	if ( arg != NULL )
 		*arg ++ = '\0';
 
-	consumer = mlt_factory_consumer( NULL, id, arg );
+	profile->is_explicit = 1;
+	consumer = mlt_factory_consumer( profile, id, arg );
 
 	if ( consumer != NULL )
 	{
