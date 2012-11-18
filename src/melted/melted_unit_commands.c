@@ -441,7 +441,7 @@ int melted_get_unit_status( command_argument cmd_arg )
 	mvcp_status_t status;
 	int error = melted_unit_get_status( melted_get_unit( cmd_arg->unit ), &status );
 
-	if ( error == -1 )
+	if ( error )
 		return RESPONSE_INVALID_UNIT;
 	else
 	{

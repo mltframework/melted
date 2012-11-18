@@ -590,13 +590,12 @@ int melted_unit_get_status( melted_unit unit, mvcp_status status )
 			status->status = unit_paused;
 		else
 			status->status = unit_playing;
+		status->unit = mlt_properties_get_int( unit->properties, "unit" );
 	}
 	else
 	{
 		status->status = unit_undefined;
 	}
-
-	status->unit = mlt_properties_get_int( unit->properties, "unit" );
 
 	return error;
 }
