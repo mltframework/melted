@@ -48,7 +48,6 @@ typedef struct
 	int disconnected;
 	mvcp_parser parser;
 	mvcp dv;
-	mvcp dv_status;
 	int selected_unit;
 	char current_directory[ 512 ];
 	char last_directory[ 512 ];

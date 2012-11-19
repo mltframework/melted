@@ -178,7 +178,7 @@ void client_queue_action( client demo, mvcp_status status )
 			queue->position = ( queue->position + 1 ) % 50;
 			if ( queue->position == queue->tail )
 				queue->position = queue->head;
-			mvcp_unit_load( demo->dv_status, status->unit, queue->list[ queue->position ] );
+			mvcp_unit_load( demo->dv, status->unit, queue->list[ queue->position ] );
 			if ( status->status == unit_not_loaded )
 				mvcp_unit_play( demo->dv, queue->unit );
 			queue->ignore = 1;
@@ -187,7 +187,7 @@ void client_queue_action( client demo, mvcp_status status )
 		{
 			if ( queue->position == -1 )
 				queue->position = queue->head;
-			mvcp_unit_load( demo->dv_status, status->unit, queue->list[ queue->position ] );
+			mvcp_unit_load( demo->dv, status->unit, queue->list[ queue->position ] );
 			if ( status->status == unit_not_loaded )
 				mvcp_unit_play( demo->dv, queue->unit );
 			queue->position = ( queue->position - 1 ) % 50;
@@ -203,11 +203,11 @@ static void *client_status_thread( void *arg )
 {
 	client demo = arg;
 	mvcp_status_t status;
-	mvcp_notifier notifier = mvcp_get_notifier( demo->dv_status );
+	mvcp_notifier notifier = mvcp_get_notifier( demo->dv );
 
 	while ( !demo->terminated )
 	{
-		if ( mvcp_notifier_wait( notifier, &status ) != -1 )
+		if ( mvcp_notifier_wait( notifier, &status ) == 0 )
 		{
 			client_queue_action( demo, &status );
 			client_show_status( demo, &status );
@@ -995,7 +995,6 @@ mvcp_error_code client_run_menu( client demo, client_menu menu )
 void client_run( client this )
 {
 	this->dv = mvcp_init( this->parser );
-	this->dv_status = mvcp_init( this->parser );
 	if ( mvcp_connect( this->dv ) == mvcp_ok )
 	{
 		pthread_create( &this->thread, NULL, client_status_thread, this );
@@ -1010,7 +1009,6 @@ void client_run( client this )
 		wait_for_any_key( "" );
 	}
 
-	mvcp_close( this->dv_status );
 	mvcp_close( this->dv );
 
 	printf( "Demo Exit.\n" );
