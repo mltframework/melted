@@ -51,9 +51,7 @@ void report( mvcp_response response )
 
 static void cleanup()
 {
-	int i;
-	for ( i = 0; i < MAX_UNITS; i++ )
-		melted_unit_close( melted_get_unit(i) );
+	melted_delete_all_units();
 }
 
 int main( int argc, char **argv  )

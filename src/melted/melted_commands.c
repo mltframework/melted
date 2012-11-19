@@ -33,8 +33,7 @@
 #include "melted_commands.h"
 #include "melted_log.h"
 
-static melted_unit g_units[MAX_UNITS];
-
+static melted_unit g_units[MAX_UNITS] = {NULL};
 
 /** Return the melted_unit given a numeric index.
 */
@@ -71,13 +70,7 @@ void melted_delete_all_units( void )
 {
 	int i;
 	for (i = 0; i < MAX_UNITS; i++)
-	{
-		if ( melted_get_unit(i) != NULL )
-		{
-			melted_unit_close( melted_get_unit(i) );
-			melted_log( LOG_NOTICE, "Deleted unit U%d.", i ); 
-		}
-	}
+		melted_delete_unit( i );
 }
 
 /** Add a virtual vtr to the server.
@@ -85,12 +78,22 @@ void melted_delete_all_units( void )
 response_codes melted_add_unit( command_argument cmd_arg )
 {
 	int i = 0;
+
+	// Initialize g_units array on first call.
+	if ( g_units[0] == NULL )
+	{
+		for ( i = 1; i < MAX_UNITS; i ++ )
+			g_units[ i ] = NULL;
+	}
+
+	// Locate first empty item in g_units array.
 	for ( i = 0; i < MAX_UNITS; i ++ )
 		if ( g_units[ i ] == NULL )
 			break;
 
 	if ( i < MAX_UNITS )
 	{
+		// Add unit.
 		char *arg = cmd_arg->argument;
 		g_units[ i ] = melted_unit_init( i, arg );
 		if ( g_units[ i ] != NULL )
