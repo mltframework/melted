@@ -370,12 +370,14 @@ int melted_step( command_argument cmd_arg )
 int melted_goto( command_argument cmd_arg )
 {
 	melted_unit unit = melted_get_unit(cmd_arg->unit);
-	int clip = parse_clip( cmd_arg, 3 );
 	
 	if (unit == NULL || melted_unit_is_offline(unit))
 		return RESPONSE_INVALID_UNIT;
 	else
+	{
+		int clip = parse_clip( cmd_arg, 3 );
 		melted_unit_change_position( unit, clip, *(int*) cmd_arg->argument );
+	}
 	return RESPONSE_SUCCESS;
 }
 
