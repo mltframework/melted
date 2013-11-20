@@ -245,7 +245,7 @@ static void wipe_unit( melted_unit unit )
 	if ( info.producer != NULL && info.start > 0 )
 	{
 		mlt_service_lock( MLT_PLAYLIST_SERVICE( playlist ) );
-		mlt_playlist_remove_region( playlist, 0, info.start - 1 );
+		mlt_playlist_remove_region( playlist, 0, info.start );
 		mlt_service_unlock( MLT_PLAYLIST_SERVICE( playlist ) );
 	}
 	
