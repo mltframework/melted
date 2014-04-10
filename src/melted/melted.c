@@ -110,8 +110,10 @@ int main( int argc, char **argv )
 		else if ( !strcmp( argv[ index ], "-proxy" ) )
 			melted_server_set_proxy( server, argv[ ++ index ] );
 		else if ( !strcmp( argv[ index ], "-test" ) )
+		{
 			test = 1;
 			background = 0;
+		}
 		else if ( !strcmp( argv[ index ], "-nodetach" ) )
 			background = 0;
 		else if ( !strcmp( argv[ index ], "-c" ) )
