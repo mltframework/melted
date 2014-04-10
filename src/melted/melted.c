@@ -70,6 +70,7 @@ int main( int argc, char **argv )
 	int error = 0;
 	int index = 0;
 	int background = 1;
+	int test = 0;
 	struct timespec tm = { 1, 0 };
 	mvcp_status_t status;
 	struct {
@@ -109,6 +110,9 @@ int main( int argc, char **argv )
 		else if ( !strcmp( argv[ index ], "-proxy" ) )
 			melted_server_set_proxy( server, argv[ ++ index ] );
 		else if ( !strcmp( argv[ index ], "-test" ) )
+			test = 1;
+			background = 0;
+		else if ( !strcmp( argv[ index ], "-nodetach" ) )
 			background = 0;
 		else if ( !strcmp( argv[ index ], "-c" ) )
 			config_file = argv[ ++ index ];
@@ -127,10 +131,14 @@ int main( int argc, char **argv )
 		setsid();
 		melted_log_init( log_syslog, LOG_NOTICE );
 	}
-	else
+	else if ( test )
 	{
 		mlt_log_set_level( MLT_LOG_VERBOSE );
 		melted_log_init( log_stderr, LOG_DEBUG );
+	}
+	else
+	{
+		melted_log_init( log_syslog, LOG_NOTICE );
 	}
 
 	atexit( main_cleanup );
