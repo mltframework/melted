@@ -1,7 +1,7 @@
 /*
  * melted.c -- MLT Video TCP Server
  *
- * Copyright (C) 2002-2009 Ushodaya Enterprises Limited
+ * Copyright (C) 2002-2015 Meltytech, LLC
  * Authors:
  *     Dan Dennedy <dan@dennedy.org>
  *     Charles Yates <charles.yates@pandora.be>

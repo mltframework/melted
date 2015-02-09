@@ -1,6 +1,6 @@
 /*
  * io.h -- MVCP client input/output
- * Copyright (C) 2002-2000 Ushodaya Enterprises Limited
+ * Copyright (C) 2002-2015 Meltytech, LLC
  * Author: Charles Yates <charles.yates@pandora.be>
  *
  * This program is free software; you can redistribute it and/or modify

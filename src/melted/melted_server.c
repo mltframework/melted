@@ -1,6 +1,6 @@
 /*
  * melted_server.c
- * Copyright (C) 2002-20039 Ushodaya Enterprises Limited
+ * Copyright (C) 2002-2015 Meltytech, LLC
  * Author: Charles Yates <charles.yates@pandora.be>
  *
  * This program is free software; you can redistribute it and/or modify

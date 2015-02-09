@@ -1,6 +1,6 @@
 MLT libmvcp API Documentation 
 
-Copyright (C) 2004-2009 Ushodaya Enterprised Limited 
+Copyright (C) 2004-2015 Meltytech, LLC
 Author: Charles Yates <charles.yates@pandora.be> 
 Last Revision: 2009-05-15
 

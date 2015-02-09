@@ -1,7 +1,6 @@
 MLT Video Control Protocol (MVCP) Reference Documentation
 
-Copyright (C) 2004-2009 Ushodaya Enterprised Limited
-Copyright (C) 2010-2011 Dan R. Dennedy
+Copyright (C) 2004-2015 Meltytech, LLC
 Author: Dan Dennedy <dan@dennedy.org>
 Last Revision: 2011-04-17
 

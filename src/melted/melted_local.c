@@ -1,6 +1,6 @@
 /*
  * melted_local.c -- Local Melted Parser
- * Copyright (C) 2002-2009 Ushodaya Enterprises Limited
+ * Copyright (C) 2002-2015 Meltytech, LLC
  * Author: Charles Yates <charles.yates@pandora.be>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -208,7 +208,7 @@ static command_t vocabulary[] =
 
 static char helpstr [] = 
 	"melted -- A Multimedia Playout Server\n" 
-	"	Copyright (C) 2002-2003 Ushodaya Enterprises Limited\n"
+	"	Copyright (C) 2002-2015 Meltytech, LLC\n"
 	"	Authors:\n"
 	"		Dan Dennedy <dan@dennedy.org>\n"
 	"		Charles Yates <charles.yates@pandora.be>\n"

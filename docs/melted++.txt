@@ -1,6 +1,6 @@
 Server Customisation
 
-Copyright (C) 2005-2009 Ushodaya Enterprises Limited
+Copyright (C) 2005-2015 Meltytech, LLC
 Authors: Charles Yates <charles.yates@pandora.be>
 Last Revision: 2009-05-14
 

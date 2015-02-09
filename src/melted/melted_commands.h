@@ -1,6 +1,6 @@
 /*
  * melted_commands.h - global commands
- * Copyright (C) 2002-2009 Ushodaya Enterprises Limited
+ * Copyright (C) 2002-2015 Meltytech, LLC
  * Author: Dan Dennedy <dan@dennedy.org>
  *
  * This program is free software; you can redistribute it and/or modify

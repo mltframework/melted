@@ -1,6 +1,6 @@
 Melted Test Procedure
 
-Copyright (C) 2003-2009 Ushodaya Enterprised Limited
+Copyright (C) 2003-2015 Meltytech, LLC
 Author: Dan Dennedy <dan@dennedy.org>
 Last Revision: 2009-05-15
 
