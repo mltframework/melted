@@ -1,6 +1,6 @@
 /**
  * config.h - Convenience header file for all melted++ objects
- * Copyright (C) 2004-2009 Charles Yates
+ * Copyright (C) 2004-2015 Meltytech, LLC
  * Author: Charles Yates <charles.yates@pandora.be>
  *
  * This program is free software; you can redistribute it and/or modify
